@@ -2,7 +2,7 @@
 
 
 
-RATS Working Group                                              M. Novak
+Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
 Expires: 6 March 2027                           Sandelman Software Works
@@ -21,30 +21,37 @@ Abstract
    services, which precede the introduction of Remote Attestation, are
    often difficult to change/update in significant ways due to, among
    other reasons, organizational friction, technological inertia, and
-   regulatory policies.  Yet there are significant advantages if
-   workloads can be incrementally updated in the trustworthiness of the
-   platform, without disrupting their clients and servers.
+   regulatory policies.  There are significant advantages if workloads
+   can be incrementally updated in the trustworthiness of the platform,
+   without disrupting their clients and servers.
 
    This document details a proposed architecture by which Remote
    Attestation utilized for providing Attesters with Identity Documents
    (keys or credentials) to authenticate to RUPs.  The proposal is
    intended to work with common credential acquisition protocols and
-   mechanisms such as EST [RFC7030], SPIRE, and many others.  Another
-   important but separate goal is to encapsulate the Attester-side
-   complexity of Remote Attestation and credential acquisition similar
-   to how [ENVOY] does it.
+   mechanisms such as EST [RFC7030], SPIRE, and many others.
+
+   Another important but separate goal is to encapsulate the Attester-
+   side complexity of Remote Attestation and credential acquisition
+   similar to how [ENVOY] does it.  This allows Attesters to be
+   implemented in a way that abstracts away the details of credential
+   acquisition: both the protocols used and the credential acquisition
+   mechanisms employed, whether minting new (Enrollment), or requesting
+   existing (Retrieval).
 
 About This Document
 
    This note is to be removed before publishing as an RFC.
 
-   Status information for this document may be found at
+   The latest revision of this draft can be found at
+   https://TheBankster.github.io/rats-twi-um/draft-novak-rats-
+   tacra.html.  Status information for this document may be found at
    https://datatracker.ietf.org/doc/draft-novak-rats-tacra/.
 
-   Discussion of this document takes place on the RATS Working Group
-   mailing list (mailto:rats@ietf.org), which is archived at
-   https://example.com/WG.  Subscribe at
-   https://www.ietf.org/mailman/listinfo/rats/.
+   Discussion of this document takes place on the Remote ATtestation
+   ProcedureS Working Group mailing list (mailto:rats@ietf.org), which
+   is archived at https://mailarchive.ietf.org/arch/browse/rats/.
+   Subscribe at https://www.ietf.org/mailman/listinfo/rats/.
 
    Source for this draft and an issue tracker can be found at
    https://github.com/TheBankster/rats-twi-um.
@@ -83,12 +90,13 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction
-   2.  Conventions and Definitions
-   3.  Security Considerations
-   4.  IANA Considerations
-   5.  References
-     5.1.  Normative References
-     5.2.  Informative References
+   2.  Requirements
+   3.  Conventions and Definitions
+   4.  Security Considerations
+   5.  IANA Considerations
+   6.  References
+     6.1.  Normative References
+     6.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -121,19 +129,33 @@ Table of Contents
 
    For the RATS-Unaware Relying Parties, these adoption barriers are
    eliminated, as these RUPs are capable of authenticating their clients
-   utilizing appropriate Identity Documents.  This includes shared
-   symmetric keys, bearer tokens, credentials including PKIX
-   certificates [RFC5280], JWTs [RFC7515], or WIMSE WITs
-   [I-D.ietf-wimse-workload-creds].  In this world, the Attester uses
-   Remote Attestation to obtain from the RATS Relying Party a key, token
-   or credential that is compatible with the RUP.
+   utilizing appropriate Identity Documents.  Identity Documents, also
+   known as Credential Types, are any of: shared symmetric keys, bearer
+   tokens (e.g., API Keys, JSON Web Tokens JWTs [RFC7515]), and "proof-
+   of-possession" credentials such as PKIX certificates [RFC5280], WIMSE
+   Workload Idenity Certificates (WTCs), or WIMSE Workload Identity
+   Tokens (WITs) [I-D.ietf-wimse-workload-creds].
 
-   This document details an architecture by which legacy Identity
-   Document issuance mechanisms are replaced with identical Identity
-   Documents issued, but with the additional prerequisite of successful
-   Remote Attestation of the workloads in question.
+   In summary, rather than using Remote Attestation directly against the
+   RUP, the Attester uses it to obtain from the RATS Relying Party a
+   key, token or credential that is compatible with the RUP.  This
+   document details an architecture by which legacy Identity Document
+   issuance mechanisms are replaced with identical Identity Documents
+   issued, but with the additional prerequisite of successful Remote
+   Attestation of the workloads in question.
 
-2.  Conventions and Definitions
+2.  Requirements
+
+   This proposal is a results of work by the Confidential Computing
+   Consortium's Trustworthy Workload Identity (TWI) SIG (TODO:
+   reference) which has published a set of Definitions (TODO: reference)
+   and Requirements (TODO: reference).  The requirements published by
+   the TWI SIG are high-level and deliberately not implementation-
+   centric.  The proposal specified here fully aligns with those
+   requirements, while focusing on a portable and extensible
+   implementation.
+
+3.  Conventions and Definitions
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
@@ -141,17 +163,17 @@ Table of Contents
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-3.  Security Considerations
+4.  Security Considerations
 
    TODO Security
 
-4.  IANA Considerations
+5.  IANA Considerations
 
    This document has no IANA actions.
 
-5.  References
+6.  References
 
-5.1.  Normative References
+6.1.  Normative References
 
    [I-D.ietf-wimse-workload-creds]
               Campbell, B., Salowey, J. A., Schwenkschuster, A.,
@@ -190,7 +212,7 @@ Table of Contents
               Architecture", RFC 9334, DOI 10.17487/RFC9334, January
               2023, <https://www.rfc-editor.org/rfc/rfc9334>.
 
-5.2.  Informative References
+6.2.  Informative References
 
    [ENVOY]    Envoy, "The Envoy Proxy", n.d., <https://envoyproxy.io>.
 
