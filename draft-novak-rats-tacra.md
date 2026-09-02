@@ -78,7 +78,7 @@ There are significant advantages if workloads can be incrementally updated in th
 
 This document details a proposed architecture by which Remote Attestation utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs. The proposal is intended to work with common credential acquisition protocols and mechanisms such as EST {{!RFC7030}}, SPIRE, and many others.
 
-Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how {{!ENVOY}} does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the credential acquisition mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval).
+Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how {{!ENVOY}} does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the credential acquisition mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
 
 --- middle
 
@@ -89,15 +89,18 @@ The RATS Architecture requires that RATS Relying Parties understand Attestation 
 Additionally, there is an unstated assumption present in the RATS Architecture that a change in Evidence may lead to a change in either the Attestation Results or Appraisal Policy for Attestation Results.
 
 One key requirement for successful deployment of Remote Attestation-capable workloads is minimal blast radius.
-When a workload is moved from a legacy to a remotely attestable (e.g. Trusted Execution) environment, including Intel SGX, AMD SEV-SNP,  ARM TrustZone, that workload can use Remote Attestation to obtain a stable and trustworthy Identity Document while its clients and servers do not notice anything different.
+When a workload is moved from a legacy to a remotely attestable (e.g. Trusted Execution) environment, including Intel SGX, AMD SEV-SNP,  ARM CCA, that workload can use Remote Attestation to obtain a stable and trustworthy Identity Document while its clients and servers do not notice anything different.
 
 For that, a mechanism is required by means of which a Credential Broker, a Key Broker, or a Credential Authority takes on the role of RATS Relying Party.
 This provides an intermediation between Attestation Results, expressed using formats such as EAT and AR4SI, and the RATS-Unaware Relying Parties whose authentication and authorization policies may precede the introduction of Remotely Attestable Workloads and remain static for long periods of time.
 
 For the RATS-Unaware Relying Parties, these adoption barriers are eliminated, as these RUPs are capable of authenticating their clients utilizing appropriate Identity Documents.
-Identity Documents, also known as Credential Types, are any of: shared symmetric keys, bearer tokens (e.g., API Keys, JSON Web Tokens JWTs {{!RFC7515}}), and "proof-of-possession" credentials such as PKIX certificates {{!RFC5280}}, WIMSE Workload Idenity Certificates (WICs), or WIMSE Workload Identity Tokens (WITs) {{!I-D.ietf-wimse-workload-creds}}.
+Identity Documents, also known as Credential Types, are any of:
+* Pre-shared symmetric keys
+* Bearer tokens, e.g., API Keys, JSON Web Tokens JWTs {{!RFC7515}}), and
+* "Proof-of-possession" credentials, such as PKIX certificates {{!RFC5280}}, WIMSE Workload Idenity Certificates (WICs), or WIMSE Workload Identity Tokens (WITs) {{!I-D.ietf-wimse-workload-creds}}
 
-In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, token or credential that is compatible with the RUP.
+In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, bearer token or proof-of-possession credential that is compatible with the RUP.
 This document details an architecture by which legacy Identity Document issuance mechanisms are replaced with identical Identity Documents issued, but with the additional prerequisite of successful Remote Attestation of the workloads in question.
 
 ## Reasons for RATS Unaware Relying Party Immutability
@@ -105,13 +108,17 @@ This document details an architecture by which legacy Identity Document issuance
 The most important and most common scenario addressed here is that of a workload that employs Remote Attestation but whose Relying Party has no capacity to process Attestation Results or execute Appraisal Policy for Attestation Results.
 This RATS Unaware Relying Party is typically unable to make the corresponding changes for a number of reasons:
 
-* It may be a compiled object or container provided by a third party.
-* Or it may be implemented in a language not easily changed or upgraded with new capabilities.
-* Or, as an extreme example, it could be an ancient COBOL program compiled into a WASM object, perhaps connected to the network via virtual paper-tape and virtual printer interfaces.
-* Further, such a system may require extensive and significant review by an authority before changes to the core algorithm can be made.
-* Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep.
+* It may be a compiled object or container provided by a third party
+* Or it may be implemented in a language not easily changed or upgraded with new capabilities
+* Or, as an extreme example, it could be an ancient COBOL program compiled into a WASM object, perhaps connected to the network via virtual paper-tape and virtual printer interfaces
+* Further, such a system may require extensive and significant review by an authority before changes to the core algorithm can be made
+* Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep
 
-In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the key, token, or credential obtained by the workload following Remote Attestation matches that expected by the RUP.
+In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the pre-shared key, bearer token, or proof-of-possesion credential obtained by the workload following Remote Attestation matches that expected by the RUP.
+
+# Conventions and Definitions
+
+{::boilerplate bcp14-tagged}
 
 # Requirements
 
@@ -139,11 +146,14 @@ This proposal is a result of work by the Confidential Computing Consortium's Tru
 8. Cannot assume that Workload has independent network access (i.e., its only way of communicating with the outside world for purposes of credential acquisition are the platform's Confidential Computing-specific Application Binary Interface (ABI) and the Credential Acquisition API (CAAPI), defined later in this document)
 9. Compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation
 
-Note: it is not possible, and neither is it a goal, to leave credential acquisition protocols and mechanisms (EST, SPIRE, etc.) unmodified.
+## Required Modifications to Existing Credential Acquisition Mechanisms
 
-# Conventions and Definitions
-
-{::boilerplate bcp14-tagged}
+It is not possible, and neither is it a goal, to leave credential acquisition protocols and mechanisms (EST, SPIRE, etc.) unmodified. These protocols currently do not support Remote Attestation, for the following reasons:
+* Remote Attestation is typically a two-phase process:
+    1. The Attester requests and obtains a challenge, also sometimes referred to as "nonce" or "freshness" from the Verifier
+    2. The Attester responds to the Verifier's challenge with Evidence, which is how it demonstrates it security and capabilities
+* None of the existing broadly deployed credential mechanisms support this challenge-response semantics, but all appear extensible to accommodate such changes without a lot of additonal effort.
+* The credentials that these mechanisms return are typically visible in plaintext to the control plane, where it is a common requirement to keep the knowledge of authentication secrets to the Attesters and a small number of trusted services, such as key vaults and HSMs.
 
 # Architecture
 
@@ -168,9 +178,64 @@ This arrangement shields the Attester developers from having to know the details
 
 # CAAPI Interface
 
-The CAAPI interface can be implemented using any mechanism suitable for local communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.
+The Credential Acquisition API (CAAPI) is an interface that can be implemented using any mechanism suitable for local communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.
 
+## Initiate-Credential-Acquisition
 
+Called to initiate the process of credential acquisition, stating which target - the RUP - the Attester intends to authenticate to, and and credential type(s) it can work with for that target. Can be called any number of times. Results can expire as the underlying challenge can be time-limited.
+
+Multiple credential acquisitions can be initiated in parallel.
+
+Parameters:
+* (required) Target name (i.e., the server URIs to which the Attester wishes to authenticate)
+* (optional) List of expected credential types; if not specified, any credential type is acceptable for that target
+
+Returns:
+* On success: a Context handle, to be used in subsequent communications
+* On failure: enumerated reason for failure, such as:
+    * Invalid target
+    * Unsupported target
+    * Invallid credential type(s)
+    * Unsupported credential type(s)
+    * Server error: permission failure
+    * Server error: server unreachable
+    * Server error: server unavailable
+    * Invalid target
+    * Unsupported target
+    * etc. (TBD)
+
+## Obtain-Credential
+
+Called to obtain from a given target a credential of a specified credential type, for a previously initiated credential acquisition.
+
+Parameters:
+* (required) Valid context handle from the Initiate-Credential-Acquisition call
+    * a context handle can only be used in this call once
+    * the credential will be obtained for the target specified in the Initiate-Credential-Acquisition call
+* (required) Credential type of the credential that the Attester expects to receive
+
+Returns:
+* On success: newly acquired credential
+* On failure: enumerated reason for failure, such as:
+    * Expired context handle; the Attester must repeat the process by calling Initiate-Credential-Acquisition again
+    * Reused context handle
+    * Invalid context handle
+    * Unsupported credential type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable
+    * etc. (TBD)
+
+## Finalize-Credential-Acquisition
+
+Called to free up resources. The supplied context handle is no longer valid after this call.
+
+Parameter:
+* (required) Context handle from the Initiate-Credential-Acquisition call
+
+Returns:
+* Nothing
 
 # Security Considerations {#security}
 
