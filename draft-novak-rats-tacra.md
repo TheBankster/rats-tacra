@@ -74,10 +74,11 @@ informative:
 
 There is a large class of "RATS-Unaware" Relying Parties (RUPs) that Attesters nevertheless need to interoperate with.
 Existing deployed services, which precede the introduction of Remote Attestation, are often difficult to change/update in significant ways due to, among other reasons, organizational friction, technological inertia, and regulatory policies.
-Yet there are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers.
+There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers.
 
 This document details a proposed architecture by which Remote Attestation utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs. The proposal is intended to work with common credential acquisition protocols and mechanisms such as EST {{!RFC7030}}, SPIRE, and many others.
-Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how {{!ENVOY}} does it.
+
+Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how {{!ENVOY}} does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the credential acquisition mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval).
 
 --- middle
 
@@ -94,10 +95,14 @@ For that, a mechanism is required by means of which a Credential Broker, a Key B
 This provides an intermediation between Attestation Results, expressed using formats such as EAT and AR4SI, and the RATS-Unaware Relying Parties whose authentication and authorization policies may precede the introduction of Remotely Attestable Workloads and remain static for long periods of time.
 
 For the RATS-Unaware Relying Parties, these adoption barriers are eliminated, as these RUPs are capable of authenticating their clients utilizing appropriate Identity Documents.
-This includes shared symmetric keys, bearer tokens, credentials including PKIX certificates {{!RFC5280}}, JWTs {{!RFC7515}}, or WIMSE WITs {{!I-D.ietf-wimse-workload-creds}}.
-In this world, the Attester uses Remote Attestation to obtain from the RATS Relying Party a key, token or credential that is compatible with the RUP.
+Identity Documents, also known as Credential Types, are any of: shared symmetric keys, bearer tokens (e.g., API Keys, JSON Web Tokens JWTs {{!RFC7515}}), and "proof-of-possession" credentials such as PKIX certificates {{!RFC5280}}, WIMSE Workload Idenity Certificates (WTCs), or WIMSE Workload Identity Tokens (WITs) {{!I-D.ietf-wimse-workload-creds}}.
 
+In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, token or credential that is compatible with the RUP.
 This document details an architecture by which legacy Identity Document issuance mechanisms are replaced with identical Identity Documents issued, but with the additional prerequisite of successful Remote Attestation of the workloads in question.
+
+# Requirements
+
+This proposal is a results of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions (TODO: reference) and Requirements (TODO: reference). The requirements published by the TWI SIG are high-level and deliberately not implementation-centric. The proposal specified here fully aligns with those requirements, while focusing on a portable and extensible implementation.
 
 # Conventions and Definitions
 
