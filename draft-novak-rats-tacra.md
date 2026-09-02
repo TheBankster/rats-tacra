@@ -95,10 +95,23 @@ For that, a mechanism is required by means of which a Credential Broker, a Key B
 This provides an intermediation between Attestation Results, expressed using formats such as EAT and AR4SI, and the RATS-Unaware Relying Parties whose authentication and authorization policies may precede the introduction of Remotely Attestable Workloads and remain static for long periods of time.
 
 For the RATS-Unaware Relying Parties, these adoption barriers are eliminated, as these RUPs are capable of authenticating their clients utilizing appropriate Identity Documents.
-Identity Documents, also known as Credential Types, are any of: shared symmetric keys, bearer tokens (e.g., API Keys, JSON Web Tokens JWTs {{!RFC7515}}), and "proof-of-possession" credentials such as PKIX certificates {{!RFC5280}}, WIMSE Workload Idenity Certificates (WTCs), or WIMSE Workload Identity Tokens (WITs) {{!I-D.ietf-wimse-workload-creds}}.
+Identity Documents, also known as Credential Types, are any of: shared symmetric keys, bearer tokens (e.g., API Keys, JSON Web Tokens JWTs {{!RFC7515}}), and "proof-of-possession" credentials such as PKIX certificates {{!RFC5280}}, WIMSE Workload Idenity Certificates (WICs), or WIMSE Workload Identity Tokens (WITs) {{!I-D.ietf-wimse-workload-creds}}.
 
 In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, token or credential that is compatible with the RUP.
 This document details an architecture by which legacy Identity Document issuance mechanisms are replaced with identical Identity Documents issued, but with the additional prerequisite of successful Remote Attestation of the workloads in question.
+
+## Reasons for RATS Unaware Relying Party Immutability
+
+The most important and most common scenario addressed here is that of a workload that employs Remote Attestation but whose Relying Party has no capacity to process Attestation Results or execute Appraisal Policy for Attestation Results.
+This RATS Unaware Relying Party is typically unable to make the corresponding changes for a number of reasons:
+
+* It may be a compiled object or container provided by a third party.
+* Or it may be implemented in a language not easily changed or upgraded with new capabilities.
+* Or, as an extreme example, it could be an ancient COBOL program compiled into a WASM object, perhaps connected to the network via virtual paper-tape and virtual printer interfaces.
+* Further, such a system may require extensive and significant review by an authority before changes to the core algorithm can be made.
+* Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep.
+
+In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the key, token, or credential obtained by the workload following Remote Attestation matches that expected by the RUP.
 
 # Requirements
 
@@ -119,7 +132,6 @@ This proposal is a result of work by the Confidential Computing Consortium's Tru
    * SPIRE
    * ACMEv2 (TODO: Add RFC #)
    * TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)
-   * https://datatracker.ietf.org/doc/draft-ietf-lamps-csr-attestation/?
    * Future mechanisms through architectural extensibility
 5. Supports Workloads utilizing different credential acquisition mechanisms per-target
 6. Supports both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester
@@ -127,11 +139,37 @@ This proposal is a result of work by the Confidential Computing Consortium's Tru
 8. Cannot assume that Workload has independent network access (i.e., its only way of communicating with the outside world for purposes of credential acquisition are the platform's Confidential Computing-specific Application Binary Interface (ABI) and the Credential Acquisition API (CAAPI), defined later in this document)
 9. Compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation
 
-Note: it is not possible, and neither is it a goal, to leave protocols (EST, SPIRE, etc) unmodified.
+Note: it is not possible, and neither is it a goal, to leave credential acquisition protocols and mechanisms (EST, SPIRE, etc.) unmodified.
 
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
+
+# Architecture
+
+In the text that follows, numbers in the format [Req #] refer to the corresponding numbered requirement in the list of Requirements in the opening section of this document.
+
+{::include tacra_architecture.txt}
+
+This architecture assumes the existence of a “Credential Acquisition System” (CAS), such as EST, SPIRE, ACMEv2, etc., that comprises a client and a server. The CAS Client is presumed to be running on the Attester’s system, but outside the Attester’s TEE. The CAS Server is a remote service invoked by the CAS Client over the CAS protocol, which is unknown and opaque to the Attester.
+
+The Attester (the workload) runs inside a TEE. It obtains credentials by calling the in-proc CAS Client Proxy, which can be a statically linked library or an Envoy-style sidecar (TODO: add Envoy reference). The CAS Client Proxy interacts with the outside world via two channels:
+
+1. With the underlying hardware platform to utilize its TEE-specific functions, such as generating keys and obtaining evidence, via the platform-specific plugin [Req 9], and
+2. With the Credential Acquisition Client, via the well-defined Credential Acquisition API (CAAPI) interface
+
+These being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Req 8]. The server side of the CAAPI interface is part of the CAS Server Proxy. The CAS Server Proxy is hosted by the Credential Acquisition Client. There can be as many Credential Acquisition Client implementations as there are credential acquisition mechanisms [Req 4]: EST Client, SPIRE Agent, etc. There is no restriction against multiple credential acquisition mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Req 5].
+
+The CAS Server Proxy performs the discovery of which credentials types and which credential acquisition mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, and automatically picks and utilizes the corresponding mechanism and credential type, without the Attester’s knowledge or involvement [Req 1]. If a credential type specified by the Attester is unavailable due to the Credential Acquisition System limitations, an error may result.
+
+The Credential Acquisition Server implements the server side of the corresponding credential acquisition mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Certificate Authority for minting new certificates) and the Key/Credential store for fetching existing keys or credentials, on the Attester’s behalf [Req 7]. The credential types supported by this architecture are limited only by what the Credential Acquisition System can support [Req 2].
+
+This arrangement shields the Attester developers from having to know the details of the platform on which the attester runs. It limits the additional size of the Attester TCB to the smallest possible amount [Req 3]. It enables the Credential Acquisition Client to execute any credential acquisition mechanism, without the Attester’s knowledge [Req 4]. There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Req 6].
+
+# CAAPI Interface
+
+The CAAPI interface can be implemented using any mechanism suitable for local communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.
+
 
 
 # Security Considerations {#security}

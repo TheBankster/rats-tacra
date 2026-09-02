@@ -1,0 +1,24 @@
+      Trusted          ┌───────────────── Credential Acquisition System ────────────────┐
+     Execution         │       EST Client,                            EST Server,       │
+    Environment        │    SPIRE Agent, etc.                      SPIRE Server, etc.   │
+┌──────────────────┐   │ ┌────────────────────┐                  ┌────────────────────┐ │
+│     Workload     │   │ │    Credential      │                  │     Credential     │ │
+│    (Attester)    │   │ │ Acquisition Client │                  │ Acquisition Server │ │
+│ ┌──────────────┐ │   │ │ ┌────────────────┐ │    Credential    │                    │ │
+│ │     CAS      │ │   │ │ │      CAS       │ │    Acquisition   │                    │ │
+│ │ Client Proxy │ │   │ │ │  Server Proxy  │ │     Protocol     │                    │ │
+│ │ ┌──────────┐ │ │   │ │ │ ┌────────────┐ │ ├──────────────────►                    │ │
+│ │ │  CAAPI   │ │ │   │ │ │ │   CAAPI    │ │ │ (EST, SPIRE, ...)│                    │ │
+│ │ │  Client  ├─┼─┼───┼─┼─┼─►   Server   │ │ │                  │                    │ │
+│ │ └──────────┘ │ │   │ │ │ └────────────┘ │ │                  │                    │ │
+│ │ ┌──────────┐ │ │   │ │ └────────────────┘ │                  │                    │ │
+│ │ │ Platform │ │ │   │ └────────────────────┘                  └──┬─────────────────┘ │
+│ │ │  Plug-In │ │ │   └────────────────────────────────────────────┼───────────────────┘
+│ │ └─────┬────┘ │ │                                                │
+│ └───────┼──────┘ │                        ┌───────────────────────┼────────────┐  
+└─────────┼────────┘                        │                       │            │
+ ┌────────▼───────┐                   ┌─────▼────┐    ┌─────────────▼──┐   ┌─────▼──────┐
+ │  Platform ABI  │                   │   RATS   │    │ Key/Credential │   │  Identity  │
+ │  (Quote, RNG,  │                   │ Verifier │    │  Store (e.g.,  │   │  Provider  │
+ │      etc.)     │                   │          │    │  HSM, Vault)   │   │ (e.g., CA) │
+ └────────────────┘                   └──────────┘    └────────────────┘   └────────────┘
