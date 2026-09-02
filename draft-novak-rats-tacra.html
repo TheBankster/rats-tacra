@@ -13,7 +13,7 @@
 Existing deployed services, which precede the introduction of Remote Attestation, are often difficult to change/update in significant ways due to, among other reasons, organizational friction, technological inertia, and regulatory policies.
 There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers. 
        This document details a proposed architecture by which Remote Attestation utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs. The proposal is intended to work with common credential acquisition protocols and mechanisms such as EST  , SPIRE, and many others. 
-       Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how   does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the credential acquisition mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval). 
+       Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how   does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the credential acquisition mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials. 
     ' name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="trustworthy workload identity" name="keyword">
@@ -1097,7 +1097,7 @@ svg {
 Existing deployed services, which precede the introduction of Remote Attestation, are often difficult to change/update in significant ways due to, among other reasons, organizational friction, technological inertia, and regulatory policies.
 There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">This document details a proposed architecture by which Remote Attestation utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs. The proposal is intended to work with common credential acquisition protocols and mechanisms such as EST <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, SPIRE, and many others.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
-<p id="section-abstract-3">Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how <span>[<a href="#ENVOY" class="cite xref">ENVOY</a>]</span> does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the credential acquisition mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval).<a href="#section-abstract-3" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how <span>[<a href="#ENVOY" class="cite xref">ENVOY</a>]</span> does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the credential acquisition mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1172,16 +1172,32 @@ There are significant advantages if workloads can be incrementally updated in th
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-requirements" class="internal xref">Requirements</a></p>
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-requirements" class="internal xref">Requirements</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-required-modifications-to-e" class="internal xref">Required Modifications to Existing Credential Acquisition Mechanisms</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-architecture" class="internal xref">Architecture</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-caapi-interface" class="internal xref">CAAPI Interface</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-initiate-credential-acquisi" class="internal xref">Initiate-Credential-Acquisition</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-obtain-credential" class="internal xref">Obtain-Credential</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-finalize-credential-acquisi" class="internal xref">Finalize-Credential-Acquisition</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
@@ -1219,12 +1235,15 @@ There are significant advantages if workloads can be incrementally updated in th
 The RATS Architecture requires that RATS Relying Parties understand Attestation Results expressed using standards such as EAT and AR4SI, execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
 Additionally, there is an unstated assumption present in the RATS Architecture that a change in Evidence may lead to a change in either the Attestation Results or Appraisal Policy for Attestation Results.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">One key requirement for successful deployment of Remote Attestation-capable workloads is minimal blast radius.
-When a workload is moved from a legacy to a remotely attestable (e.g. Trusted Execution) environment, including Intel SGX, AMD SEV-SNP,  ARM TrustZone, that workload can use Remote Attestation to obtain a stable and trustworthy Identity Document while its clients and servers do not notice anything different.<a href="#section-1-2" class="pilcrow">¶</a></p>
+When a workload is moved from a legacy to a remotely attestable (e.g. Trusted Execution) environment, including Intel SGX, AMD SEV-SNP,  ARM CCA, that workload can use Remote Attestation to obtain a stable and trustworthy Identity Document while its clients and servers do not notice anything different.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">For that, a mechanism is required by means of which a Credential Broker, a Key Broker, or a Credential Authority takes on the role of RATS Relying Party.
 This provides an intermediation between Attestation Results, expressed using formats such as EAT and AR4SI, and the RATS-Unaware Relying Parties whose authentication and authorization policies may precede the introduction of Remotely Attestable Workloads and remain static for long periods of time.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">For the RATS-Unaware Relying Parties, these adoption barriers are eliminated, as these RUPs are capable of authenticating their clients utilizing appropriate Identity Documents.
-Identity Documents, also known as Credential Types, are any of: shared symmetric keys, bearer tokens (e.g., API Keys, JSON Web Tokens JWTs <span>[<a href="#RFC7515" class="cite xref">RFC7515</a>]</span>), and "proof-of-possession" credentials such as PKIX certificates <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, WIMSE Workload Idenity Certificates (WICs), or WIMSE Workload Identity Tokens (WITs) <span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span>.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, token or credential that is compatible with the RUP.
+Identity Documents, also known as Credential Types, are any of:
+* Pre-shared symmetric keys
+* Bearer tokens, e.g., API Keys, JSON Web Tokens JWTs <span>[<a href="#RFC7515" class="cite xref">RFC7515</a>]</span>), and
+* "Proof-of-possession" credentials, such as PKIX certificates <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, WIMSE Workload Idenity Certificates (WICs), or WIMSE Workload Identity Tokens (WITs) <span>[<a href="#I-D.ietf-wimse-workload-creds" class="cite xref">I-D.ietf-wimse-workload-creds</a>]</span><a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, bearer token or proof-of-possession credential that is compatible with the RUP.
 This document details an architecture by which legacy Identity Document issuance mechanisms are replaced with identical Identity Documents issued, but with the additional prerequisite of successful Remote Attestation of the workloads in question.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <div id="reasons-for-rats-unaware-relying-party-immutability">
 <section id="section-1.1">
@@ -1235,113 +1254,125 @@ This document details an architecture by which legacy Identity Document issuance
 This RATS Unaware Relying Party is typically unable to make the corresponding changes for a number of reasons:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-2.1">
-            <p id="section-1.1-2.1.1">It may be a compiled object or container provided by a third party.<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.1.1">It may be a compiled object or container provided by a third party<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.2">
-            <p id="section-1.1-2.2.1">Or it may be implemented in a language not easily changed or upgraded with new capabilities.<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.2.1">Or it may be implemented in a language not easily changed or upgraded with new capabilities<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.3">
-            <p id="section-1.1-2.3.1">Or, as an extreme example, it could be an ancient COBOL program compiled into a WASM object, perhaps connected to the network via virtual paper-tape and virtual printer interfaces.<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.3.1">Or, as an extreme example, it could be an ancient COBOL program compiled into a WASM object, perhaps connected to the network via virtual paper-tape and virtual printer interfaces<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.4">
-            <p id="section-1.1-2.4.1">Further, such a system may require extensive and significant review by an authority before changes to the core algorithm can be made.<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.4.1">Further, such a system may require extensive and significant review by an authority before changes to the core algorithm can be made<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.5">
-            <p id="section-1.1-2.5.1">Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep.<a href="#section-1.1-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.5.1">Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep<a href="#section-1.1-2.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-3">In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the key, token, or credential obtained by the workload following Remote Attestation matches that expected by the RUP.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the pre-shared key, bearer token, or proof-of-possesion credential obtained by the workload following Remote Attestation matches that expected by the RUP.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-</section>
-</div>
-<div id="requirements">
-<section id="section-2">
-      <h2 id="name-requirements">
-<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-requirements" class="section-name selfRef">Requirements</a>
-      </h2>
-<p id="section-2-1">This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions (TODO: reference) and Requirements (TODO: reference). The requirements published by the TWI SIG are high-level and deliberately not implementation-centric. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-2-2">
-<li id="section-2-2.1">
-          <p id="section-2-2.1.1">Supports mechanisms for minting (new) as well as retrieving (pre-existing) credentials; the workload does not know what type of credential it will be given (new or pre-existing) when it launches; it discovers this at runtime<a href="#section-2-2.1.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-2-2.2">
-          <p id="section-2-2.2.1">Supports most current and future credential formats:<a href="#section-2-2.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-2-2.2.2.1">
-              <p id="section-2-2.2.2.1.1">X.509 Certificates<a href="#section-2-2.2.2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.2.2.2">
-              <p id="section-2-2.2.2.2.1">WIMSE Workload Identity Certificates (WICs)<a href="#section-2-2.2.2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.2.2.3">
-              <p id="section-2-2.2.2.3.1">WIMSE Workload Identity Tokens (WITs)<a href="#section-2-2.2.2.3.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.2.2.4">
-              <p id="section-2-2.2.2.4.1">Bearer tokens (JWTs, API Keys)<a href="#section-2-2.2.2.4.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.2.2.5">
-              <p id="section-2-2.2.2.5.1">TPM 2.0 DAA Group Certificates (for replica workloads)<a href="#section-2-2.2.2.5.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.2.2.6">
-              <p id="section-2-2.2.2.6.1">Pre-shared keys<a href="#section-2-2.2.2.6.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.2.2.7">
-              <p id="section-2-2.2.2.7.1">Future formats through architectural extensibility<a href="#section-2-2.2.2.7.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-</li>
-        <li id="section-2-2.3">
-          <p id="section-2-2.3.1">Minimal trust boundary expansion of the Attester implementation<a href="#section-2-2.3.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-2-2.4">
-          <p id="section-2-2.4.1">Supports, transparently to the Attester, most current and future credential acquisition mechanisms:<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-2-2.4.2.1">
-              <p id="section-2-2.4.2.1.1">EST (RFC 7030)<a href="#section-2-2.4.2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.4.2.2">
-              <p id="section-2-2.4.2.2.1">SPIRE<a href="#section-2-2.4.2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.4.2.3">
-              <p id="section-2-2.4.2.3.1">ACMEv2 (TODO: Add RFC #)<a href="#section-2-2.4.2.3.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.4.2.4">
-              <p id="section-2-2.4.2.4.1">TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)<a href="#section-2-2.4.2.4.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2-2.4.2.5">
-              <p id="section-2-2.4.2.5.1">Future mechanisms through architectural extensibility<a href="#section-2-2.4.2.5.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-</li>
-        <li id="section-2-2.5">
-          <p id="section-2-2.5.1">Supports Workloads utilizing different credential acquisition mechanisms per-target<a href="#section-2-2.5.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-2-2.6">
-          <p id="section-2-2.6.1">Supports both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-2-2.7">
-          <p id="section-2-2.7.1">Supports most current and future RATS Verifiers, Identity Providers, and Key/Credential Stores, transparently to the Attester<a href="#section-2-2.7.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-2-2.8">
-          <p id="section-2-2.8.1">Cannot assume that Workload has independent network access (i.e., its only way of communicating with the outside world for purposes of credential acquisition are the platform's Confidential Computing-specific Application Binary Interface (ABI) and the Credential Acquisition API (CAAPI), defined later in this document)<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-2-2.9">
-          <p id="section-2-2.9.1">Compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation<a href="#section-2-2.9.1" class="pilcrow">¶</a></p>
-</li>
-      </ol>
-<p id="section-2-3">Note: it is not possible, and neither is it a goal, to leave credential acquisition protocols and mechanisms (EST, SPIRE, etc.) unmodified.<a href="#section-2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
-<section id="section-3">
+<section id="section-2">
       <h2 id="name-conventions-and-definitions">
-<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
       </h2>
-<p id="section-3-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
 "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
-appear in all capitals, as shown here.<a href="#section-3-1" class="pilcrow">¶</a></p>
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="requirements">
+<section id="section-3">
+      <h2 id="name-requirements">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-requirements" class="section-name selfRef">Requirements</a>
+      </h2>
+<p id="section-3-1">This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions (TODO: reference) and Requirements (TODO: reference). The requirements published by the TWI SIG are high-level and deliberately not implementation-centric. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3-2">
+<li id="section-3-2.1">
+          <p id="section-3-2.1.1">Supports mechanisms for minting (new) as well as retrieving (pre-existing) credentials; the workload does not know what type of credential it will be given (new or pre-existing) when it launches; it discovers this at runtime<a href="#section-3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.2">
+          <p id="section-3-2.2.1">Supports most current and future credential formats:<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-2.2.2.1">
+              <p id="section-3-2.2.2.1.1">X.509 Certificates<a href="#section-3-2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.2">
+              <p id="section-3-2.2.2.2.1">WIMSE Workload Identity Certificates (WICs)<a href="#section-3-2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.3">
+              <p id="section-3-2.2.2.3.1">WIMSE Workload Identity Tokens (WITs)<a href="#section-3-2.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.4">
+              <p id="section-3-2.2.2.4.1">Bearer tokens (JWTs, API Keys)<a href="#section-3-2.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.5">
+              <p id="section-3-2.2.2.5.1">TPM 2.0 DAA Group Certificates (for replica workloads)<a href="#section-3-2.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.6">
+              <p id="section-3-2.2.2.6.1">Pre-shared keys<a href="#section-3-2.2.2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.7">
+              <p id="section-3-2.2.2.7.1">Future formats through architectural extensibility<a href="#section-3-2.2.2.7.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li id="section-3-2.3">
+          <p id="section-3-2.3.1">Minimal trust boundary expansion of the Attester implementation<a href="#section-3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.4">
+          <p id="section-3-2.4.1">Supports, transparently to the Attester, most current and future credential acquisition mechanisms:<a href="#section-3-2.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-2.4.2.1">
+              <p id="section-3-2.4.2.1.1">EST (RFC 7030)<a href="#section-3-2.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.2">
+              <p id="section-3-2.4.2.2.1">SPIRE<a href="#section-3-2.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.3">
+              <p id="section-3-2.4.2.3.1">ACMEv2 (TODO: Add RFC #)<a href="#section-3-2.4.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.4">
+              <p id="section-3-2.4.2.4.1">TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)<a href="#section-3-2.4.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.5">
+              <p id="section-3-2.4.2.5.1">Future mechanisms through architectural extensibility<a href="#section-3-2.4.2.5.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li id="section-3-2.5">
+          <p id="section-3-2.5.1">Supports Workloads utilizing different credential acquisition mechanisms per-target<a href="#section-3-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.6">
+          <p id="section-3-2.6.1">Supports both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester<a href="#section-3-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.7">
+          <p id="section-3-2.7.1">Supports most current and future RATS Verifiers, Identity Providers, and Key/Credential Stores, transparently to the Attester<a href="#section-3-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.8">
+          <p id="section-3-2.8.1">Cannot assume that Workload has independent network access (i.e., its only way of communicating with the outside world for purposes of credential acquisition are the platform's Confidential Computing-specific Application Binary Interface (ABI) and the Credential Acquisition API (CAAPI), defined later in this document)<a href="#section-3-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.9">
+          <p id="section-3-2.9.1">Compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation<a href="#section-3-2.9.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<div id="required-modifications-to-existing-credential-acquisition-mechanisms">
+<section id="section-3.1">
+        <h3 id="name-required-modifications-to-e">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-required-modifications-to-e" class="section-name selfRef">Required Modifications to Existing Credential Acquisition Mechanisms</a>
+        </h3>
+<p id="section-3.1-1">It is not possible, and neither is it a goal, to leave credential acquisition protocols and mechanisms (EST, SPIRE, etc.) unmodified. These protocols currently do not support Remote Attestation, for the following reasons:
+* Remote Attestation is typically a two-phase process:
+    1. The Attester requests and obtains a challenge, also sometimes referred to as "nonce" or "freshness" from the Verifier
+    2. The Attester responds to the Verifier's challenge with Evidence, which is how it demonstrates it security and capabilities
+* None of the existing broadly deployed credential mechanisms support this challenge-response semantics, but all appear extensible to accommodate such changes without a lot of additonal effort.
+* The credentials that these mechanisms return are typically visible in plaintext to the control plane, where it is a common requirement to keep the knowledge of authentication secrets to the Attesters and a small number of trusted services, such as key vaults and HSMs.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="architecture">
@@ -1378,7 +1409,69 @@ Environment        │    SPIRE Agent, etc.                      SPIRE Server, e
       <h2 id="name-caapi-interface">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-caapi-interface" class="section-name selfRef">CAAPI Interface</a>
       </h2>
-<p id="section-5-1">The CAAPI interface can be implemented using any mechanism suitable for local communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">The Credential Acquisition API (CAAPI) is an interface that can be implemented using any mechanism suitable for local communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="initiate-credential-acquisition">
+<section id="section-5.1">
+        <h3 id="name-initiate-credential-acquisi">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-initiate-credential-acquisi" class="section-name selfRef">Initiate-Credential-Acquisition</a>
+        </h3>
+<p id="section-5.1-1">Called to initiate the process of credential acquisition, stating which target - the RUP - the Attester intends to authenticate to, and and credential type(s) it can work with for that target. Can be called any number of times. Results can expire as the underlying challenge can be time-limited.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Multiple credential acquisitions can be initiated in parallel.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">Parameters:
+* (required) Target name (i.e., the server URIs to which the Attester wishes to authenticate)
+* (optional) List of expected credential types; if not specified, any credential type is acceptable for that target<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.1-4">Returns:
+* On success: a Context handle, to be used in subsequent communications
+* On failure: enumerated reason for failure, such as:
+    * Invalid target
+    * Unsupported target
+    * Invallid credential type(s)
+    * Unsupported credential type(s)
+    * Server error: permission failure
+    * Server error: server unreachable
+    * Server error: server unavailable
+    * Invalid target
+    * Unsupported target
+    * etc. (TBD)<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="obtain-credential">
+<section id="section-5.2">
+        <h3 id="name-obtain-credential">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-obtain-credential" class="section-name selfRef">Obtain-Credential</a>
+        </h3>
+<p id="section-5.2-1">Called to obtain from a given target a credential of a specified credential type, for a previously initiated credential acquisition.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">Parameters:
+* (required) Valid context handle from the Initiate-Credential-Acquisition call
+    * a context handle can only be used in this call once
+    * the credential will be obtained for the target specified in the Initiate-Credential-Acquisition call
+* (required) Credential type of the credential that the Attester expects to receive<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">Returns:
+* On success: newly acquired credential
+* On failure: enumerated reason for failure, such as:
+    * Expired context handle; the Attester must repeat the process by calling Initiate-Credential-Acquisition again
+    * Reused context handle
+    * Invalid context handle
+    * Unsupported credential type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable
+    * etc. (TBD)<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="finalize-credential-acquisition">
+<section id="section-5.3">
+        <h3 id="name-finalize-credential-acquisi">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-finalize-credential-acquisi" class="section-name selfRef">Finalize-Credential-Acquisition</a>
+        </h3>
+<p id="section-5.3-1">Called to free up resources. The supplied context handle is no longer valid after this call.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">Parameter:
+* (required) Context handle from the Initiate-Credential-Acquisition call<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">Returns:
+* Nothing<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="security">
