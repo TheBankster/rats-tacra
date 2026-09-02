@@ -180,7 +180,7 @@ This arrangement shields the Attester developers from having to know the details
 Under the covers and opaquely to the Attester, the CAS Client Proxy discovers and utilizes one of two credential acquisition modes: Enrollment and Retrieval. Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch bearer tokens and shared proof-of-possession credentials (e.g., for replica workloads). In both cases, the associated secrets remain opaque to the CAS at all times [Req 10].
 
 * Enrollment: the CAS Client Proxy generates and includes alongside Evidence a CSR. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD.
-For Retrieval, the CAS Client Proxy generates and includes in Evidence an asymmetric encryption key called the Credential Wrapping Key or CWK. The resulting secrets are encrypted to this CWK.
+* Retrieval: the CAS Client Proxy generates and includes in Evidence an asymmetric encryption key called the Credential Wrapping Key or CWK. The resulting secrets are encrypted to this CWK.
 
 # Credential Acquisition Interface
 
