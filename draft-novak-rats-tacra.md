@@ -9,20 +9,20 @@ number:
 date:
 # consensus: true
 v: 3
-area: Security
-workgroup: RATS Working Group
+area: "Security"
+workgroup: "Remote ATtestation ProcedureS"
 keyword:
  - trustworthy workload identity
  - remote attestation
  - credential enrollment
  - credential retrieval
 venue:
-  group: RATS
-  type: Working Group
-  mail: rats@ietf.org
-  arch: https://example.com/WG
-  github: TheBankster/rats-twi-um
-  # latest: https://example.com/LATEST
+  group: "Remote ATtestation ProcedureS"
+  type: "Working Group"
+  mail: "rats@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/rats/"
+  github: "TheBankster/rats-twi-um"
+  latest: "https://TheBankster.github.io/rats-twi-um/draft-novak-rats-tacra.html"
 
 author:
  - ins: M. Novak
