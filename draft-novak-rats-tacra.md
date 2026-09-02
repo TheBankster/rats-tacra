@@ -182,12 +182,12 @@ The Credential Acquisition API (CAAPI) is an interface that can be implemented u
 
 ## Initiate-Credential-Acquisition
 
-Called to initiate the process of credential acquisition, stating which target - the RUP - the Attester intends to authenticate to, and and credential type(s) it can work with for that target. Can be called any number of times. Results can expire as the underlying challenge can be time-limited.
+Initiates the process of credential acquisition, stating which target - the RUP - the Attester intends to authenticate to, and and credential type(s) it can work with for that target. Can be called any number of times. Results can expire as the underlying challenge can be time-limited. Results on success must be garbage-collected.
 
 Multiple credential acquisitions can be initiated in parallel.
 
 Parameters:
-* (required) Target name (i.e., the server URIs to which the Attester wishes to authenticate)
+* (required) Target name, i.e., the server URIs to which the Attester wishes to authenticate
 * (optional) List of expected credential types; if not specified, any credential type is acceptable for that target
 
 Returns:
@@ -206,7 +206,7 @@ Returns:
 
 ## Obtain-Credential
 
-Called to obtain from a given target a credential of a specified credential type, for a previously initiated credential acquisition.
+Obtains a credential of a specified credential type, for a previously initiated credential acquisition.
 
 Parameters:
 * (required) Valid context handle from the Initiate-Credential-Acquisition call
