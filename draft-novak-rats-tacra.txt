@@ -146,14 +146,77 @@ Table of Contents
 
 2.  Requirements
 
-   This proposal is a results of work by the Confidential Computing
+   This proposal is a result of work by the Confidential Computing
    Consortium's Trustworthy Workload Identity (TWI) SIG (TODO:
    reference) which has published a set of Definitions (TODO: reference)
    and Requirements (TODO: reference).  The requirements published by
    the TWI SIG are high-level and deliberately not implementation-
-   centric.  The proposal specified here fully aligns with those
-   requirements, while focusing on a portable and extensible
+   centric.  The requirements specified here fully align with the TWI
+   SIG requirements, while focusing on a portable and extensible
    implementation.
+
+   1.  Supports mechanisms for minting (new) as well as retrieving (pre-
+       existing) credentials; the workload does not know what type of
+       credential it will be given (new or pre-existing) when it
+       launches; it discovers this at runtime
+
+   2.  Supports most current and future credential formats:
+
+       *  X.509 Certificates
+
+       *  WIMSE Workload Identity Certificates (WICs)
+
+       *  WIMSE Workload Identity Tokens (WITs)
+
+       *  Bearer tokens (JWTs, API Keys)
+
+       *  TPM 2.0 DAA Group Certificates (for replica workloads)
+
+       *  Pre-shared keys
+
+       *  Future formats through architectural extensibility
+
+   3.  Minimal trust boundary expansion of the Attester implementation
+
+   4.  Supports, transparently to the Attester, most current and future
+       credential acquisition mechanisms:
+
+       *  EST (RFC 7030)
+
+       *  SPIRE
+
+       *  ACMEv2 (TODO: Add RFC #)
+
+       *  TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)
+
+       *  https://datatracker.ietf.org/doc/draft-ietf-lamps-csr-
+          attestation/?
+
+       *  Future mechanisms through architectural extensibility
+
+   5.  Supports Workloads utilizing different credential acquisition
+       mechanisms per-target
+
+   6.  Supports both Background Check and Passport RATS modes,
+       indistinguishably from the PoV of the Attester
+
+   7.  Supports most current and future RATS Verifiers, Identity
+       Providers, and Key/Credential Stores, transparently to the
+       Attester
+
+   8.  Cannot assume that Workload has independent network access (i.e.,
+       its only way of communicating with the outside world for purposes
+       of credential acquisition are the platform's Confidential
+       Computing-specific Application Binary Interface (ABI) and the
+       Credential Acquisition API (CAAPI), defined later in this
+       document)
+
+   9.  Compatible with all existing and future Confidential Computing
+       platforms meeting minimum requirements around secure cryptography
+       and evidence generation
+
+   Note: it is not possible, and neither is it a goal, to leave
+   protocols (EST, SPIRE, etc) unmodified.
 
 3.  Conventions and Definitions
 

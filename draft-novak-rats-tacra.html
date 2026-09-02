@@ -1222,7 +1222,80 @@ This document details an architecture by which legacy Identity Document issuance
       <h2 id="name-requirements">
 <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-requirements" class="section-name selfRef">Requirements</a>
       </h2>
-<p id="section-2-1">This proposal is a results of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions (TODO: reference) and Requirements (TODO: reference). The requirements published by the TWI SIG are high-level and deliberately not implementation-centric. The proposal specified here fully aligns with those requirements, while focusing on a portable and extensible implementation.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-1">This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions (TODO: reference) and Requirements (TODO: reference). The requirements published by the TWI SIG are high-level and deliberately not implementation-centric. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-2-2">
+<li id="section-2-2.1">
+          <p id="section-2-2.1.1">Supports mechanisms for minting (new) as well as retrieving (pre-existing) credentials; the workload does not know what type of credential it will be given (new or pre-existing) when it launches; it discovers this at runtime<a href="#section-2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-2-2.2">
+          <p id="section-2-2.2.1">Supports most current and future credential formats:<a href="#section-2-2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.2.2.1">
+              <p id="section-2-2.2.2.1.1">X.509 Certificates<a href="#section-2-2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.2">
+              <p id="section-2-2.2.2.2.1">WIMSE Workload Identity Certificates (WICs)<a href="#section-2-2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.3">
+              <p id="section-2-2.2.2.3.1">WIMSE Workload Identity Tokens (WITs)<a href="#section-2-2.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.4">
+              <p id="section-2-2.2.2.4.1">Bearer tokens (JWTs, API Keys)<a href="#section-2-2.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.5">
+              <p id="section-2-2.2.2.5.1">TPM 2.0 DAA Group Certificates (for replica workloads)<a href="#section-2-2.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.6">
+              <p id="section-2-2.2.2.6.1">Pre-shared keys<a href="#section-2-2.2.2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.7">
+              <p id="section-2-2.2.2.7.1">Future formats through architectural extensibility<a href="#section-2-2.2.2.7.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li id="section-2-2.3">
+          <p id="section-2-2.3.1">Minimal trust boundary expansion of the Attester implementation<a href="#section-2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-2-2.4">
+          <p id="section-2-2.4.1">Supports, transparently to the Attester, most current and future credential acquisition mechanisms:<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.4.2.1">
+              <p id="section-2-2.4.2.1.1">EST (RFC 7030)<a href="#section-2-2.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.4.2.2">
+              <p id="section-2-2.4.2.2.1">SPIRE<a href="#section-2-2.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.4.2.3">
+              <p id="section-2-2.4.2.3.1">ACMEv2 (TODO: Add RFC #)<a href="#section-2-2.4.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.4.2.4">
+              <p id="section-2-2.4.2.4.1">TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)<a href="#section-2-2.4.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.4.2.5">
+              <p id="section-2-2.4.2.5.1">https://datatracker.ietf.org/doc/draft-ietf-lamps-csr-attestation/?<a href="#section-2-2.4.2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.4.2.6">
+              <p id="section-2-2.4.2.6.1">Future mechanisms through architectural extensibility<a href="#section-2-2.4.2.6.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li id="section-2-2.5">
+          <p id="section-2-2.5.1">Supports Workloads utilizing different credential acquisition mechanisms per-target<a href="#section-2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-2-2.6">
+          <p id="section-2-2.6.1">Supports both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-2-2.7">
+          <p id="section-2-2.7.1">Supports most current and future RATS Verifiers, Identity Providers, and Key/Credential Stores, transparently to the Attester<a href="#section-2-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-2-2.8">
+          <p id="section-2-2.8.1">Cannot assume that Workload has independent network access (i.e., its only way of communicating with the outside world for purposes of credential acquisition are the platform's Confidential Computing-specific Application Binary Interface (ABI) and the Credential Acquisition API (CAAPI), defined later in this document)<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-2-2.9">
+          <p id="section-2-2.9.1">Compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation<a href="#section-2-2.9.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<p id="section-2-3">Note: it is not possible, and neither is it a goal, to leave protocols (EST, SPIRE, etc) unmodified.<a href="#section-2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
