@@ -5,10 +5,10 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 6 March 2027                           Sandelman Software Works
+Expires: 7 March 2027                           Sandelman Software Works
                                                              H. Birkholz
                                                         Franhaufer Inst.
-                                                        2 September 2026
+                                                        3 September 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -44,8 +44,8 @@ About This Document
    This note is to be removed before publishing as an RFC.
 
    The latest revision of this draft can be found at
-   https://TheBankster.github.io/rats-twi-um/draft-novak-rats-
-   tacra.html.  Status information for this document may be found at
+   https://TheBankster.github.io/rats-tacra/draft-novak-rats-tacra.html.
+   Status information for this document may be found at
    https://datatracker.ietf.org/doc/draft-novak-rats-tacra/.
 
    Discussion of this document takes place on the Remote ATtestation
@@ -71,7 +71,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 March 2027.
+   This Internet-Draft will expire on 7 March 2027.
 
 Copyright Notice
 
