@@ -70,6 +70,8 @@ informative:
     author:
       org: Envoy
 
+...
+
 --- abstract
 
 There is a large class of "RATS-Unaware" Relying Parties (RUPs) that Attesters nevertheless need to interoperate with.
