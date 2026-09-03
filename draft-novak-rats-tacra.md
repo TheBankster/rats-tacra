@@ -181,7 +181,7 @@ It is not a goal, and, at any rate, it is not possible, to leave credential acqu
 
 In the text that follows, numbers in the format [Req #] refer to the corresponding numbered items in the list of Requirements in the opening section of this document.
 
-{::include tacra_Architecture.txt}
+{::include tacra_architecture.txt}
 
 This Architecture assumes the existence of a “Credential Acquisition System” (CAS), such as EST, SPIRE, ACMEv2, etc., that comprises a client and a server. The CAS Client is presumed to be running on the Attester’s system, but outside the Attester’s TEE. The CAS Server is a remote service invoked by the CAS Client over the CAS protocol, which must remain opaque to the Attester.
 
