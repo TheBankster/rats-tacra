@@ -22,7 +22,7 @@ venue:
   mail: "rats@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/rats/"
   github: "TheBankster/rats-twi-um"
-  latest: "https://TheBankster.github.io/rats-twi-um/draft-novak-rats-tacra.html"
+  latest: "https://TheBankster.github.io/rats-tacra/draft-novak-rats-tacra.html"
 
 author:
  - ins: M. Novak
