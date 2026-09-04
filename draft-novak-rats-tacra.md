@@ -136,10 +136,12 @@ Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Con
     * WIMSE Workload Idenity Certificates (WICs)
     * WIMSE Workload Identity Tokens (WITs)
     * etc.
-* Credential Type: one of
-    1. Pre-shared symmetric key
-    2. Bearer token, e.g., API Key, JSON Web Tokens JWT {{RFC7519}}, or
-    3. Proof-of-possession credential
+* Bearer Token Credential: a credential that does not require proof of possession of a secret to use:
+    * Pre-shared symmetric key
+    * API key
+    * JSON Web Token JWT {{RFC7519}}
+    * etc.
+* Credential Type: a catch-all term for any concrete credential type from the two lists above
 * Credential, a.k.a. Identity Document: an instance of a Credential Type
 * Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as EST, SPIRE, ACMEv2, etc.
 * Credential Acquisition System (CAS): a client-server Architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism
@@ -197,20 +199,20 @@ In the text that follows, numbers in the format [Req #] refer to the correspondi
 
 This Architecture assumes the existence of a “Credential Acquisition System” (CAS), such as EST, SPIRE, ACMEv2, etc., that comprises a client and a server. The CAS Client is presumed to be running on the Attester’s system, but outside the Attester’s TEE. The CAS Server is a remote service invoked by the CAS Client over the CAS protocol, which must remain opaque to the Attester.
 
-The Attester (the workload) runs inside a TEE. It obtains credentials by calling the in-proc CAS Client Proxy, which insulates it from the details of platform-specific details involved in Remote Attestation. The CAS Client Proxy can be a statically linked library or an Envoy-style sidecar (TODO: add Envoy reference). The Attester communicates with the CAS Client Proxy via a Credential Acquisition Interface (CAI) defined later in this document.
+The Attester (the workload) runs inside a TEE. It obtains credentials by calling the CAS Client Proxy, which insulates it from all the details of platform-specific and protocol-specific aspects and services involved in Remote Attestation and credential enrollment/retrieval. The CAS Client Proxy can be a statically or dynamically linked library, an Envoy-style sidecar, or any other mechanism, but it must run inside the Attester's TEE. The Attester communicates with the CAS Client Proxy via a simple Credential Acquisition Interface (CAI) defined later in this document.
 
 For the purposes of credential acquisition, the CAS Client Proxy interacts with the outside world on behalf of the Attester via two channels:
 
-1. With the underlying hardware platform to utilize its TEE-specific functions, such as generating keys and obtaining evidence, via the platform-specific plugin [Req 9], and
-2. With the Credential Acquisition Client, via the well-defined Credential Acquisition API (CAAPI) (TODO: define in this document? It performs similar function to CAI but also generates the necessary keys and evidence and marshals data back and forth)
+1. With the underlying hardware platform to utilize its TEE-specific functions, such as generating keys and obtaining evidence, via the platform-specific plugin, and
+2. With the Credential Acquisition Client, via the well-defined Credential Acquisition API (CAAPI), also outlined later in this document.
 
-These being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Req 8]. The server side of CAAPI is part of the CAS Server Proxy. The CAS Server Proxy is hosted by the Credential Acquisition Client. There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms [Req 4]: EST Client, SPIRE Agent, etc. There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Req 5].
+These being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Req 8]. The server side of CAAPI is part of the Credential Acquisition Client. There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms [Req 4]: EST Client, SPIRE Agent, etc. There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Req 5].
 
-The CAS Server Proxy performs the discovery of which Credentials Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, and works with CAS Client Proxy to automatically pick and utilize the corresponding mechanism and Credential Type, without the Attester’s knowledge or involvement [Req 1]. If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result.
+The Credential Acquisition System controls which Credentials Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester’s knowledge or involvement [Req 1]. If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result. The Attester discovers what is avaiable by trial and error, but typically it is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the type of credential it requires.
 
 The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Certificate Authority for minting new certificates) and the Key/Credential store for fetching existing keys or credentials, on the Attester’s behalf [Req 7]. The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support [Req 2].
 
-This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs. It restricts the unavoidable expansion of the Attester TCB to the smallest possible amount [Req 3]. It enables the Credential Acquisition Client to execute any Credential Acquisition Mechanism, without the Attester’s knowledge [Req 4]. There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Req 6].
+This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs [Req 9]. It restricts the unavoidable expansion of the Attester TCB to the smallest possible amount [Req 3]. There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Req 6].
 
 Under the covers and opaquely to the Attester, the CAS Client Proxy discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval. Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads). In both cases, the associated secrets remain opaque to the CAS at all times [Req 10].
 
@@ -220,72 +222,41 @@ Under the covers and opaquely to the Attester, the CAS Client Proxy discovers an
 
 # Credential Acquisition Interface (CAI)
 
-The Credential Acquisition Interface can be implemented using any mechanism suitable for local communication, including but not limited to statically linked calls and Protobuf/gRPC. Here only the high-level description is provided.
-
-## Initiate-Credential-Acquisition
-
-Initiates the process of credential acquisition, stating which target – the RUP – the Attester intends to authenticate to, and Credential Type(s) it can work with for that target. Can be called any number of times. Results can expire as the underlying challenge can be time-limited. Results on success must be garbage-collected.
-
-Multiple credential acquisitions can be initiated in parallel.
-
-Parameters:
-* (required) Target name, i.e., the server URIs to which the Attester wishes to authenticate
-* (optional) List of expected Credential Types; if not specified, any Credential Type is acceptable for that target
-
-Returns:
-* On success: a Context handle, to be used in subsequent communications
-* On failure: enumerated reason for failure, such as:
-    * Invalid target
-    * Unsupported target
-    * Invalid Credential Type(s)
-    * Unsupported Credential Type(s)
-    * Server error: permission failure
-    * Server error: server unreachable
-    * Server error: server unavailable
-    * Invalid target
-    * Unsupported target
-    * etc. (TBD)
+The Credential Acquisition Interface can be implemented using any mechanism suitable for local communication, including but not limited to statically linked calls and Protobuf/gRPC. Here only the high-level description is provided. The CAI consists of a single Acquire-Credential API, outlined below.
 
 ## Obtain-Credential
 
-Obtains a credential of a specified Credential Type, for a previously initiated credential acquisition.
+Orchestrates an opaque-to-Attester process by which the Attester obtains a credential that it would need to authenticate to a given Target utilizing the given Credential Type.
 
 Parameters:
-* (required) Valid context handle from the Initiate-Credential-Acquisition call
-    * A context handle can only be used in this call once
-    * The credential will be obtained for the target specified in the Initiate-Credential-Acquisition call
-* (required) Credential Type of the credential that the Attester expects to receive
+* (required) Target name, e.g., the server URI to which the Attester wishes to authenticate
+* (required) Credential Type the Attester plans to use with this Target
 
 Returns:
-* On success: newly acquired credential
+* On success: newly acquired credential or the requested type
 * On failure: enumerated reason for failure, such as:
-    * Expired context handle; the Attester must repeat the process by calling Initiate-Credential-Acquisition again
-    * Reused context handle
-    * Invalid context handle
-    * Unsupported Credential Type
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
     * Server error: failed remote attestation
     * Server error: permission failure
+    * Server error: remote attestation failure
     * Server error: server unavailable; try again later
-    * Server error: server unreachable
+    * Server error: server unreachable; try again later
     * etc. (TBD)
-
-## Finalize-Credential-Acquisition
-
-Called to free up resources. The supplied context handle is no longer valid after this call.
-
-Parameter:
-* (required) Context handle from the Initiate-Credential-Acquisition call
-
-Returns:
-* Nothing
 
 
 # Credential Acquisition API (CAAPI)
 
 The Credential Acquisition API can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.
 
-TODO: Describe here
+## Initiate-Credential-Acquisition
 
+TODO: Describe
+
+## Acquire-Credential
+
+TODO: Describe
 
 # Security Considerations {#security}
 
