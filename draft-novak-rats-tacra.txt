@@ -346,21 +346,21 @@ Table of Contents
      Environment     │ EST Client, etc.                 EST Srv, ... │
    ┌──────────────┐  │┌───────────────┐                 ┌───────────┐│
    │   Workload   │  ││  Credential   │                 │ Credential││
-   │  (Attester)  │  ││ Acqs'n Client │                 │Acquisition││
-   │┌───<CAI>────┐│  ││┌─────────────┐│   Credential    │   Server  ││
-   ││    CAS     ││  │││     CAS     ││   Acquisition   │           ││
-   ││Client Proxy││  │││  Srv Proxy  ││    Protocol     │           ││
-   ││┌──────────┐││  │││ ┌─────────┐ │├─────────────────►           ││
-   │││  CAAPI   │││  │││ │ CAAPI   │ ││(EST, SPIRE, ...)│           ││
-   │││  Client  ├<CAAPI>─► Server  │ ││                 │           ││
-   ││└──────────┘││  │││ └─────────┘ ││                 │           ││
-   ││┌──────────┐││  ││└─────────────┘│                 │           ││
-   │││ Platform │││  │└───────────────┘                 └─────────┬─┘│
-   │││  Plug-In │││  └────────────────────────────────────────────┼──┘
-   ││└─────┬────┘││                                               │
-   │└──────┼─────┘│               ┌────────────┬──────────────────┤
-   └───────┼──────┘               │            │                  │
-    ┌──────▼─────┐       ┌────────▼──┐ ┌───────▼──┐ ┌─────────────▼──┐
+   │  (Attester)  │  ││ Acquisition   │                 │Acquisition││
+   │┌───<CAI>────┐│  ││    System     │   Credential    │   System  ││
+   ││    CAI     ││  ││    Client     │   Acquisition   │   Server  ││
+   ││Library/Ctnr││  ││  ┌─────────┐  │    Protocol     │           ││
+   ││┌──────────┐││  ││  │ CAAPI   │  ├─────────────────►           ││
+   │││  CAAPI   │││  ││  │ Server  │  │(EST, SPIRE, ...)│           ││
+   │││  Client  ├<CAAPI>─► Plug-in │  │                 │           ││
+   ││└──────────┘││  ││  └─────────┘  │                 │           ││
+   ││┌──────────┐││  │└───────────────┘                 └─────────┬─┘│
+   │││ Platform │││  └────────────────────────────────────────────┼──┘
+   │││  Plug-In │││               ┌────Mint New Credential────────┤
+   ││└─────┬────┘││               │          ┌─Remote Attestation─┤
+   │└──────┼─────┘│               │          │                    │
+   └───────┼──────┘               │          │           Retrieve │
+    ┌──────▼─────┐       ┌────────▼──┐ ┌─────▼────┐ ┌─────────────▼──┐
     │Platform ABI│       │ Identity  │ │   RATS   │ │ Key/Credential │
     │(Quote, RNG,│       │ Provider  │ │ Verifier │ │  Store (e.g.   │
     │    etc.)   │       │ (e.g. CA) │ │          │ │  HSM, Vault)   │
