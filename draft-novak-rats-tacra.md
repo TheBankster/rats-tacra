@@ -42,8 +42,9 @@ author:
 
 normative:
   RFC7030: EST
-  RFC9334: RATS
   RFC8555: ACMEv2
+  RFC9334: RATS
+  RFC9711: EAT
 
 informative:
   TWISIGDef:
@@ -70,7 +71,12 @@ informative:
     title: The Envoy Proxy
     author:
       org: Envoy
-
+  AR4SI:
+    -: AR4SI
+    target: https://datatracker.ietf.org/doc/draft-ietf-rats-ar4si/
+    title: Attestation Results for Secure Interactions
+    author:
+      org: IETF RATS Working Group
 ...
 
 --- abstract
@@ -79,9 +85,9 @@ There is a large class of "RATS-Unaware" Relying Parties (RUPs) that Attesters n
 Existing deployed services, which precede the introduction of Remote Attestation, are often difficult to change/update in significant ways due to, among other reasons, organizational friction, technological inertia, and regulatory policies.
 There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers.
 
-This document details a proposed Architecture by which Remote Attestation utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs. The proposal is intended to work with common credential acquisition protocols and mechanisms such as EST {{!RFC7030}}, SPIRE, ACMEv2 {{!RFC8555}} and many others.
+This document details a proposed Architecture by which Remote Attestation utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs. The proposal is intended to work with common credential acquisition protocols and mechanisms such as EST {{!RFC7030}}, {{SPIRE}}, ACMEv2 {{RFC8555}} and many others.
 
-Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how {{!ENVOY}} does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the Credential Acquisition Mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
+Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how {{ENVOY}} does it. This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the Credential Acquisition Mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
 
 --- middle
 
@@ -89,7 +95,7 @@ Another important but separate goal is to encapsulate the Attester-side complexi
 # Introduction {#intro}
 
 Success of a technology is ultimately measured by its adoption.
-The RATS Architecture requires that RATS Relying Parties understand Attestation Results expressed using standards such as EAT and AR4SI (TODO: Reference both), execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
+The RATS Architecture requires that RATS Relying Parties understand Attestation Results expressed using standards such as EAT {{!RFC9711}} and AR4SI {{AR4SI}}, execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
 Additionally, there is an unstated assumption present in the RATS Architecture that a change in Evidence may lead to a change in either the Attestation Results or Appraisal Policy for Attestation Results.
 
 One key requirement for successful deployment of Remote Attestation-capable workloads is minimal blast radius.
@@ -121,16 +127,16 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
 
 {::boilerplate bcp14-tagged}
 
-Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Confidential Computing Consortium {{!TWISIGReq}} are hereby incorporated by reference.
+Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Confidential Computing Consortium {{TWISIGReq}} are hereby incorporated by reference.
 
 * Proof-of-Possession Credential: a credential that requires a private asymmetric signing key to sign statements using this credential
-    * PKIX certificates {{!RFC5280}}
+    * PKIX certificates {{RFC5280}}
     * WIMSE Workload Idenity Certificates (WICs)
-    * WIMSE Workload Identity Tokens (WITs) {{!I-D.ietf-wimse-workload-creds}}
+    * WIMSE Workload Identity Tokens (WITs) {{I-D.ietf-wimse-workload-creds}}
     * etc.
 * Credential Type: one of
     1. Pre-shared symmetric key
-    2. Bearer token, e.g., API Key, JSON Web Tokens JWT {{!RFC7515}}, or
+    2. Bearer token, e.g., API Key, JSON Web Tokens JWT {{RFC7515}}, or
     3. Proof-of-possession credential
 * Credential, a.k.a. Identity Document: an instance of a Credential Type
 * Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as EST, SPIRE, ACMEv2, etc.
@@ -143,7 +149,7 @@ Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Con
 
 # Requirements
 
-This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions {{!TWISIGReq}} and Requirements {{!TWISIGDef}}. The requirements published by the TWI SIG are deliberately high-level. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
+This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}. The requirements published by the TWI SIG are deliberately high-level. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
 1. Supports mechanisms for minting (new) as well as retrieving (pre-existing) credentials; the workload does not know what type of credential it will be given (new or pre-existing) when it launches; the approproate mode is negotiated and utilized at runtime
 2. Supports most current and future credential formats:
@@ -182,7 +188,10 @@ It is not a goal, and, at any rate, it is not possible, to leave credential acqu
 
 In the text that follows, numbers in the format [Req #] refer to the corresponding numbered items in the list of Requirements in the opening section of this document.
 
+~~~~ ascii-art
 {::include tacra_architecture.txt}
+~~~~
+{: #fig-tacra title="TACRA architecture"}
 
 This Architecture assumes the existence of a “Credential Acquisition System” (CAS), such as EST, SPIRE, ACMEv2, etc., that comprises a client and a server. The CAS Client is presumed to be running on the Attester’s system, but outside the Attester’s TEE. The CAS Server is a remote service invoked by the CAS Client over the CAS protocol, which must remain opaque to the Attester.
 
