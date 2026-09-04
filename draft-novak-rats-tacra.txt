@@ -342,19 +342,19 @@ Table of Contents
    opening section of this document.
 
        Trusted       ┌──────── Credential Acquisition System ────────┐
-      Execution      │  SPIRE Agent,                    SPIRE Server,│
-     Environment     │ EST Client, etc.                 EST Srv, ... │
-   ┌──────────────┐  │┌───────────────┐                 ┌───────────┐│
-   │   Workload   │  ││  Credential   │                 │ Credential││
-   │  (Attester)  │  ││  Acquisition  │                 │Acquisition││
-   │┌───<CAI>────┐│  ││    System     │   Credential    │  System   ││
-   ││    CAI     ││  ││    Client     │   Acquisition   │  Server   ││
-   ││Library/Ctnr││  ││  ┌─────────┐  │    Protocol     │           ││
-   ││┌──────────┐││  ││  │ CAAPI   │  ├─────────────────►           ││
-   │││  CAAPI   │││  ││  │ Server  │  │(EST, SPIRE, ...)│           ││
-   │││  Client  ├<CAAPI>─► Plug-in │  │                 │           ││
-   ││└──────────┘││  ││  └─────────┘  │                 │           ││
-   ││┌──────────┐││  │└───────────────┘                 └─────────┬─┘│
+      Execution      │  SPIRE Agent,                   SPIRE Server, │
+     Environment     │ EST Client, etc.                EST Srv, etc. │
+   ┌──────────────┐  │┌───────────────┐               ┌─────────────┐│
+   │   Workload   │  ││  Credential   │               │ Credential  ││
+   │  (Attester)  │  ││  Acquisition  │               │ Acquisition ││
+   │┌───<CAI>────┐│  ││    System     │  Credential   │   System    ││
+   ││    CAI     ││  ││    Client     │  Acquisition  │   Server    ││
+   ││Library/Ctnr││  ││  ┌─────────┐  │   Protocol    │             ││
+   ││┌──────────┐││  ││  │   CAS   │  ├───────────────►             ││
+   │││  CAAPI   │││  ││  │ Client  │  │ (EST, SPIRE,  │             ││
+   │││  Client  ├<CAAPI>─► Plug-in │  │      etc.)    │             ││
+   ││└──────────┘││  ││  └─────────┘  │               │             ││
+   ││┌──────────┐││  │└───────────────┘               └───────────┬─┘│
    │││ Platform │││  └────────────────────────────────────────────┼──┘
    │││  Plug-In │││               ┌─Mint New Credential───────────┤
    ││└─────┬────┘││               │          ┌─Remote Attestation─┤
