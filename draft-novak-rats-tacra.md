@@ -41,7 +41,9 @@ author:
    email: Henk.Birkholz@ietf.contact
 
 normative:
+  RFC5280: PKIX
   RFC7030: EST
+  RFC7519: JWT
   RFC8555: ACMEv2
   RFC9334: RATS
   RFC9711: EAT
@@ -132,11 +134,11 @@ Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Con
 * Proof-of-Possession Credential: a credential that requires a private asymmetric signing key to sign statements using this credential
     * PKIX certificates {{RFC5280}}
     * WIMSE Workload Idenity Certificates (WICs)
-    * WIMSE Workload Identity Tokens (WITs) {{I-D.ietf-wimse-workload-creds}}
+    * WIMSE Workload Identity Tokens (WITs)
     * etc.
 * Credential Type: one of
     1. Pre-shared symmetric key
-    2. Bearer token, e.g., API Key, JSON Web Tokens JWT {{RFC7515}}, or
+    2. Bearer token, e.g., API Key, JSON Web Tokens JWT {{RFC7519}}, or
     3. Proof-of-possession credential
 * Credential, a.k.a. Identity Document: an instance of a Credential Type
 * Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as EST, SPIRE, ACMEv2, etc.
