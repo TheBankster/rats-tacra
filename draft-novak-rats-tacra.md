@@ -21,7 +21,7 @@ venue:
   type: "Working Group"
   mail: "rats@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/rats/"
-  github: "TheBankster/rats-twi-um"
+  github: "TheBankster/rats-tacra"
   latest: "https://TheBankster.github.io/rats-tacra/draft-novak-rats-tacra.html"
 
 author:
