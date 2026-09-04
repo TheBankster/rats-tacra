@@ -138,6 +138,7 @@ Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Con
 * Credential Acquisition Mode: one of
     1. Credential Enrollment (minting new proof-of-possession credential), or
     2. Credential Retrieval (retrieving an existing, pre-provisioned credential of any type)
+* Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel
 
 
 # Requirements
@@ -150,7 +151,7 @@ This proposal is a result of work by the Confidential Computing Consortium's Tru
    * WIMSE Workload Identity Certificates (WICs)
    * WIMSE Workload Identity Tokens (WITs)
    * Bearer tokens (JWTs, API Keys)
-   * TPM 2.0 DAA Group Certificates (for replica workloads)
+   * TPM 2.0 DAA Group Certificates (for Replica workloads)
    * Pre-shared keys
    * Future formats through architectural extensibility
 3. Minimal trust boundary expansion of the Attester implementation
@@ -200,7 +201,7 @@ The Credential Acquisition Server implements the server side of the correspondin
 
 This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs. It restricts the unavoidable expansion of the Attester TCB to the smallest possible amount [Req 3]. It enables the Credential Acquisition Client to execute any Credential Acquisition Mechanism, without the Attester’s knowledge [Req 4]. There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Req 6].
 
-Under the covers and opaquely to the Attester, the CAS Client Proxy discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval. Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for replica workloads). In both cases, the associated secrets remain opaque to the CAS at all times [Req 10].
+Under the covers and opaquely to the Attester, the CAS Client Proxy discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval. Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads). In both cases, the associated secrets remain opaque to the CAS at all times [Req 10].
 
 * Enrollment: the CAS Client Proxy generates and includes alongside Evidence a CSR. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss).
 * Retrieval: the CAS Client Proxy generates and includes in Evidence an asymmetric encryption key called the Credential Wrapping Key or CWK. The resulting secrets are encrypted to this CWK.
