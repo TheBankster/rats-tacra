@@ -1,24 +1,27 @@
-      Trusted          ┌───────────────── Credential Acquisition System ────────────────┐
-     Execution         │       EST Client,                            EST Server,       │
-    Environment        │    SPIRE Agent, etc.                      SPIRE Server, etc.   │
-┌──────────────────┐   │ ┌────────────────────┐                  ┌────────────────────┐ │
-│     Workload     │   │ │    Credential      │                  │     Credential     │ │
-│    (Attester)    │   │ │ Acquisition Client │                  │ Acquisition Server │ │
-│ ┌────<CAI>─────┐ │   │ │ ┌────────────────┐ │    Credential    │                    │ │
-│ │     CAS      │ │   │ │ │      CAS       │ │    Acquisition   │                    │ │
-│ │ Client Proxy │ │   │ │ │  Server Proxy  │ │     Protocol     │                    │ │
-│ │ ┌──────────┐ │ │   │ │ │ ┌────────────┐ │ ├──────────────────►                    │ │
-│ │ │  CAAPI   │ │ │   │ │ │ │   CAAPI    │ │ │ (EST, SPIRE, ...)│                    │ │
-│ │ │  Client  ├───<CAAPI>───►   Server   │ │ │                  │                    │ │
-│ │ └──────────┘ │ │   │ │ │ └────────────┘ │ │                  │                    │ │
-│ │ ┌──────────┐ │ │   │ │ └────────────────┘ │                  │                    │ │
-│ │ │ Platform │ │ │   │ └────────────────────┘                  └──┬─────────────────┘ │
-│ │ │  Plug-In │ │ │   └────────────────────────────────────────────┼───────────────────┘
-│ │ └─────┬────┘ │ │                                                │
-│ └───────┼──────┘ │                        ┌───────────────────────┼────────────┐  
-└─────────┼────────┘                        │                       │            │
- ┌────────▼───────┐                   ┌─────▼────┐    ┌─────────────▼──┐   ┌─────▼──────┐
- │  Platform ABI  │                   │   RATS   │    │ Key/Credential │   │  Identity  │
- │  (Quote, RNG,  │                   │ Verifier │    │  Store (e.g.,  │   │  Provider  │
- │      etc.)     │                   │          │    │  HSM, Vault)   │   │ (e.g., CA) │
- └────────────────┘                   └──────────┘    └────────────────┘   └────────────┘
+    Trusted       ┌──────── Credential Acquisition System ────────┐
+   Execution      │  SPIRE Agent,                    SPIRE Server,│
+  Environment     │ EST Client, etc.                 EST Srv, ... │
+┌──────────────┐  │┌───────────────┐                 ┌───────────┐│
+│   Workload   │  ││  Credential   │                 │ Credential││
+│  (Attester)  │  ││ Acqs'n Client │                 │Acquisition││
+│┌───<CAI>────┐│  ││┌─────────────┐│   Credential    │   Server  ││
+││    CAS     ││  │││     CAS     ││   Acquisition   │           ││
+││Client Proxy││  │││  Srv Proxy  ││    Protocol     │           ││
+││┌──────────┐││  │││ ┌─────────┐ │├─────────────────►           ││
+│││  CAAPI   │││  │││ │ CAAPI   │ ││(EST, SPIRE, ...)│           ││
+│││  Client  ├<CAAPI>─► Server  │ ││                 │           ││
+││└──────────┘││  │││ └─────────┘ ││                 │           ││
+││┌──────────┐││  ││└─────────────┘│                 │           ││
+│││ Platform │││  │└───────────────┘                 └─────────┬─┘│
+│││  Plug-In │││  └────────────────────────────────────────────┼──┘
+││└─────┬────┘││                                               │
+│└──────┼─────┘│               ┌────────────┬──────────────────┤  
+└───────┼──────┘               │            │                  │
+ ┌──────▼─────┐       ┌────────▼──┐ ┌───────▼──┐ ┌─────────────▼──┐   
+ │Platform ABI│       │ Identity  │ │   RATS   │ │ Key/Credential │
+ │(Quote, RNG,│       │ Provider  │ │ Verifier │ │  Store (e.g.   │
+ │    etc.)   │       │ (e.g. CA) │ │          │ │  HSM, Vault)   │
+ └────────────┘       └───────────┘ └──────────┘ └────────────────┘
+
+
+
