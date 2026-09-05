@@ -98,7 +98,7 @@ Table of Contents
            Mechanisms
    4.  Architecture
    5.  Credential Acquisition Interface (CAI)
-     5.1.  Obtain-Credential
+     5.1.  Acquire-Credential
    6.  Credential Acquisition API (CAAPI)
      6.1.  Initiate-Credential-Acquisition
      6.2.  Enroll-Credential
@@ -241,7 +241,7 @@ Table of Contents
           credential), or
 
       2.  Credential Retrieval (retrieving an existing, pre-provisioned
-          credential of any type)
+          credential of any Credential Type)
 
    *  Replica workloads: workloads that are functionally
       indistinguishable from the point of view of clients that
@@ -453,9 +453,9 @@ Table of Contents
       vice versa: include the CSR in Evidence.  The details of how this
       is decided at runtime are TBD (TODO: discuss).
 
-   *  Retrieval: the CAS Client Proxy generates and includes in Evidence
-      an asymmetric encryption key called the Credential Wrapping Key or
-      CWK.  The resulting secrets are encrypted to this CWK.
+   *  Retrieval: the CAS Client Proxy generates an asymmetric encryption
+      key CEK and includes CEKpub in Evidence.  The resulting secrets
+      are encrypted to CEKpub.
 
 5.  Credential Acquisition Interface (CAI)
 
@@ -465,15 +465,15 @@ Table of Contents
    level description is provided.  The CAI consists of a single Acquire-
    Credential API, outlined below.
 
-5.1.  Obtain-Credential
+5.1.  Acquire-Credential
 
    Orchestrates an opaque-to-Attester process by which the Attester
-   obtains a credential that it would need to authenticate to a given
+   acquires a credential that it would need to authenticate to a given
    Target utilizing the given Credential Type.
 
-   Parameters: * (required) Target name, e.g., the server URI to which
-   the Attester wishes to authenticate * (required) Credential Type the
-   Attester plans to use with this Target
+   Parameters: * Target name, e.g., the server URI to which the Attester
+   wishes to authenticate * Credential Type the Attester plans to use
+   with this Target
 
    Returns: * On success: newly acquired credential or the requested
    type * On failure: enumerated reason for failure, such as: * Invalid
@@ -491,25 +491,70 @@ Table of Contents
 
 6.1.  Initiate-Credential-Acquisition
 
-   TODO: Describe
+   Initiates the credential acquisition process by obtaining a challenge
+   from a Verifier.
+
+   Patameters: * Target name, e.g., the server URI to which the Attester
+   wishes to authenticate * Credential Type the Attester plans to use
+   with this Target
+
+   Returns: * On success: * Credential acquisition mechanism (enroll or
+   retrieve) * Verifier challenge * Other TBD pertinent information,
+   such as supported ciphers, etc.  (TODO: define) * On failure:
+   enumerated erason for failure, such as: * On failure: enumerated
+   reason for failure, such as: * Invalid Target * Unsupported Target *
+   Invalid Credential Type * Server error: failed remote attestation *
+   Server error: permission failure * Server error: server unavailable;
+   try again later * Server error: server unreachable; try again later *
+   etc.  (TBD)
 
 6.2.  Enroll-Credential
 
-   TODO: Describe
+   Enrolls (mints) a new proof-of-possession credential.
+
+   Parameters: * Target name, e.g., the server URI to which the Attester
+   wishes to authenticate * Credential Type the Attester plans to use
+   with this Target * Evidence matching the previously returned Verifier
+   challenge * CSR matching the Evidence (TODO: discuss CSR-to-Evidence
+   binding/relationship)
+
+   Returns: * On success: plaintext newly enrolled (minted) credential
+   or the requested type * On failure: enumerated reason for failure,
+   such as: * Invalid Target * Unsupported Target * Invalid Credential
+   Type * Server error: failed remote attestation * Server error:
+   permission failure * Server error: remote attestation failure *
+   Server error: server unavailable; try again later * Server error:
+   server unreachable; try again later * etc.  (TBD)
 
 6.3.  Retrieve-Credential
 
-   TODO: Describe
+   Retrieves (fetches pre-existing) credential.
+
+   Parameters: * Target name, e.g., the server URI to which the Attester
+   wishes to authenticate * Credential Type the Attester plans to use
+   with this Target * Evidence matching the previously returned Verifier
+   challenge * CEKpub matching the Evidence (TODO: discuss CEK-to-
+   Evidence binding/relationship)
+
+   Returns: * On success: wrapped (encrypted to CEKpub) credential or
+   the requested type * On failure: enumerated reason for failure, such
+   as: * Invalid Target * Unsupported Target * Invalid Credential Type *
+   Server error: failed remote attestation * Server error: permission
+   failure * Server error: remote attestation failure * Server error:
+   server unavailable; try again later * Server error: server
+   unreachable; try again later * etc.  (TBD)
 
 7.  Security Considerations
 
-   TODO Security
+   This specification supports but discourages the use of bearer token
+   credentials.  They are supported in the interest of maximizing
+   compatibility.
 
    (TODO: Mention the following:) * CAS Server is not necessarily
-   trusted with plaintext secrets * Secure binding between Evidence and
-   CSR for Enrollment mode * Need to authenticate CAS Client to CAS
-   Client Proxy (TODO: is there a need?) * Authenticating CAS Client
-   (the part outside the Attester) to CAS Server
+   trusted with plaintext secrets and how to keep such secrets opaque to
+   it * Secure binding between Evidence and CSR for Enrollment mode *
+   Authenticating the CAS Client (the part outside the Attester) to the
+   CAS Server
 
 8.  IANA Considerations
 

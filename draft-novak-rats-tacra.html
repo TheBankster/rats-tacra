@@ -1189,7 +1189,7 @@ There are significant advantages if workloads can be incrementally updated in th
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-credential-acquisition-inte" class="internal xref">Credential Acquisition Interface (CAI)</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
-                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-obtain-credential" class="internal xref">Obtain-Credential</a></p>
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-acquire-credential" class="internal xref">Acquire-Credential</a></p>
 </li>
             </ul>
 </li>
@@ -1342,7 +1342,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
               <p id="section-2-3.7.2.1.1">Credential Enrollment (minting new proof-of-possession credential), or<a href="#section-2-3.7.2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-2-3.7.2.2">
-              <p id="section-2-3.7.2.2.1">Credential Retrieval (retrieving an existing, pre-provisioned credential of any type)<a href="#section-2-3.7.2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-2-3.7.2.2.1">Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)<a href="#section-2-3.7.2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 </li>
@@ -1506,7 +1506,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <p id="section-4-12.1.1">Enrollment: the CAS Client Proxy generates and includes alongside Evidence a CSR. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss).<a href="#section-4-12.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-4-12.2">
-          <p id="section-4-12.2.1">Retrieval: the CAS Client Proxy generates and includes in Evidence an asymmetric encryption key called the Credential Wrapping Key or CWK. The resulting secrets are encrypted to this CWK.<a href="#section-4-12.2.1" class="pilcrow">¶</a></p>
+          <p id="section-4-12.2.1">Retrieval: the CAS Client Proxy generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub.<a href="#section-4-12.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
@@ -1517,15 +1517,15 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-credential-acquisition-inte" class="section-name selfRef">Credential Acquisition Interface (CAI)</a>
       </h2>
 <p id="section-5-1">The Credential Acquisition Interface can be implemented using any mechanism suitable for local communication, including but not limited to statically linked calls and Protobuf/gRPC. Here only the high-level description is provided. The CAI consists of a single Acquire-Credential API, outlined below.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<div id="obtain-credential">
+<div id="acquire-credential">
 <section id="section-5.1">
-        <h3 id="name-obtain-credential">
-<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-obtain-credential" class="section-name selfRef">Obtain-Credential</a>
+        <h3 id="name-acquire-credential">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-acquire-credential" class="section-name selfRef">Acquire-Credential</a>
         </h3>
-<p id="section-5.1-1">Orchestrates an opaque-to-Attester process by which the Attester obtains a credential that it would need to authenticate to a given Target utilizing the given Credential Type.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-1">Orchestrates an opaque-to-Attester process by which the Attester acquires a credential that it would need to authenticate to a given Target utilizing the given Credential Type.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <p id="section-5.1-2">Parameters:
-* (required) Target name, e.g., the server URI to which the Attester wishes to authenticate
-* (required) Credential Type the Attester plans to use with this Target<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.1-3">Returns:
 * On success: newly acquired credential or the requested type
 * On failure: enumerated reason for failure, such as:
@@ -1553,7 +1553,25 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         <h3 id="name-initiate-credential-acquisi">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-initiate-credential-acquisi" class="section-name selfRef">Initiate-Credential-Acquisition</a>
         </h3>
-<p id="section-6.1-1">TODO: Describe<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-1">Initiates the credential acquisition process by obtaining a challenge from a Verifier.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">Patameters:
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">Returns:
+* On success:
+    * Credential acquisition mechanism (enroll or retrieve)
+    * Verifier challenge
+    * Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)
+* On failure: enumerated erason for failure, such as:
+* On failure: enumerated reason for failure, such as:
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable; try again later
+    * etc. (TBD)<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="enroll-credential">
@@ -1561,7 +1579,24 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         <h3 id="name-enroll-credential">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-enroll-credential" class="section-name selfRef">Enroll-Credential</a>
         </h3>
-<p id="section-6.2-1">TODO: Describe<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">Enrolls (mints) a new proof-of-possession credential.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">Parameters:
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target
+* Evidence matching the previously returned Verifier challenge
+* CSR matching the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">Returns:
+* On success: plaintext newly enrolled (minted) credential or the requested type
+* On failure: enumerated reason for failure, such as:
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: remote attestation failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable; try again later
+    * etc. (TBD)<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="retrieve-credential">
@@ -1569,7 +1604,24 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         <h3 id="name-retrieve-credential">
 <a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-retrieve-credential" class="section-name selfRef">Retrieve-Credential</a>
         </h3>
-<p id="section-6.3-1">TODO: Describe<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-1">Retrieves (fetches pre-existing) credential.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">Parameters:
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target
+* Evidence matching the previously returned Verifier challenge
+* CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">Returns:
+* On success: wrapped (encrypted to CEKpub) credential or the requested type
+* On failure: enumerated reason for failure, such as:
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: remote attestation failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable; try again later
+    * etc. (TBD)<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1579,12 +1631,11 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-security-considerations">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-7-1">TODO Security<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-1">This specification supports but discourages the use of bearer token credentials. They are supported in the interest of maximizing compatibility.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2">(TODO: Mention the following:)
-* CAS Server is not necessarily trusted with plaintext secrets
+* CAS Server is not necessarily trusted with plaintext secrets and how to keep such secrets opaque to it
 * Secure binding between Evidence and CSR for Enrollment mode
-* Need to authenticate CAS Client to CAS Client Proxy (TODO: is there a need?)
-* Authenticating CAS Client (the part outside the Attester) to CAS Server<a href="#section-7-2" class="pilcrow">¶</a></p>
+* Authenticating the CAS Client (the part outside the Attester) to the CAS Server<a href="#section-7-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana">
