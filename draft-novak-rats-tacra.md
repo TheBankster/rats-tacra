@@ -147,7 +147,7 @@ Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Con
 * Credential Acquisition System (CAS): a client-server Architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism
 * Credential Acquisition Mode: one of
     1. Credential Enrollment (minting new proof-of-possession credential), or
-    2. Credential Retrieval (retrieving an existing, pre-provisioned credential of any type)
+    2. Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)
 * Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel
 
 
@@ -217,20 +217,20 @@ This arrangement shields the Attester developers from having to know the details
 Under the covers and opaquely to the Attester, the CAS Client Proxy discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval. Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads). In both cases, the associated secrets remain opaque to the CAS at all times [Req 10].
 
 * Enrollment: the CAS Client Proxy generates and includes alongside Evidence a CSR. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss).
-* Retrieval: the CAS Client Proxy generates and includes in Evidence an asymmetric encryption key called the Credential Wrapping Key or CWK. The resulting secrets are encrypted to this CWK.
+* Retrieval: the CAS Client Proxy generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub.
 
 
 # Credential Acquisition Interface (CAI)
 
 The Credential Acquisition Interface can be implemented using any mechanism suitable for local communication, including but not limited to statically linked calls and Protobuf/gRPC. Here only the high-level description is provided. The CAI consists of a single Acquire-Credential API, outlined below.
 
-## Obtain-Credential
+## Acquire-Credential
 
-Orchestrates an opaque-to-Attester process by which the Attester obtains a credential that it would need to authenticate to a given Target utilizing the given Credential Type.
+Orchestrates an opaque-to-Attester process by which the Attester acquires a credential that it would need to authenticate to a given Target utilizing the given Credential Type.
 
 Parameters:
-* (required) Target name, e.g., the server URI to which the Attester wishes to authenticate
-* (required) Credential Type the Attester plans to use with this Target
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target
 
 Returns:
 * On success: newly acquired credential or the requested type
@@ -252,25 +252,83 @@ The Credential Acquisition API can be implemented using any mechanism suitable f
 
 ## Initiate-Credential-Acquisition
 
-TODO: Describe
+Initiates the credential acquisition process by obtaining a challenge from a Verifier.
+
+Patameters:
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target
+
+Returns:
+* On success:
+    * Credential acquisition mechanism (enroll or retrieve)
+    * Verifier challenge
+    * Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)
+* On failure: enumerated erason for failure, such as:
+* On failure: enumerated reason for failure, such as:
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable; try again later
+    * etc. (TBD)
 
 ## Enroll-Credential
 
-TODO: Describe
+Enrolls (mints) a new proof-of-possession credential.
+
+Parameters:
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target
+* Evidence matching the previously returned Verifier challenge
+* CSR matching the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)
+
+Returns:
+* On success: plaintext newly enrolled (minted) credential or the requested type
+* On failure: enumerated reason for failure, such as:
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: remote attestation failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable; try again later
+    * etc. (TBD)
 
 ## Retrieve-Credential
 
-TODO: Describe
+Retrieves (fetches pre-existing) credential.
+
+Parameters:
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target
+* Evidence matching the previously returned Verifier challenge
+* CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)
+
+Returns:
+* On success: wrapped (encrypted to CEKpub) credential or the requested type
+* On failure: enumerated reason for failure, such as:
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: remote attestation failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable; try again later
+    * etc. (TBD)
+
 
 # Security Considerations {#security}
 
-TODO Security
+This specification supports but discourages the use of bearer token credentials. They are supported in the interest of maximizing compatibility.
 
 (TODO: Mention the following:)
-* CAS Server is not necessarily trusted with plaintext secrets
+* CAS Server is not necessarily trusted with plaintext secrets and how to keep such secrets opaque to it
 * Secure binding between Evidence and CSR for Enrollment mode
-* Need to authenticate CAS Client to CAS Client Proxy (TODO: is there a need?)
-* Authenticating CAS Client (the part outside the Attester) to CAS Server
+* Authenticating the CAS Client (the part outside the Attester) to the CAS Server
 
 
 # IANA Considerations {#iana}
