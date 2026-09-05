@@ -254,7 +254,11 @@ The Credential Acquisition API can be implemented using any mechanism suitable f
 
 TODO: Describe
 
-## Acquire-Credential
+## Enroll-Credential
+
+TODO: Describe
+
+## Retrieve-Credential
 
 TODO: Describe
 
