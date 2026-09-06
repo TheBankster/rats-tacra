@@ -50,6 +50,12 @@ normative:
 
 informative:
   TWISIGDef:
+    -: TWISIGCharter
+    target: https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md
+    title: Trustworthy Workload Identity (TWI) Special Interest Group — Charter
+    author:
+      org: Confidential Computing Consortium Trustworthy Workload Identity SIG
+  TWISIGDef:
     -: TWISIGDef
     target: https://github.com/confidential-computing/twi/blob/main/TWI_Definitions.md
     title: Trustworthy Workload Identity (TWI) Special Interest Group — Definitions
@@ -153,7 +159,7 @@ Terms related to Trustworthy Workload Identity defined by the TWI SIG at the Con
 
 # Requirements
 
-This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG (TODO: reference) which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}. The requirements published by the TWI SIG are deliberately high-level. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
+This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}. The requirements published by the TWI SIG are deliberately high-level. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
 1. Supports mechanisms for minting (new) as well as retrieving (pre-existing) credentials; the workload does not know what type of credential it will be given (new or pre-existing) when it launches; the approproate mode is negotiated and utilized at runtime
 2. Supports most current and future credential formats:
@@ -173,8 +179,8 @@ This proposal is a result of work by the Confidential Computing Consortium's Tru
    * Future mechanisms through architectural extensibility
 5. Supports Workloads utilizing different Credential Acquisition Mechanisms per-target
 6. Supports both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester
-7. Supports most current and future RATS Verifiers, Identity Providers, and Key/Credential Stores, transparently to the Attester
-8. Cannot assume that Workload has independent network access (i.e., its only way of communicating with the outside world for purposes of credential acquisition are the platform's Confidential Computing-specific Application Binary Interface (ABI) and the Credential Acquisition Interface, defined later in this document)
+7. Supports most current and future RATS Verifiers, Identity Providers, and Secret Vaults, transparently to the Attester
+8. Cannot assume that Workload has independent network access (i.e., its only way of communicating with the outside world for purposes of credential acquisition are the platform's Confidential Computing-specific Application Binary Interface (ABI) and the Credential Acquisition API, defined later in this document)
 9. Compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation
 10. Restricts visibility of fetched secrets to the Attester, excluding the CAS Client and CAS Server
 
@@ -206,49 +212,23 @@ For the purposes of credential acquisition, the CAS Client Proxy interacts with 
 1. With the underlying hardware platform to utilize its TEE-specific functions, such as generating keys and obtaining evidence, via the platform-specific plugin, and
 2. With the Credential Acquisition Client, via the well-defined Credential Acquisition API (CAAPI), also outlined later in this document.
 
-These being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Req 8]. The server side of CAAPI is part of the Credential Acquisition Client. There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms [Req 4]: EST Client, SPIRE Agent, etc. There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Req 5].
+These being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Req 8]. The server side of CAAPI is part of the Credential Acquisition Client. There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms [Req 4]: EST Client, SPIRE Agent, etc. There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Req 5]. Existing Credential Acquisition Clients are extended to support Remote Attestation via dedicated CAS Client Plug-ins.
 
-The Credential Acquisition System controls which Credentials Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester’s knowledge or involvement [Req 1]. If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result. The Attester discovers what is avaiable by trial and error, but typically it is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the type of credential it requires.
+The Credential Acquisition System controls which Credentials Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester’s knowledge or involvement [Req 1]. If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result. The Attester discovers what is avaiable by trial and error, but typically it is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type it requires.
 
-The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Certificate Authority for minting new certificates) and the Key/Credential store for fetching existing keys or credentials, on the Attester’s behalf [Req 7]. The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support [Req 2].
+The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Certificate Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester’s behalf [Req 7]. The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support [Req 2]. Existing Credential Acquisition Servers are extended to support Remote Attestation via dedicated CAS Server Plug-ins.
 
 This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs [Req 9]. It restricts the unavoidable expansion of the Attester TCB to the smallest possible amount [Req 3]. There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Req 6].
 
 Under the covers and opaquely to the Attester, the CAS Client Proxy discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval. Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads). In both cases, the associated secrets remain opaque to the CAS at all times [Req 10].
 
 * Enrollment: the CAS Client Proxy generates and includes alongside Evidence a CSR. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss).
-* Retrieval: the CAS Client Proxy generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub.
-
-
-# Credential Acquisition Interface (CAI)
-
-The Credential Acquisition Interface can be implemented using any mechanism suitable for local communication, including but not limited to statically linked calls and Protobuf/gRPC. Here only the high-level description is provided. The CAI consists of a single Acquire-Credential API, outlined below.
-
-## Acquire-Credential
-
-Orchestrates an opaque-to-Attester process by which the Attester acquires a credential that it would need to authenticate to a given Target utilizing the given Credential Type.
-
-Parameters:
-* Target name, e.g., the server URI to which the Attester wishes to authenticate
-* Credential Type the Attester plans to use with this Target
-
-Returns:
-* On success: newly acquired credential or the requested type
-* On failure: enumerated reason for failure, such as:
-    * Invalid Target
-    * Unsupported Target
-    * Invalid Credential Type
-    * Server error: failed remote attestation
-    * Server error: permission failure
-    * Server error: remote attestation failure
-    * Server error: server unavailable; try again later
-    * Server error: server unreachable; try again later
-    * etc. (TBD)
+* Retrieval: the CAS Client Proxy generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them.
 
 
 # Credential Acquisition API (CAAPI)
 
-The Credential Acquisition API can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.
+The Credential Acquisition API allows the Attester to communicate with the Credential Acquisition System. These APIs are invoked by the Credential Acquisition Interface, covered in the next section. CAAPI can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.
 
 ## Initiate-Credential-Acquisition
 
@@ -260,10 +240,9 @@ Patameters:
 
 Returns:
 * On success:
-    * Credential acquisition mechanism (enroll or retrieve)
+    * Credential acquisition mechanism: "enroll" or "retrieve"
     * Verifier challenge
     * Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)
-* On failure: enumerated erason for failure, such as:
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
     * Unsupported Target
@@ -279,9 +258,9 @@ Returns:
 Enrolls (mints) a new proof-of-possession credential.
 
 Parameters:
-* Target name, e.g., the server URI to which the Attester wishes to authenticate
-* Credential Type the Attester plans to use with this Target
-* Evidence matching the previously returned Verifier challenge
+* Target name matching that of the corresponding Initiate-Credential-Acquisition call
+* Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
+* Evidence derived from the previously returned Verifier challenge
 * CSR matching the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)
 
 Returns:
@@ -302,13 +281,54 @@ Returns:
 Retrieves (fetches pre-existing) credential.
 
 Parameters:
-* Target name, e.g., the server URI to which the Attester wishes to authenticate
-* Credential Type the Attester plans to use with this Target
-* Evidence matching the previously returned Verifier challenge
+* Target name matching that of the corresponding Initiate-Credential-Acquisition call
+* Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
+* Evidence derived from the previously returned Verifier challenge
 * CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)
 
 Returns:
 * On success: wrapped (encrypted to CEKpub) credential or the requested type
+* On failure: enumerated reason for failure, such as:
+    * Invalid Target
+    * Unsupported Target
+    * Invalid Credential Type
+    * Server error: failed remote attestation
+    * Server error: permission failure
+    * Server error: remote attestation failure
+    * Server error: server unavailable; try again later
+    * Server error: server unreachable; try again later
+    * etc. (TBD)
+
+## CAAPI Invocation Sequence
+
+The caller (normally the Credential Acquisition Interface) first decides which Target it wishes to authenticate to, and using which Credential Type. CAAPI offers no facilities for this, so this must be decided out of band.
+
+The typical invocation flow is:
+
+1. CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)
+    * Returns a Verifier challenge and a Credential Acquisition Mode
+2. Platform Plug-in: Generate Keys and the corresponding Evidence:
+    * CSK, the Certificate Signing Key, and the corresponding CSR, for credential enrollment or
+    * CEK, the Credential Encryption Key, for credential retrieval
+3. CAAPI: Depending on which Credential Acquisition Mode is returned, either
+    * Enroll-Credential(Target, Credential Type, CSR, Evidence)
+    * Retrieve-Credential(Target, Credential Type, CEKpub, Evidence)
+
+
+# Credential Acquisition Interface (CAI)
+
+The Credential Acquisition Interface can be implemented using any mechanism suitable for local communication, including but not limited to statically linked calls and Protobuf/gRPC. Here only the high-level description is provided. The CAI consists of a single Acquire-Credential API, outlined below. The Acquire-Credential implementation follows the recommended CAAPI invocation sequence.
+
+## Acquire-Credential
+
+Orchestrates an opaque-to-Attester process by which the Attester acquires a credential that it would need to authenticate to a given Target utilizing the given Credential Type.
+
+Parameters:
+* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Credential Type the Attester plans to use with this Target
+
+Returns:
+* On success: newly acquired credential or the requested type
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
     * Unsupported Target
