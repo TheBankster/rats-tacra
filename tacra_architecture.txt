@@ -13,12 +13,15 @@
 ││└──────────┘││    ││ └─────────┘ │               │ └─────────┘ ││
 ││┌──────────┐││    │└─────────────┘               └───────────┬─┘│
 │││ Platform │││    └──────────────────────────────────────────┼──┘
-│││ Plug-in  │││               ┌─Retrieve Key/Credential───────┤
-││└─────┬────┘││               │         ┌─Remote Attestation──┤
-│└──────┼─────┘│               │         │          ┌─Mint New─┘
-└───────┼──────┘               │         │          │ Credential
-┌───────▼──────┐        ┌──────▼─┐  ┌────▼─────┐  ┌─▼────────────┐
-│<Platform ABI>│        │ Secret │  │   RATS   │  │ Certificate  │
-│ (Quote, RNG, │        │ Vault  ├──► Verifier ◄──┤ Authority    │
-│     etc.)    │        └────────┘  └──────────┘  │ or other IdP │
-└──────────────┘                                  └──────────────┘
+│││ Plug-in  │││                 ┌─Retrieve Key/Credential─────┤
+││└─────┬────┘││                 │        ┌─Remote Attestation─┤
+│└──────┼─────┘├──┐              │        │         ┌─Mint New─┘
+└───────┼──────┘  │              │        │         │ Credential
+┌───────▼──────┐  │ ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼──[RATS RP]─┐
+├<Platform ABI>┤  │ │ Secret Vault ├─►   RATS   ◄─┤ Certificate  │
+│ (Quote, RNG, │  │ └──────────────┘ │ Verifier │ │ Authority    │
+│     etc.)    │  │                  └──────────┘ │ or other IdP │
+└──────────────┘┌─▼─[RATS-Unaware RP]─┐           └──────────────┘
+                │ Existing Unmodified │
+                │    Relying Party    │
+                └─────────────────────┘
