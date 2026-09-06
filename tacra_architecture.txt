@@ -1,24 +1,24 @@
-    Trusted       ┌──────── Credential Acquisition System ────────┐
-   Execution      │  SPIRE Agent,                   SPIRE Server, │
-  Environment     │ EST Client, etc.                EST Srv, etc. │
-┌──────────────┐  │┌───────────────┐               ┌─────────────┐│
-│   Workload   │  ││  Credential   │               │ Credential  ││
-│  (Attester)  │  ││  Acquisition  │               │ Acquisition ││
-│┌───<CAI>────┐│  ││    System     │  Credential   │   System    ││
-││    CAI     ││  ││    Client     │  Acquisition  │   Server    ││
-││Library/Ctnr││  ││  ┌─────────┐  │   Protocol    │             ││
-││┌──────────┐││  ││  │   CAS   │  ├───────────────►             ││
-│││  CAAPI   │││  ││  │ Client  │  │ (EST, SPIRE,  │             ││
-│││  Client  ├<CAAPI>─► Plug-in │  │      etc.)    │             ││
-││└──────────┘││  ││  └─────────┘  │               │             ││
-││┌──────────┐││  │└───────────────┘               └───────────┬─┘│
-│││ Platform │││  └────────────────────────────────────────────┼──┘
-│││  Plug-In │││               ┌─Mint New Credential───────────┤
-││└─────┬────┘││               │          ┌─Remote Attestation─┤
-│└──────┼─────┘│               │          │        ┌─Retrieve──┘
-└───────┼──────┘               │          │        │ Key/Credential
- ┌──────▼─────┐       ┌────────▼──┐ ┌─────▼────┐ ┌─▼──────────────┐
- │Platform ABI│       │ Identity  │ │   RATS   │ │ Key/Credential │
- │(Quote, RNG,│       │ Provider  │ │ Verifier │ │  Store (e.g.   │
- │    etc.)   │       │ (e.g. CA) │ │          │ │  HSM, Vault)   │
- └────────────┘       └───────────┘ └──────────┘ └────────────────┘
+    Trusted         ┌─────── Credential Acquisition System ───────┐
+   Execution        │ SPIRE Agent,                  SPIRE Server, │
+  Environment       │EST Client, etc.               EST Srv, etc. │
+┌──────────────┐    │┌─────────────┐               ┌─────────────┐│
+│   Workload   │    ││ Credential  │               │ Credential  ││
+│  (Attester)  │    ││ Acquisition │               │ Acquisition ││
+│┌───<CAI>────┐│    ││   System    │  Credential   │   System    ││
+││    CAI     ││    ││   Client    │  Acquisition  │   Server    ││
+││Library/Ctnr││    ││ ┌─────────┐ │   Protocol    │ ┌─────────┐ ││
+││┌─<CAAPI>──┐││    ││ │   CAS   │ │ (EST, SPIRE,  │ │   CAS   │ ││
+│││  CAAPI   │││    ││ │ Client  │ │     etc.)     │ │ Server  │ ││
+│││  Client  ├─────────► Plug-in │ ├───────────────► │ Plug-in │ ││
+││└──────────┘││    ││ └─────────┘ │               │ └─────────┘ ││
+││┌──────────┐││    │└─────────────┘               └───────────┬─┘│
+│││ Platform │││    └──────────────────────────────────────────┼──┘
+│││ Plug-in  │││               ┌─Retrieve Key/Credential───────┤
+││└─────┬────┘││               │         ┌─Remote Attestation──┤
+│└──────┼─────┘│               │         │          ┌─Mint New─┘
+└───────┼──────┘               │         │          │ Credential
+┌───────▼──────┐        ┌──────▼─┐  ┌────▼─────┐  ┌─▼────────────┐
+│<Platform ABI>│        │ Secret │  │   RATS   │  │ Certificate  │
+│ (Quote, RNG, │        │ Vault  ├──► Verifier ◄──┤ Authority    │
+│     etc.)    │        └────────┘  └──────────┘  │ or other IdP │
+└──────────────┘                                  └──────────────┘
