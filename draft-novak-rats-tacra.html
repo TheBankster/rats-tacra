@@ -1460,28 +1460,28 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <pre>
     Trusted         ┌─────── Credential Acquisition System ───────┐
    Execution        │ SPIRE Agent,                  SPIRE Server, │
-  Environment       │EST Client, etc.               EST Srv, etc. │
-┌──────────────┐    │┌─────────────┐               ┌─────────────┐│
+  Environment       │ EST Client,...                EST Server,...│
+┌─[Attester]───┐    │┌─────────────┐               ┌─────────────┐│
 │   Workload   │    ││ Credential  │               │ Credential  ││
-│  (Attester)  │    ││ Acquisition │               │ Acquisition ││
-│┌───&lt;CAI&gt;────┐│    ││   System    │  Credential   │   System    ││
-││    CAI     ││    ││   Client    │  Acquisition  │   Server    ││
-││Library/Ctnr││    ││ ┌─────────┐ │   Protocol    │ ┌─────────┐ ││
-││┌─&lt;CAAPI&gt;──┐││    ││ │   CAS   │ │ (EST, SPIRE,  │ │   CAS   │ ││
-│││  CAAPI   │││    ││ │ Client  │ │     etc.)     │ │ Server  │ ││
-│││  Client  ├┼┼────┼┼─► Plug-in │ ├───────────────┼─► Plug-in │ ││
-││└──────────┘││    ││ └─────────┘ │               │ └───────┬─┘ ││
-││┌──────────┐││    │└─────────────┘               └─────────┼───┘│
-│││ Platform │││    └────────────────────────────────────────┼────┘
-│││ Plug-in  │││                 ┌─Retrieve Key/Credential───┴─┐
-││└─────┬────┘││                 │        ┌─Remote Attestation─┤
-│└──────┼─────┘├──┐              │        │         ┌─Mint New─┘
-└───────┼──────┘  │              │        │         │ Credential
-┌───────▼──────┐  │ ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼──[RATS RP]─┐
-├&lt;Platform ABI&gt;┤  │ │ Secret Vault ├─►   RATS   ◄─┤ Certificate  │
-│ (Quote, RNG, │  │ └──────────────┘ │ Verifier │ │ Authority    │
-│     etc.)    │  │                  └──────────┘ │ or other IdP │
-└──────────────┘┌─▼─[RATS-Unaware RP]─┐           └──────────────┘
+│┌───&lt;CAI&gt;────┐│    ││ Acquisition │               │ Acquisition ││
+││    CAI     ││    ││   System    │  Credential   │   System    ││
+││ Library or ││    ││   Client    │  Acquisition  │   Server    ││
+││ Container  ││    ││┌───────────┐│   Protocol    │┌───────────┐││
+││┌─&lt;CAAPI&gt;──┐││    │││    CAS    ││ (EST, SPIRE,  ││    CAS    │││
+│││  CAAPI   │││    │││  Client   ││     etc.)     ││  Server   │││
+│││  Client  ├┼┼────┼┼►  Plug-in  │├───────────────┼►  Plug-in  │││
+││└──────────┘││    ││└───────────┘│               │└─────────┬─┘││
+││┌──────────┐││    │└─────────────┘               └──────────┼──┘│
+│││ Platform │││    └─────────────────────────────────────────┼───┘
+│││ Plug-in  │││                  ┌─Retrieve Key/Credential───┴───┐
+││└─────┬────┘││                  │        ┌─Remote Attestation───┤
+│└──────┼─────┘├──┐               │        │         ┌─Mint New───┘
+└───────┼──────┘  │               │        │         │ Credential
+┌───────▼──────┐  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼──[RATS RP]─┐
+├&lt;Platform ABI&gt;┤  │  │ Secret Vault ├─►   RATS   ◄─┤ Certificate  │
+│ (Quote, RNG, │  │  └──────────────┘ │ Verifier │ │ Authority    │
+│     etc.)    │  │                   └──────────┘ │ or other IdP │
+└──────────────┘┌─▼─[RATS-Unaware RP]─┐            └──────────────┘
                 │ Existing Unmodified │
                 │    Relying Party    │
                 └─────────────────────┘
