@@ -1,5 +1,5 @@
-    Trusted         ┌─────── Credential Acquisition System ───────┐
-   Execution        │ SPIRE Agent,                  SPIRE Server, │
+                    ┌─────── Credential Acquisition System ───────┐
+  Attesting         │ SPIRE Agent,                  SPIRE Server, │
   Environment       │ EST Client,...                EST Server,...│
 ┌─[Attester]───┐    │┌─────────────┐               ┌─────────────┐│
 │   Workload   │    ││ Credential  │               │ Credential  ││

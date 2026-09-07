@@ -50,6 +50,8 @@ informative:
   RFC8555: ACMEv2
   WIMSE: I-D.ietf-wimse-workload-creds
   CSR-ATTEST: I-D.ietf-lamps-csr-attestation
+  INTERACTION-MODELS: I-D.ietf-rats-reference-interaction-models
+  ATTESTATION-FRESHNESS: I-D.ietf-lamps-attestation-freshness
   DAA: I-D.ietf-rats-daa
   TWISIGCharter:
     target: https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md
@@ -155,7 +157,7 @@ Note: WITs are JWTs that require key confirmation. That makes them proof-of-poss
 
 This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}. The requirements published by the TWI SIG are deliberately high-level. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
-1. Supports mechanisms for minting (new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.
+1. Supports mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.
 2. Supports most current and future credential formats:
    * X.509 Certificates
    * WIMSE Workload Identity Certificates (WICs)
@@ -182,7 +184,7 @@ This proposal is a result of work by the Confidential Computing Consortium's Tru
 
 It is not a goal, and, at any rate, it is not possible, to leave credential acquisition protocols and mechanisms (EST, SPIFFE/SPIRE, etc.) unmodified. These mechanisms currently do not support Remote Attestation, for the following reasons:
 1. Remote Attestation is typically a two-phase process:
-    1. The Attester requests and obtains a challenge, also sometimes referred to as "nonce" or "freshness" from the Verifier
+    1. The Attester requests and obtains a challenge, also sometimes referred to as "freshness", from the Verifier {{INTERACTION-MODELS}} {{ATTESTATION-FRESHNESS}}
     2. The Attester responds to the Verifier's challenge with Evidence, which is how it demonstrates its security, possession cryptographic key material, and capabilities
 2. None of the existing broadly deployed Credential Acquisition Mechanisms support this challenge-response sequences, but all appear extensible to accommodate such changes without a lot of additional effort, and without risking backwards compatibility.
 3. The credentials that these mechanisms return are typically visible in plaintext to the control plane (the CAS Client and the CAS Server), whereas it is a common requirement to keep the knowledge of authentication secrets to the Attesters and a small number of trusted services, such as key vaults and HSMs.
@@ -225,9 +227,8 @@ Under the covers and opaquely to the Attester, the Credential Acquisition Interf
 | :--- | :--- | :--- |
 | Attester | Attester | Attesting Environment extended and complemented by CAI, CAAPI, Platform Plug-in |
 | CAI | Part of Attester | Library or Sidecar assisting Attester in obtaining credentials |
-| Platform Plug-in | Part of Attester | Invoked by CAI to perform platform-specific Remote Attestation |
+| Platform Plug-in | Part of Attester | Invoked by CAI to perform platform-specific Remote Attestation and key generation operations |
 | CAAPI Client | Part of Attester | Invoked by CAI to communicate with CAS Client |
-tasks |
 | CAS Client | None: Conduit only | CAS Client extended by Remote Attestation Plug-in |
 | CAS Server | None: Conduit only | CAS Server extended by Remote Attestation Plug-in |
 | Secret Vault | RATS Relying Party | Invoked in the Enrollment variant of this architecture; MUST encrypt retrieved results to CEKpub |
@@ -243,7 +244,7 @@ The Credential Acquisition API allows the Attester to communicate with the Crede
 
 ## Initiate-Credential-Acquisition
 
-Initiates the credential acquisition process by obtaining a challenge from a Verifier.
+Initiates the credential acquisition process by obtaining Freshness and validating that the indicated Target name and Credential Type are supported by the CAS.
 
 Parameters:
 
@@ -254,7 +255,7 @@ Returns:
 
 * On success:
     * Credential acquisition mechanism: "enroll" or "retrieve"
-    * Verifier challenge
+    * (optional) Freshness handle (see {{INTERACTION-MODELS}})
     * Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
@@ -274,7 +275,7 @@ Parameters:
 
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
-* Evidence derived from the previously returned Verifier challenge
+* Evidence, bound to the previously returned Freshness, if any
 * CSR matching the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)
 
 Returns:
@@ -299,7 +300,7 @@ Parameters:
 
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
-* Evidence derived from the previously returned Verifier challenge
+* Evidence, bound to the previously returned Freshness, if any
 * CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)
 
 Returns:
@@ -323,7 +324,7 @@ The caller (normally the Credential Acquisition Interface) first decides which T
 The typical invocation flow is:
 
 1. CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)
-    * Returns a Verifier challenge and a Credential Acquisition Mode
+    * Returns optional Freshness and the Credential Acquisition Mode for this Target and Credential Type
 2. Platform Plug-in: Generate Keys and the corresponding Evidence:
     * CSK, the Certificate Signing Key, and the corresponding CSR, for credential enrollment or
     * CEK, the Credential Encryption Key, for credential retrieval
