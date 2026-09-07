@@ -5,10 +5,10 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 10 March 2027                          Sandelman Software Works
+Expires: 11 March 2027                          Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
-                                                        6 September 2026
+                                                        7 September 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 March 2027.
+   This Internet-Draft will expire on 11 March 2027.
 
 Copyright Notice
 
@@ -352,11 +352,11 @@ Table of Contents
    ││Library/Ctnr││    ││ ┌─────────┐ │   Protocol    │ ┌─────────┐ ││
    ││┌─<CAAPI>──┐││    ││ │   CAS   │ │ (EST, SPIRE,  │ │   CAS   │ ││
    │││  CAAPI   │││    ││ │ Client  │ │     etc.)     │ │ Server  │ ││
-   │││  Client  ├─────────► Plug-in │ ├───────────────► │ Plug-in │ ││
-   ││└──────────┘││    ││ └─────────┘ │               │ └─────────┘ ││
-   ││┌──────────┐││    │└─────────────┘               └───────────┬─┘│
-   │││ Platform │││    └──────────────────────────────────────────┼──┘
-   │││ Plug-in  │││                 ┌─Retrieve Key/Credential─────┤
+   │││  Client  ├┼┼────┼┼─► Plug-in │ ├───────────────┼─► Plug-in │ ││
+   ││└──────────┘││    ││ └─────────┘ │               │ └───────┬─┘ ││
+   ││┌──────────┐││    │└─────────────┘               └─────────┼───┘│
+   │││ Platform │││    └────────────────────────────────────────┼────┘
+   │││ Plug-in  │││                 ┌─Retrieve Key/Credential───┴─┐
    ││└─────┬────┘││                 │        ┌─Remote Attestation─┤
    │└──────┼─────┘├──┐              │        │         ┌─Mint New─┘
    └───────┼──────┘  │              │        │         │ Credential
