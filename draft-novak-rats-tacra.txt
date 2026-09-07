@@ -258,11 +258,11 @@ Table of Contents
    with the TWI SIG requirements, while focusing on a portable and
    extensible implementation.
 
-   1.   Supports mechanisms for minting (new) as well as retrieving
-        (pre-existing) credentials; the workload knows what Credential
-        Type it will need when it launches, but discovers whether it
-        will have to retrieve an existing or enroll a new credential at
-        runtime.
+   1.   Supports mechanisms for enrolling (minting new) as well as
+        retrieving (pre-existing) credentials; the workload knows what
+        Credential Type it will need when it launches, but discovers
+        whether it will have to retrieve an existing or enroll a new
+        credential at runtime.
 
    2.   Supports most current and future credential formats:
 
@@ -321,19 +321,19 @@ Table of Contents
    etc.) unmodified.  These mechanisms currently do not support Remote
    Attestation, for the following reasons: 1.  Remote Attestation is
    typically a two-phase process: 1.  The Attester requests and obtains
-   a challenge, also sometimes referred to as "nonce" or "freshness"
-   from the Verifier 2.  The Attester responds to the Verifier's
-   challenge with Evidence, which is how it demonstrates its security,
-   possession cryptographic key material, and capabilities 2.  None of
-   the existing broadly deployed Credential Acquisition Mechanisms
-   support this challenge-response sequences, but all appear extensible
-   to accommodate such changes without a lot of additional effort, and
-   without risking backwards compatibility. 3.  The credentials that
-   these mechanisms return are typically visible in plaintext to the
-   control plane (the CAS Client and the CAS Server), whereas it is a
-   common requirement to keep the knowledge of authentication secrets to
-   the Attesters and a small number of trusted services, such as key
-   vaults and HSMs.
+   a challenge, also sometimes referred to as "freshness", from the
+   Verifier [INTERACTION-MODELS] [ATTESTATION-FRESHNESS] 2.  The
+   Attester responds to the Verifier's challenge with Evidence, which is
+   how it demonstrates its security, possession cryptographic key
+   material, and capabilities 2.  None of the existing broadly deployed
+   Credential Acquisition Mechanisms support this challenge-response
+   sequences, but all appear extensible to accommodate such changes
+   without a lot of additional effort, and without risking backwards
+   compatibility. 3.  The credentials that these mechanisms return are
+   typically visible in plaintext to the control plane (the CAS Client
+   and the CAS Server), whereas it is a common requirement to keep the
+   knowledge of authentication secrets to the Attesters and a small
+   number of trusted services, such as key vaults and HSMs.
 
 4.  Architecture
 
@@ -341,8 +341,8 @@ Table of Contents
    corresponding numbered items in the list of Requirements in the
    opening section of this document.
 
-       Trusted         ┌─────── Credential Acquisition System ───────┐
-      Execution        │ SPIRE Agent,                  SPIRE Server, │
+                       ┌─────── Credential Acquisition System ───────┐
+     Attesting         │ SPIRE Agent,                  SPIRE Server, │
      Environment       │ EST Client,...                EST Server,...│
    ┌─[Attester]───┐    │┌─────────────┐               ┌─────────────┐│
    │   Workload   │    ││ Credential  │               │ Credential  ││
@@ -462,50 +462,48 @@ Table of Contents
 
 4.1.  Summary of RATS Roles
 
-     +==============+==========+====================================+
-     | TACRA        | RATS     | Remarks                            |
-     | Component    | Role     |                                    |
-     +==============+==========+====================================+
-     | Attester     | Attester | Attesting Environment extended and |
-     |              |          | complemented by CAI, CAAPI,        |
-     |              |          | Platform Plug-in                   |
-     +--------------+----------+------------------------------------+
-     | CAI          | Part of  | Library or Sidecar assisting       |
-     |              | Attester | Attester in obtaining credentials  |
-     +--------------+----------+------------------------------------+
-     | Platform     | Part of  | Invoked by CAI to perform          |
-     | Plug-in      | Attester | platform-specific Remote           |
-     |              |          | Attestation                        |
-     +--------------+----------+------------------------------------+
-     | CAAPI Client | Part of  | Invoked by CAI to communicate with |
-     |              | Attester | CAS Client                         |
-     +--------------+----------+------------------------------------+
-     | tasks        |          |                                    |
-     +--------------+----------+------------------------------------+
-     | CAS Client   | None:    | CAS Client extended by Remote      |
-     |              | Conduit  | Attestation Plug-in                |
-     |              | only     |                                    |
-     +--------------+----------+------------------------------------+
-     | CAS Server   | None:    | CAS Server extended by Remote      |
-     |              | Conduit  | Attestation Plug-in                |
-     |              | only     |                                    |
-     +--------------+----------+------------------------------------+
-     | Secret Vault | RATS     | Invoked in the Enrollment variant  |
-     |              | Relying  | of this architecture; MUST encrypt |
-     |              | Party    | retrieved results to CEKpub        |
-     +--------------+----------+------------------------------------+
-     | Certificate  | Relying  | Invoked in the Enrollment variant  |
-     | Authority    | Party    | of this architecture               |
-     +--------------+----------+------------------------------------+
-     | Verifier     | Verifier | No changes in RATS Verifier role   |
-     |              |          | or implementation                  |
-     +--------------+----------+------------------------------------+
-     | RATS-Unaware | None     | No changes in RUP role or          |
-     | Relying      |          | implementation                     |
-     | Party        |          |                                    |
-     +--------------+----------+------------------------------------+
+     +==============+==========+=====================================+
+     | TACRA        | RATS     | Remarks                             |
+     | Component    | Role     |                                     |
+     +==============+==========+=====================================+
+     | Attester     | Attester | Attesting Environment extended and  |
+     |              |          | complemented by CAI, CAAPI,         |
+     |              |          | Platform Plug-in                    |
+     +--------------+----------+-------------------------------------+
+     | CAI          | Part of  | Library or Sidecar assisting        |
+     |              | Attester | Attester in obtaining credentials   |
+     +--------------+----------+-------------------------------------+
+     | Platform     | Part of  | Invoked by CAI to perform platform- |
+     | Plug-in      | Attester | specific Remote Attestation and key |
+     |              |          | generation operations               |
+     +--------------+----------+-------------------------------------+
+     | CAAPI Client | Part of  | Invoked by CAI to communicate with  |
+     |              | Attester | CAS Client                          |
+     +--------------+----------+-------------------------------------+
+     | CAS Client   | None:    | CAS Client extended by Remote       |
+     |              | Conduit  | Attestation Plug-in                 |
+     |              | only     |                                     |
+     +--------------+----------+-------------------------------------+
+     | CAS Server   | None:    | CAS Server extended by Remote       |
+     |              | Conduit  | Attestation Plug-in                 |
+     |              | only     |                                     |
+     +--------------+----------+-------------------------------------+
+     | Secret Vault | RATS     | Invoked in the Enrollment variant   |
+     |              | Relying  | of this architecture; MUST encrypt  |
+     |              | Party    | retrieved results to CEKpub         |
+     +--------------+----------+-------------------------------------+
+     | Certificate  | Relying  | Invoked in the Enrollment variant   |
+     | Authority    | Party    | of this architecture                |
+     +--------------+----------+-------------------------------------+
+     | Verifier     | Verifier | No changes in RATS Verifier role or |
+     |              |          | implementation                      |
+     +--------------+----------+-------------------------------------+
+     | RATS-Unaware | None     | No changes in RUP role or           |
+     | Relying      |          | implementation                      |
+     | Party        |          |                                     |
+     +--------------+----------+-------------------------------------+
 
-                       Table 1: RATS roles in TACRA
+                        Table 1: RATS roles in TACRA
 
 5.  Credential Acquisition API (CAAPI)
 
@@ -518,8 +516,9 @@ Table of Contents
 
 5.1.  Initiate-Credential-Acquisition
 
-   Initiates the credential acquisition process by obtaining a challenge
-   from a Verifier.
+   Initiates the credential acquisition process by obtaining Freshness
+   and validating that the indicated Target name and Credential Type are
+   supported by the CAS.
 
    Parameters:
 
@@ -534,7 +533,7 @@ Table of Contents
 
       -  Credential acquisition mechanism: "enroll" or "retrieve"
 
-      -  Verifier challenge
+      -  (optional) Freshness handle (see [INTERACTION-MODELS])
 
       -  Other TBD pertinent information, such as supported ciphers,
          etc.  (TODO: define)
@@ -569,7 +568,7 @@ Table of Contents
    *  Credential Type matching that of the corresponding Initiate-
       Credential-Acquisition call
 
-   *  Evidence derived from the previously returned Verifier challenge
+   *  Evidence, bound to the previously returned Freshness, if any
 
    *  CSR matching the Evidence (TODO: discuss CSR-to-Evidence binding/
       relationship)
@@ -611,7 +610,7 @@ Table of Contents
    *  Credential Type matching that of the corresponding Initiate-
       Credential-Acquisition call
 
-   *  Evidence derived from the previously returned Verifier challenge
+   *  Evidence, bound to the previously returned Freshness, if any
 
    *  CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence
       binding/relationship)
@@ -652,7 +651,8 @@ Table of Contents
 
    1.  CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)
 
-       *  Returns a Verifier challenge and a Credential Acquisition Mode
+       *  Returns optional Freshness and the Credential Acquisition Mode
+          for this Target and Credential Type
 
    2.  Platform Plug-in: Generate Keys and the corresponding Evidence:
 
@@ -757,6 +757,14 @@ Table of Contents
 
 9.2.  Informative References
 
+   [ATTESTATION-FRESHNESS]
+              Tschofenig, H., Brockhaus, H., Mandel, J., and S. Turner,
+              "Requesting a Freshness Nonce for Attestation Evidence in
+              Certificate Signing Requests", Work in Progress, Internet-
+              Draft, draft-ietf-lamps-attestation-freshness-08, 4 July
+              2026, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              lamps-attestation-freshness-08>.
+
    [CSR-ATTEST]
               Ounsworth, M., Tschofenig, H., Birkholz, H., Wiseman, M.,
               and N. Smith, "Use of Remote Attestation with
@@ -773,6 +781,14 @@ Table of Contents
               daa-09>.
 
    [ENVOY]    Envoy, "The Envoy Proxy", n.d., <https://envoyproxy.io>.
+
+   [INTERACTION-MODELS]
+              Birkholz, H., Eckel, M., Pan, W., and E. Voit, "Reference
+              Interaction Models for Remote Attestation Procedures",
+              Work in Progress, Internet-Draft, draft-ietf-rats-
+              reference-interaction-models-17, 2 April 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-rats-
+              reference-interaction-models-17>.
 
    [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key

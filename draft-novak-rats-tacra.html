@@ -1363,7 +1363,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-3-1">This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG <span>[<a href="#TWISIGCharter" class="cite xref">TWISIGCharter</a>]</span> which has published a set of Definitions <span>[<a href="#TWISIGDef" class="cite xref">TWISIGDef</a>]</span> and Requirements <span>[<a href="#TWISIGReq" class="cite xref">TWISIGReq</a>]</span>. The requirements published by the TWI SIG are deliberately high-level. The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3-2">
 <li id="section-3-2.1">
-          <p id="section-3-2.1.1">Supports mechanisms for minting (new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.<a href="#section-3-2.1.1" class="pilcrow">¶</a></p>
+          <p id="section-3-2.1.1">Supports mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.<a href="#section-3-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-2.2">
           <p id="section-3-2.2.1">Supports most current and future credential formats:<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
@@ -1440,7 +1440,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         </h3>
 <p id="section-3.1-1">It is not a goal, and, at any rate, it is not possible, to leave credential acquisition protocols and mechanisms (EST, SPIFFE/SPIRE, etc.) unmodified. These mechanisms currently do not support Remote Attestation, for the following reasons:
 1. Remote Attestation is typically a two-phase process:
-    1. The Attester requests and obtains a challenge, also sometimes referred to as "nonce" or "freshness" from the Verifier
+    1. The Attester requests and obtains a challenge, also sometimes referred to as "freshness", from the Verifier <span>[<a href="#INTERACTION-MODELS" class="cite xref">INTERACTION-MODELS</a>]</span> <span>[<a href="#ATTESTATION-FRESHNESS" class="cite xref">ATTESTATION-FRESHNESS</a>]</span>
     2. The Attester responds to the Verifier's challenge with Evidence, which is how it demonstrates its security, possession cryptographic key material, and capabilities
 2. None of the existing broadly deployed Credential Acquisition Mechanisms support this challenge-response sequences, but all appear extensible to accommodate such changes without a lot of additional effort, and without risking backwards compatibility.
 3. The credentials that these mechanisms return are typically visible in plaintext to the control plane (the CAS Client and the CAS Server), whereas it is a common requirement to keep the knowledge of authentication secrets to the Attesters and a small number of trusted services, such as key vaults and HSMs.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
@@ -1458,8 +1458,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <figure id="figure-1">
         <div class="alignLeft art-ascii-art art-text artwork" id="section-4-2.1">
 <pre>
-    Trusted         ┌─────── Credential Acquisition System ───────┐
-   Execution        │ SPIRE Agent,                  SPIRE Server, │
+                    ┌─────── Credential Acquisition System ───────┐
+  Attesting         │ SPIRE Agent,                  SPIRE Server, │
   Environment       │ EST Client,...                EST Server,...│
 ┌─[Attester]───┐    │┌─────────────┐               ┌─────────────┐│
 │   Workload   │    ││ Credential  │               │ Credential  ││
@@ -1547,17 +1547,12 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
             <tr>
               <td class="text-left" rowspan="1" colspan="1">Platform Plug-in</td>
               <td class="text-left" rowspan="1" colspan="1">Part of Attester</td>
-              <td class="text-left" rowspan="1" colspan="1">Invoked by CAI to perform platform-specific Remote Attestation</td>
+              <td class="text-left" rowspan="1" colspan="1">Invoked by CAI to perform platform-specific Remote Attestation and key generation operations</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">CAAPI Client</td>
               <td class="text-left" rowspan="1" colspan="1">Part of Attester</td>
               <td class="text-left" rowspan="1" colspan="1">Invoked by CAI to communicate with CAS Client</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">tasks</td>
-              <td class="text-left" rowspan="1" colspan="1"> </td>
-              <td class="text-left" rowspan="1" colspan="1"> </td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">CAS Client</td>
@@ -1607,7 +1602,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         <h3 id="name-initiate-credential-acquisi">
 <a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-initiate-credential-acquisi" class="section-name selfRef">Initiate-Credential-Acquisition</a>
         </h3>
-<p id="section-5.1-1">Initiates the credential acquisition process by obtaining a challenge from a Verifier.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-1">Initiates the credential acquisition process by obtaining Freshness and validating that the indicated Target name and Credential Type are supported by the CAS.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <p id="section-5.1-2">Parameters:<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.1-3.1">
@@ -1626,7 +1621,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
                 <p id="section-5.1-5.1.2.1.1">Credential acquisition mechanism: "enroll" or "retrieve"<a href="#section-5.1-5.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.1-5.1.2.2">
-                <p id="section-5.1-5.1.2.2.1">Verifier challenge<a href="#section-5.1-5.1.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-5.1-5.1.2.2.1">(optional) Freshness handle (see <span>[<a href="#INTERACTION-MODELS" class="cite xref">INTERACTION-MODELS</a>]</span>)<a href="#section-5.1-5.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.1-5.1.2.3">
                 <p id="section-5.1-5.1.2.3.1">Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)<a href="#section-5.1-5.1.2.3.1" class="pilcrow">¶</a></p>
@@ -1680,7 +1675,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
             <p id="section-5.2-3.2.1">Credential Type matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.2-3.3">
-            <p id="section-5.2-3.3.1">Evidence derived from the previously returned Verifier challenge<a href="#section-5.2-3.3.1" class="pilcrow">¶</a></p>
+            <p id="section-5.2-3.3.1">Evidence, bound to the previously returned Freshness, if any<a href="#section-5.2-3.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.2-3.4">
             <p id="section-5.2-3.4.1">CSR matching the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)<a href="#section-5.2-3.4.1" class="pilcrow">¶</a></p>
@@ -1741,7 +1736,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
             <p id="section-5.3-3.2.1">Credential Type matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-3.3">
-            <p id="section-5.3-3.3.1">Evidence derived from the previously returned Verifier challenge<a href="#section-5.3-3.3.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-3.3.1">Evidence, bound to the previously returned Freshness, if any<a href="#section-5.3-3.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-3.4">
             <p id="section-5.3-3.4.1">CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)<a href="#section-5.3-3.4.1" class="pilcrow">¶</a></p>
@@ -1799,7 +1794,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
             <p id="section-5.4-3.1.1">CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)<a href="#section-5.4-3.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-3.1.2.1">
-                <p id="section-5.4-3.1.2.1.1">Returns a Verifier challenge and a Credential Acquisition Mode<a href="#section-5.4-3.1.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.1.2.1.1">Returns optional Freshness and the Credential Acquisition Mode for this Target and Credential Type<a href="#section-5.4-3.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
@@ -1953,6 +1948,10 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="ATTESTATION-FRESHNESS">[ATTESTATION-FRESHNESS]</dt>
+        <dd>
+<span class="refAuthor">Tschofenig, H.</span>, <span class="refAuthor">Brockhaus, H.</span>, <span class="refAuthor">Mandel, J.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"Requesting a Freshness Nonce for Attestation Evidence in Certificate Signing Requests"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-attestation-freshness-08</span>, <time datetime="2026-07-04" class="refDate">4 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-attestation-freshness-08">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-attestation-freshness-08</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="CSR-ATTEST">[CSR-ATTEST]</dt>
         <dd>
 <span class="refAuthor">Ounsworth, M.</span>, <span class="refAuthor">Tschofenig, H.</span>, <span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Wiseman, M.</span>, and <span class="refAuthor">N. Smith</span>, <span class="refTitle">"Use of Remote Attestation with Certification Signing Requests"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-csr-attestation-29</span>, <time datetime="2026-09-02" class="refDate">2 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-csr-attestation-29">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-csr-attestation-29</a>&gt;</span>. </dd>
@@ -1964,6 +1963,10 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <dt id="ENVOY">[ENVOY]</dt>
         <dd>
 <span class="refAuthor">Envoy</span>, <span class="refTitle">"The Envoy Proxy"</span>, <span>n.d.</span>, <span>&lt;<a href="https://envoyproxy.io">https://envoyproxy.io</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="INTERACTION-MODELS">[INTERACTION-MODELS]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Eckel, M.</span>, <span class="refAuthor">Pan, W.</span>, and <span class="refAuthor">E. Voit</span>, <span class="refTitle">"Reference Interaction Models for Remote Attestation Procedures"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-reference-interaction-models-17</span>, <time datetime="2026-04-02" class="refDate">2 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-rats-reference-interaction-models-17">https://datatracker.ietf.org/doc/html/draft-ietf-rats-reference-interaction-models-17</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC5280">[RFC5280]</dt>
         <dd>
