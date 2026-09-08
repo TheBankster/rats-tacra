@@ -11,15 +11,14 @@
 │││  Client  │││    ││└───────────┘│               │└─────────┬─┘││
 ││└──────────┘││    │└─────────────┘               └──────────┼──┘│
 ││┌──────────┐││    └─────────────────────────────────────────┼───┘
-│││ Platform │││                  ┌─Retrieve Key/Credential───┴───┐
-│││ Plug-in  │││                  │        ┌─Remote Attestation───┤
-││└─────┬────┘││                  │        │         ┌─Mint New───┘
+│││ Platform │││                  ┌─Retrieve Key/Credential───┴──┐
+│││ Plug-in  │││                  │        ┌─Remote Attestation──┤
+││└─────┬────┘││                  │        │         ┌─Mint New──┘
 │└──────┼─────┘├──┐               │        │         │ Credential
-└───────┼──────┘  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼──[RATS RP]─┐
-┌───────▼──────┐  │  │ Secret Vault ├─►   RATS   ◄─┤ Certificate  │
-├<Platform ABI>┤  │  └──────────────┘ │ Verifier │ │ Authority    │
-│ (Quote, RNG, │  │                   └──────────┘ │ or other IdP │
-│     etc.)    │┌─▼─[RATS-Unaware RP]─┐            └──────────────┘
-└──────────────┘│ Existing Unmodified │
-                │    Relying Party    │
-                └─────────────────────┘
+└───────┼──────┘  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
+┌───────▼──────┐  │  │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
+├<Platform ABI>┤  │  └──────────────┘ │ Verifier │ │ Authority   │
+│ (Quote, RNG, │  │                   └──────────┘ └─────────────┘
+│     etc.)    │┌─▼─[RATS-Unaware RP]───────────────┐
+└──────────────┘│ Existing Unmodified Relying Party │
+                └───────────────────────────────────┘
