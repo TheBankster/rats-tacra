@@ -1377,7 +1377,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <p id="section-2-2.8.1">Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-2-3">Note: WITs are JWTs that require key confirmation. That makes them proof-of-possession credentials, whereas JWTs are used without key confirmation and are thus considered bearer tokens.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-3">Note: WITs are JWTs that require key confirmation.
+That makes them proof-of-possession credentials, whereas JWTs are used without key confirmation and are thus considered bearer tokens.<a href="#section-2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="requirements">
@@ -1385,7 +1386,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-requirements">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-requirements" class="section-name selfRef">Requirements</a>
       </h2>
-<p id="section-3-1">This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG <span>[<a href="#TWISIGCharter" class="cite xref">TWISIGCharter</a>]</span> which has published a set of Definitions <span>[<a href="#TWISIGDef" class="cite xref">TWISIGDef</a>]</span> and Requirements <span>[<a href="#TWISIGReq" class="cite xref">TWISIGReq</a>]</span>. The requirements published by the TWI SIG are deliberately high-level.
+<p id="section-3-1">This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG <span>[<a href="#TWISIGCharter" class="cite xref">TWISIGCharter</a>]</span> which has published a set of Definitions <span>[<a href="#TWISIGDef" class="cite xref">TWISIGDef</a>]</span> and Requirements <span>[<a href="#TWISIGReq" class="cite xref">TWISIGReq</a>]</span>.
+The requirements published by the TWI SIG are deliberately high-level.
 The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3-2">
 <li id="section-3-2.1">
@@ -1687,7 +1689,10 @@ In both cases, the associated secrets remain opaque to the CAS at all times [Req
       <h2 id="name-credential-acquisition-api-">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-credential-acquisition-api-" class="section-name selfRef">Credential Acquisition API (CAAPI)</a>
       </h2>
-<p id="section-5-1">The Credential Acquisition API allows the Attester to communicate with the Credential Acquisition System. These APIs are invoked by the Credential Acquisition Interface, covered in the next section. CAAPI can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">The Credential Acquisition API allows the Attester to communicate with the Credential Acquisition System.
+These APIs are invoked by the Credential Acquisition Interface, covered in the next section.
+CAAPI can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC.
+Here only the high-level description is provided.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <div id="initiate-credential-acquisition">
 <section id="section-5.1">
         <h3 id="name-initiate-credential-acquisi">
