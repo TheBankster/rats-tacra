@@ -181,7 +181,7 @@ The requirements specified here fully align with the TWI SIG requirements, while
 5. MUST support Workloads utilizing different Credential Acquisition Mechanisms per-target
 6. MUST support both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester
 7. MUST support most current and future RATS Verifiers, Credential Authorities, and Secret Vaults, transparently to the Attester
-8. MUST NOT assume that Workload has independent network access
+8. MUST NOT assume that the Attester has network access
 9. MUST be compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation
 10. SHOULD restrict visibility of fetched secrets to the Attester, specifically excluding visibility by the CAS Client and CAS Server
 
