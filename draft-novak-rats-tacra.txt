@@ -284,7 +284,8 @@ Table of Contents
 
         *  Future formats through architectural extensibility
 
-   3.   Minimal trust boundary expansion of the Attesting Environment
+   3.   SHOULD limit the trust boundary expansion of the Attesting
+        Environment to the minimum
 
    4.   MUST support, transparently to the Attester, most current and
         future Credential Acquisition Mechanisms:
@@ -365,29 +366,29 @@ Table of Contents
 4.3.  Architecture Overview
 
      Attesting
-     Environment       ┌─────── Credential Acquisition System ───────┐
-   ┌─[Attester]───┐    │ SPIRE Agent,                  SPIRE Server, │
-   │   Workload   │    │ EST Client,...                EST Server,...│
-   │┌───<CAI>────┐│    │┌─────────────┐  Credential   ┌─────────────┐│
-   ││    CAI     ││    ││ CAS Client  │  Acquisition  │ CAS Server  ││
-   ││ Library or ││    ││┌───────────┐│   Protocol    │┌───────────┐││
-   ││ Container  ││    │││ TACRA CAS ││ (EST, SPIRE,  ││ TACRA CAS │││
-   ││┌─<CAAPI>──┐││    │││  Client   ││     etc.)     ││  Server   │││
-   │││  CAAPI   ├┼┼────┼┼►  Plug-in  │├───────────────┼►  Plug-in  │││
-   │││  Client  │││    ││└───────────┘│               │└─────────┬─┘││
-   ││└──────────┘││    │└─────────────┘               └──────────┼──┘│
-   ││┌──────────┐││    └─────────────────────────────────────────┼───┘
-   │││ Platform │││                  ┌─Retrieve Key/Credential───┴──┐
-   │││ Plug-in  │││                  │        ┌─Remote Attestation──┤
-   ││└─────┬────┘││                  │        │         ┌─Mint New──┘
-   │└──────┼─────┘├──┐               │        │         │ Credential
-   └───────┼──────┘  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
-   ┌───────▼──────┐  │  │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
-   ├<Platform ABI>┤  │  └──────────────┘ │ Verifier │ │ Authority   │
-   │ (Quote, RNG, │  │                   └──────────┘ └─────────────┘
-   │     etc.)    │┌─▼─[RATS-Unaware RP]───────────────┐
-   └──────────────┘│ Existing Unmodified Relying Party │
-                   └───────────────────────────────────┘
+     Environment      ┌─────── Credential Acquisition System ─────────┐
+   ┌─[Attester]───┐   │ SPIRE Agent,                   SPIRE Server,  │
+   │   Workload   │   │ EST Client,...                 EST Server,... │
+   │┌───<CAI>────┐│   │┌──────────────┐  Credential   ┌──────────────┐│
+   ││    CAI     ││   ││  CAS Client  │  Acquisition  │  CAS Server  ││
+   ││ Library or ││   ││┌────────────┐│   Protocol    │┌────────────┐││
+   ││ Container  ││   │││   TACRA    ││ (EST, SPIRE,  ││   TACRA    │││
+   ││┌─<CAAPI>──┐││   │││ CAS Client ││     etc.)     ││ CAS Server │││
+   │││  CAAPI   ├┼┼───┼┼►  Plug-in   │├───────────────┼►  Plug-in   │││
+   │││  Client  │││   ││└────────────┘│               │└──────────┬─┘││
+   ││└──────────┘││   │└──────────────┘               └───────────┼──┘│
+   ││┌──────────┐││   └───────────────────────────────────────────┼───┘
+   │││ Platform │││                    ┌─Retrieve Key/Credential──┴──┐
+   │││ Plug-in  │││                    │        ┌─Remote Attestation─┤
+   ││└─────┬────┘││                    │        │         ┌─Mint New─┘
+   │└──────┼─────┘├───┐                │        │         │ Credential
+   └───────┼──────┘   │   ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
+   ┌───────▼──────┐   │   │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
+   ├<Platform ABI>┤   │   └──────────────┘ │ Verifier │ │ Authority   │
+   │ (Quote, RNG, │   │                    └──────────┘ └─────────────┘
+   │     etc.)    │ ┌─▼─[RATS-Unaware RP]───────────────┐
+   └──────────────┘ │ Existing Unmodified Relying Party │
+                    └───────────────────────────────────┘
 
                         Figure 1: TACRA architecture
 

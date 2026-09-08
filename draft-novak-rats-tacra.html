@@ -1420,7 +1420,7 @@ The requirements specified here fully align with the TWI SIG requirements, while
           </ul>
 </li>
         <li id="section-3-2.3">
-          <p id="section-3-2.3.1">Minimal trust boundary expansion of the Attesting Environment<a href="#section-3-2.3.1" class="pilcrow">¶</a></p>
+          <p id="section-3-2.3.1"><span class="bcp14">SHOULD</span> limit the trust boundary expansion of the Attesting Environment to the minimum<a href="#section-3-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-2.4">
           <p id="section-3-2.4.1"><span class="bcp14">MUST</span> support, transparently to the Attester, most current and future Credential Acquisition Mechanisms:<a href="#section-3-2.4.1" class="pilcrow">¶</a></p>
@@ -1521,29 +1521,29 @@ These mechanisms currently do not support Remote Attestation, for the following 
           <div class="alignLeft art-ascii-art art-text artwork" id="section-4.3-1.1">
 <pre>
   Attesting
-  Environment       ┌─────── Credential Acquisition System ───────┐
-┌─[Attester]───┐    │ SPIRE Agent,                  SPIRE Server, │
-│   Workload   │    │ EST Client,...                EST Server,...│
-│┌───&lt;CAI&gt;────┐│    │┌─────────────┐  Credential   ┌─────────────┐│
-││    CAI     ││    ││ CAS Client  │  Acquisition  │ CAS Server  ││
-││ Library or ││    ││┌───────────┐│   Protocol    │┌───────────┐││
-││ Container  ││    │││ TACRA CAS ││ (EST, SPIRE,  ││ TACRA CAS │││
-││┌─&lt;CAAPI&gt;──┐││    │││  Client   ││     etc.)     ││  Server   │││
-│││  CAAPI   ├┼┼────┼┼►  Plug-in  │├───────────────┼►  Plug-in  │││
-│││  Client  │││    ││└───────────┘│               │└─────────┬─┘││
-││└──────────┘││    │└─────────────┘               └──────────┼──┘│
-││┌──────────┐││    └─────────────────────────────────────────┼───┘
-│││ Platform │││                  ┌─Retrieve Key/Credential───┴──┐
-│││ Plug-in  │││                  │        ┌─Remote Attestation──┤
-││└─────┬────┘││                  │        │         ┌─Mint New──┘
-│└──────┼─────┘├──┐               │        │         │ Credential
-└───────┼──────┘  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
-┌───────▼──────┐  │  │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
-├&lt;Platform ABI&gt;┤  │  └──────────────┘ │ Verifier │ │ Authority   │
-│ (Quote, RNG, │  │                   └──────────┘ └─────────────┘
-│     etc.)    │┌─▼─[RATS-Unaware RP]───────────────┐
-└──────────────┘│ Existing Unmodified Relying Party │
-                └───────────────────────────────────┘
+  Environment      ┌─────── Credential Acquisition System ─────────┐
+┌─[Attester]───┐   │ SPIRE Agent,                   SPIRE Server,  │
+│   Workload   │   │ EST Client,...                 EST Server,... │
+│┌───&lt;CAI&gt;────┐│   │┌──────────────┐  Credential   ┌──────────────┐│
+││    CAI     ││   ││  CAS Client  │  Acquisition  │  CAS Server  ││
+││ Library or ││   ││┌────────────┐│   Protocol    │┌────────────┐││
+││ Container  ││   │││   TACRA    ││ (EST, SPIRE,  ││   TACRA    │││
+││┌─&lt;CAAPI&gt;──┐││   │││ CAS Client ││     etc.)     ││ CAS Server │││
+│││  CAAPI   ├┼┼───┼┼►  Plug-in   │├───────────────┼►  Plug-in   │││
+│││  Client  │││   ││└────────────┘│               │└──────────┬─┘││
+││└──────────┘││   │└──────────────┘               └───────────┼──┘│
+││┌──────────┐││   └───────────────────────────────────────────┼───┘
+│││ Platform │││                    ┌─Retrieve Key/Credential──┴──┐
+│││ Plug-in  │││                    │        ┌─Remote Attestation─┤
+││└─────┬────┘││                    │        │         ┌─Mint New─┘
+│└──────┼─────┘├───┐                │        │         │ Credential
+└───────┼──────┘   │   ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
+┌───────▼──────┐   │   │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
+├&lt;Platform ABI&gt;┤   │   └──────────────┘ │ Verifier │ │ Authority   │
+│ (Quote, RNG, │   │                    └──────────┘ └─────────────┘
+│     etc.)    │ ┌─▼─[RATS-Unaware RP]───────────────┐
+└──────────────┘ │ Existing Unmodified Relying Party │
+                 └───────────────────────────────────┘
 </pre>
 </div>
 <figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
