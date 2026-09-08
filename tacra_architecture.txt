@@ -1,24 +1,24 @@
   Attesting
-  Environment       ┌─────── Credential Acquisition System ───────┐
-┌─[Attester]───┐    │ SPIRE Agent,                  SPIRE Server, │
-│   Workload   │    │ EST Client,...                EST Server,...│
-│┌───<CAI>────┐│    │┌─────────────┐  Credential   ┌─────────────┐│
-││    CAI     ││    ││ CAS Client  │  Acquisition  │ CAS Server  ││
-││ Library or ││    ││┌───────────┐│   Protocol    │┌───────────┐││
-││ Container  ││    │││ TACRA CAS ││ (EST, SPIRE,  ││ TACRA CAS │││
-││┌─<CAAPI>──┐││    │││  Client   ││     etc.)     ││  Server   │││
-│││  CAAPI   ├┼┼────┼┼►  Plug-in  │├───────────────┼►  Plug-in  │││
-│││  Client  │││    ││└───────────┘│               │└─────────┬─┘││
-││└──────────┘││    │└─────────────┘               └──────────┼──┘│
-││┌──────────┐││    └─────────────────────────────────────────┼───┘
-│││ Platform │││                  ┌─Retrieve Key/Credential───┴─┐
-│││ Plug-in  │││                  │        ┌─Remote Attestation─┤
-││└─────┬────┘││                  │        │         ┌─Mint New─┘
-│└──────┼─────┘├──┐               │        │         │ Credential
-└───────┼──────┘  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
-┌───────▼──────┐  │  │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
-├<Platform ABI>┤  │  └──────────────┘ │ Verifier │ │ Authority   │
-│ (Quote, RNG, │  │                   └──────────┘ └─────────────┘
-│     etc.)    │┌─▼─[RATS-Unaware RP]───────────────┐
-└──────────────┘│ Existing Unmodified Relying Party │
-                └───────────────────────────────────┘
+  Environment      ┌─────── Credential Acquisition System ─────────┐
+┌─[Attester]───┐   │ SPIRE Agent,                   SPIRE Server,  │
+│   Workload   │   │ EST Client,...                 EST Server,... │
+│┌───<CAI>────┐│   │┌──────────────┐  Credential   ┌──────────────┐│
+││    CAI     ││   ││  CAS Client  │  Acquisition  │  CAS Server  ││
+││ Library or ││   ││┌────────────┐│   Protocol    │┌────────────┐││
+││ Container  ││   │││   TACRA    ││ (EST, SPIRE,  ││   TACRA    │││
+││┌─<CAAPI>──┐││   │││ CAS Client ││     etc.)     ││ CAS Server │││
+│││  CAAPI   ├┼┼───┼┼►  Plug-in   │├───────────────┼►  Plug-in   │││
+│││  Client  │││   ││└────────────┘│               │└──────────┬─┘││
+││└──────────┘││   │└──────────────┘               └───────────┼──┘│
+││┌──────────┐││   └───────────────────────────────────────────┼───┘
+│││ Platform │││                    ┌─Retrieve Key/Credential──┴──┐
+│││ Plug-in  │││                    │        ┌─Remote Attestation─┤
+││└─────┬────┘││                    │        │         ┌─Mint New─┘
+│└──────┼─────┘├───┐                │        │         │ Credential
+└───────┼──────┘   │   ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
+┌───────▼──────┐   │   │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
+├<Platform ABI>┤   │   └──────────────┘ │ Verifier │ │ Authority   │
+│ (Quote, RNG, │   │                    └──────────┘ └─────────────┘
+│     etc.)    │ ┌─▼─[RATS-Unaware RP]───────────────┐
+└──────────────┘ │ Existing Unmodified Relying Party │
+                 └───────────────────────────────────┘
