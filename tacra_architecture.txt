@@ -11,9 +11,9 @@
 │││  Client  │││    ││└───────────┘│               │└─────────┬─┘││
 ││└──────────┘││    │└─────────────┘               └──────────┼──┘│
 ││┌──────────┐││    └─────────────────────────────────────────┼───┘
-│││ Platform │││                  ┌─Retrieve Key/Credential───┴──┐
-│││ Plug-in  │││                  │        ┌─Remote Attestation──┤
-││└─────┬────┘││                  │        │         ┌─Mint New──┘
+│││ Platform │││                  ┌─Retrieve Key/Credential───┴─┐
+│││ Plug-in  │││                  │        ┌─Remote Attestation─┤
+││└─────┬────┘││                  │        │         ┌─Mint New─┘
 │└──────┼─────┘├──┐               │        │         │ Credential
 └───────┼──────┘  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
 ┌───────▼──────┐  │  │ Secret Vault ├─►   RATS   ◄─┤ Credential  │

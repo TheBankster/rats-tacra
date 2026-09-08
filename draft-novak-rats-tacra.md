@@ -171,7 +171,7 @@ The requirements specified here fully align with the TWI SIG requirements, while
    * TPM 2.0 DAA Group Certificates (for Replica workloads)
    * Pre-shared keys
    * Future formats through architectural extensibility
-3. Minimal trust boundary expansion of the Attesting Environment
+3. SHOULD limit the trust boundary expansion of the Attesting Environment to the minimum
 4. MUST support, transparently to the Attester, most current and future Credential Acquisition Mechanisms:
    * EST (RFC 7030)
    * SPIFFE/SPIRE
