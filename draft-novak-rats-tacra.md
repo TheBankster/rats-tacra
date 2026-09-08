@@ -153,11 +153,13 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     2. Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)
 * Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel
 
-Note: WITs are JWTs that require key confirmation. That makes them proof-of-possession credentials, whereas JWTs are used without key confirmation and are thus considered bearer tokens.
+Note: WITs are JWTs that require key confirmation.
+That makes them proof-of-possession credentials, whereas JWTs are used without key confirmation and are thus considered bearer tokens.
 
 # Requirements
 
-This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}. The requirements published by the TWI SIG are deliberately high-level.
+This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}.
+The requirements published by the TWI SIG are deliberately high-level.
 The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
 1. Supports mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.
@@ -278,7 +280,10 @@ In both cases, the associated secrets remain opaque to the CAS at all times [Req
 
 # Credential Acquisition API (CAAPI)
 
-The Credential Acquisition API allows the Attester to communicate with the Credential Acquisition System. These APIs are invoked by the Credential Acquisition Interface, covered in the next section. CAAPI can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC. Here only the high-level description is provided.
+The Credential Acquisition API allows the Attester to communicate with the Credential Acquisition System.
+These APIs are invoked by the Credential Acquisition Interface, covered in the next section.
+CAAPI can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC.
+Here only the high-level description is provided.
 
 ## Initiate-Credential-Acquisition
 
