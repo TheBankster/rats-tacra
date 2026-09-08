@@ -5,7 +5,7 @@
 │┌───<CAI>────┐│    │┌─────────────┐  Credential   ┌─────────────┐│
 ││    CAI     ││    ││ CAS Client  │  Acquisition  │ CAS Server  ││
 ││ Library or ││    ││┌───────────┐│   Protocol    │┌───────────┐││
-││ Container  ││    │││    CAS    ││ (EST, SPIRE,  ││    CAS    │││
+││ Container  ││    │││ TACRA CAS ││ (EST, SPIRE,  ││ TACRA CAS │││
 ││┌─<CAAPI>──┐││    │││  Client   ││     etc.)     ││  Server   │││
 │││  CAAPI   ├┼┼────┼┼►  Plug-in  │├───────────────┼►  Plug-in  │││
 │││  Client  │││    ││└───────────┘│               │└─────────┬─┘││
