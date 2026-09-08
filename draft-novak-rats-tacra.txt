@@ -309,7 +309,7 @@ Table of Contents
    7.   MUST support most current and future RATS Verifiers, Credential
         Authorities, and Secret Vaults, transparently to the Attester
 
-   8.   MUST NOT assume that Workload has independent network access
+   8.   MUST NOT assume that the Attester has network access
 
    9.   MUST be compatible with all existing and future Confidential
         Computing platforms meeting minimum requirements around secure
