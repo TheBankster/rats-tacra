@@ -5,10 +5,10 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 11 March 2027                          Sandelman Software Works
+Expires: 12 March 2027                          Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
-                                                        7 September 2026
+                                                        8 September 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 March 2027.
+   This Internet-Draft will expire on 12 March 2027.
 
 Copyright Notice
 
@@ -341,31 +341,29 @@ Table of Contents
    corresponding numbered items in the list of Requirements in the
    opening section of this document.
 
-                       ┌─────── Credential Acquisition System ───────┐
-     Attesting         │ SPIRE Agent,                  SPIRE Server, │
-     Environment       │ EST Client,...                EST Server,...│
-   ┌─[Attester]───┐    │┌─────────────┐               ┌─────────────┐│
-   │   Workload   │    ││ Credential  │               │ Credential  ││
-   │┌───<CAI>────┐│    ││ Acquisition │               │ Acquisition ││
-   ││    CAI     ││    ││   System    │  Credential   │   System    ││
-   ││ Library or ││    ││   Client    │  Acquisition  │   Server    ││
-   ││ Container  ││    ││┌───────────┐│   Protocol    │┌───────────┐││
-   ││┌─<CAAPI>──┐││    │││    CAS    ││ (EST, SPIRE,  ││    CAS    │││
-   │││  CAAPI   │││    │││  Client   ││     etc.)     ││  Server   │││
-   │││  Client  ├┼┼────┼┼►  Plug-in  │├───────────────┼►  Plug-in  │││
-   ││└──────────┘││    ││└───────────┘│               │└─────────┬─┘││
-   ││┌──────────┐││    │└─────────────┘               └──────────┼──┘│
-   │││ Platform │││    └─────────────────────────────────────────┼───┘
-   │││ Plug-in  │││                  ┌─Retrieve Key/Credential───┴───┐
-   ││└─────┬────┘││                  │        ┌─Remote Attestation───┤
-   │└──────┼─────┘├──┐               │        │         ┌─Mint New───┘
-   └───────┼──────┘  │               │        │         │ Credential
-   ┌───────▼──────┐  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼──[RATS RP]─┐
-   ├<Platform ABI>┤  │  │ Secret Vault ├─►   RATS   ◄─┤ Certificate  │
-   │ (Quote, RNG, │  │  └──────────────┘ │ Verifier │ │ Authority    │
-   │     etc.)    │  │                   └──────────┘ │ or other IdP │
-   └──────────────┘┌─▼─[RATS-Unaware RP]─┐            └──────────────┘
-                   │ Existing Unmodified │
+     Attesting
+     Environment       ┌─────── Credential Acquisition System ───────┐
+   ┌─[Attester]───┐    │ SPIRE Agent,                  SPIRE Server, │
+   │   Workload   │    │ EST Client,...                EST Server,...│
+   │┌───<CAI>────┐│    │┌─────────────┐  Credential   ┌─────────────┐│
+   ││    CAI     ││    ││ CAS Client  │  Acquisition  │ CAS Server  ││
+   ││ Library or ││    ││┌───────────┐│   Protocol    │┌───────────┐││
+   ││ Container  ││    │││    CAS    ││ (EST, SPIRE,  ││    CAS    │││
+   ││┌─<CAAPI>──┐││    │││  Client   ││     etc.)     ││  Server   │││
+   │││  CAAPI   ├┼┼────┼┼►  Plug-in  │├───────────────┼►  Plug-in  │││
+   │││  Client  │││    ││└───────────┘│               │└─────────┬─┘││
+   ││└──────────┘││    │└─────────────┘               └──────────┼──┘│
+   ││┌──────────┐││    └─────────────────────────────────────────┼───┘
+   │││ Platform │││                  ┌─Retrieve Key/Credential───┴───┐
+   │││ Plug-in  │││                  │        ┌─Remote Attestation───┤
+   ││└─────┬────┘││                  │        │         ┌─Mint New───┘
+   │└──────┼─────┘├──┐               │        │         │ Credential
+   └───────┼──────┘  │  ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼──[RATS RP]─┐
+   ┌───────▼──────┐  │  │ Secret Vault ├─►   RATS   ◄─┤ Certificate  │
+   ├<Platform ABI>┤  │  └──────────────┘ │ Verifier │ │ Authority    │
+   │ (Quote, RNG, │  │                   └──────────┘ │ or other IdP │
+   │     etc.)    │┌─▼─[RATS-Unaware RP]─┐            └──────────────┘
+   └──────────────┘│ Existing Unmodified │
                    │    Relying Party    │
                    └─────────────────────┘
 
