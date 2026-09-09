@@ -152,9 +152,11 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     1. Credential Enrollment (minting new proof-of-possession credential), or
     2. Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)
 * Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel
+* Target: the RATS-unaware Relying Party for which the Attester seeks credentials
 
 Note: WITs are JWTs that require key confirmation.
 That makes them proof-of-possession credentials, whereas JWTs are used without key confirmation and are thus considered bearer tokens.
+
 
 # Requirements
 
