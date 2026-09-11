@@ -55,17 +55,17 @@ informative:
   DAA: I-D.ietf-rats-daa
   TWISIGCharter:
     target: https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md
-    title: Trustworthy Workload Identity (TWI) Special Interest Group — Charter
+    title: Trustworthy Workload Identity (TWI) Special Interest Group - Charter
     author:
       org: Confidential Computing Consortium Trustworthy Workload Identity SIG
   TWISIGDef:
     target: https://github.com/confidential-computing/twi/blob/main/TWI_Definitions.md
-    title: Trustworthy Workload Identity (TWI) Special Interest Group — Definitions
+    title: Trustworthy Workload Identity (TWI) Special Interest Group - Definitions
     author:
       org: Confidential Computing Consortium Trustworthy Workload Identity SIG
   TWISIGReq:
     target: https://github.com/confidential-computing/twi/blob/main/TWI_Requirements.md
-    title: Trustworthy Workload Identity (TWI) Special Interest Group — Requirements
+    title: Trustworthy Workload Identity (TWI) Special Interest Group - Requirements
     author:
       org: Confidential Computing Consortium Trustworthy Workload Identity SIG
   SPIFFE:
@@ -234,7 +234,7 @@ These mechanisms currently do not support Remote Attestation, for the following 
 {: #fig-tacra title="TACRA architecture"}
 
 This Architecture assumes the existence of a Credential Acquisition System (CAS), such as Enrollment over Secure Transport (EST), Secure Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated Certificate Management Environment (ACMEv2), etc., that comprises a client and a server.
-The CAS Client is presumed to be running on the Attester’s system, but outside the Attesting Environment.
+The CAS Client is presumed to be running on the Attester's system, but outside the Attesting Environment.
 The CAS Server is a remote service invoked by the CAS Client over the CAS protocol.
 Which CAS protocol is used MUST remain opaque to the Attester.
 
@@ -258,11 +258,11 @@ There can be as many Credential Acquisition Client implementations as there are 
 There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Goal 5].
 Existing CAS Clients are extended to support Remote Attestation via dedicated CAS Client Plug-ins.
 
-The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester’s knowledge or involvement [Goal 1].
+The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement [Goal 1].
 If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result.
 It is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type it requires.
 
-The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester’s behalf [Goal 7].
+The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester's behalf [Goal 7].
 The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support [Goal 2].
 Existing Credential Acquisition Servers are extended to support Remote Attestation via dedicated CAS Server Plug-ins.
 The CAS Server's interactions with the Verifier are those of a conduit, not of a Relying Party.
