@@ -37,7 +37,7 @@ author:
 
  - ins: H. Birkholz
    name: Henk Birkholz
-   org:  Fraunhofer SIT
+   org: Fraunhofer SIT
    email: Henk.Birkholz@ietf.contact
 
 normative:
@@ -92,7 +92,7 @@ Existing deployed services, which precede the introduction of Remote Attestation
 There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers.
 
 This document describes an architecture by which Remote Attestation is utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs.
-The proposal is intended to work with common credential acquisition protocols and mechanisms such as EST, SPIFFE/SPIRE, ACMEv2, and many others.
+This architecture is intended to work with common credential acquisition protocols and mechanisms such as EST, SPIFFE/SPIRE, ACMEv2, and many others.
 
 Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how Envoy does it.
 This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the Credential Acquisition Mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
@@ -104,7 +104,7 @@ Likewise, the choice between RATS Passport and Background Check models is made o
 # Introduction {#intro}
 
 Success of a technology is ultimately measured by its adoption.
-The RATS Architecture {{!RFC9334}} requires that RATS Relying Parties understand Attestation Results, execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
+The Remote ATestation procedureS (RATS) Architecture {{!RFC9334}} requires that RATS Relying Parties understand Attestation Results, execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
 A change in Evidence may lead to a change in either the Attestation Results or Appraisal Policy for Attestation Results.
 However, it is common for authentication and authorization policies on Relying Parties to remain static for long periods of time.
 This is achieved by limiting which entities get to receive the credentials used for authentication and authorization, rather than have the Relying Party make complex decisions based on the credential's changing content.
@@ -118,10 +118,10 @@ For the RATS-Unaware Relying Parties, these adoption barriers are eliminated, as
 In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, bearer token or proof-of-possession credential that is compatible with the RUP.
 This document details an Architecture by which legacy Identity Document issuance mechanisms are replaced or modified such that functionally identical Identity Documents are issued, but with the additional prerequisite of successful Remote Attestation of the workloads in question.
 
-## Reasons for RATS Unaware Relying Party Immutability
+## Reasons for RATS-Unaware Relying Party Immutability
 
 The most important and most common scenario addressed here is that of a workload that employs Remote Attestation but whose Relying Party has no capacity to process Attestation Results or execute Appraisal Policy for Attestation Results.
-This RATS Unaware Relying Party is typically unable to make the corresponding changes for a number of reasons:
+This RATS-Unaware Relying Party is typically unable to make the corresponding changes for a number of reasons:
 
 * It may be a compiled object or container provided by a third party
 * Or it may be implemented in a language not easily changed or upgraded with new capabilities
@@ -153,16 +153,36 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     2. Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)
 * Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel
 * Target: the RATS-unaware Relying Party for which the Attester seeks credentials
+* Credential Hint: optional, implementation-defined information supplied by the Attester about the credential it expects. The Attester MAY obtain the hint from runtime configuration. A RATS Relying Party MAY use the hint, ignore it, or reject the request. This document does not specify the hint's syntax or meaning.
+* CSK: Credential Signing Key for proof-of-possession credentials; CSKpri and CSKpub refer to the private and public portions, respectively
+* CEK: Credential Encryption Key for retrieved secrets; CEKpri and CEKpub refer to the private and public portions, respectively
+* Freshness Handle: a Handle as defined in {{INTERACTION-MODELS}} (for example an attestation nonce or an Epoch Marker), bound into Evidence to demonstrate freshness
+* Freshness Kind: how freshness is established for one credential-acquisition exchange; see {{freshness-kind}}
 
 Note: WITs are JWTs that require key confirmation.
 That makes them proof-of-possession credentials, whereas JWTs are used without key confirmation and are thus considered bearer tokens.
 
+## Freshness Kind {#freshness-kind}
 
-# Requirements
+This document classifies Evidence freshness for a credential-acquisition exchange by combining the methods in Section 10 of {{RFC9334}} with whether Initiate-Credential-Acquisition ({{Initiate-Credential-Acquisition}}) returns a Freshness Handle.
 
-This proposal is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}.
+`present-*` kinds return a Freshness Handle; the Attester embeds that Handle in Evidence.
+`absent-*` kinds return no Handle; the Attester uses a trusted clock, an epoch identifier already held locally, or no freshness claim.
+
+The Freshness Kind is one of:
+
+* `absent-timestamp`: no Freshness Handle is returned; the Attester stamps Evidence from a trusted clock ({{RFC9334}}, Section 10.1)
+* `absent-none`: no Freshness Handle is returned; Evidence carries no freshness claim
+* `absent-epoch`: no Freshness Handle is returned; the Attester embeds an epoch identifier already held locally ({{RFC9334}}, Section 10.3)
+* `present-nonce`: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester embeds that Handle in Evidence ({{RFC9334}}, Section 10.2)
+* `present-epoch`: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester embeds that Handle in Evidence and retries Initiate-Credential-Acquisition if the epoch has moved ({{RFC9334}}, Section 10.3)
+
+
+# Design Goals
+
+This architecture is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}.
 The requirements published by the TWI SIG are deliberately high-level.
-The requirements specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
+The design goals specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
 1. MUST support mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.
 2. MUST support most current and future credential formats:
@@ -194,7 +214,7 @@ The requirements specified here fully align with the TWI SIG requirements, while
 
 1. At the Attester level, all work is performed by a new Acquire-Credential call through a dedicated ENVOY-like {{ENVOY}} Credential Acquisition Interface (CAI) which handles all the underlying complexity; this maximally simplifies Attester development.
 2. To acquire credentials, CAI always uses a two-phase sequence:
-    1. It requests and obtains Freshness kind; freshness MAY come from the Verifier, or the Relying Party, or MAY even be empty {{INTERACTION-MODELS}} {{ATTESTATION-FRESHNESS}}
+    1. It requests and obtains a Freshness Kind ({{freshness-kind}}); freshness MAY come from the Verifier, or the Relying Party, or MAY even be empty {{INTERACTION-MODELS}} {{ATTESTATION-FRESHNESS}}
     2. It then generates and sends out Evidence, which is how the Attester demonstrates its security, possession of cryptographic key material, and capabilities
 3. The Attester receives either an error or a newly acquired credential
 
@@ -213,7 +233,7 @@ These mechanisms currently do not support Remote Attestation, for the following 
 ~~~~
 {: #fig-tacra title="TACRA architecture"}
 
-This Architecture assumes the existence of a “Credential Acquisition System” (CAS), such as EST, SPIFFE/SPIRE, ACMEv2, etc., that comprises a client and a server.
+This Architecture assumes the existence of a Credential Acquisition System (CAS), such as Enrollment over Secure Transport (EST), Secure Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated Certificate Management Environment (ACMEv2), etc., that comprises a client and a server.
 The CAS Client is presumed to be running on the Attester’s system, but outside the Attesting Environment.
 The CAS Server is a remote service invoked by the CAS Client over the CAS protocol.
 Which CAS protocol is used MUST remain opaque to the Attester.
@@ -228,40 +248,43 @@ CAI interacts with the outside world on behalf of the Attester via two channels:
 1. With the underlying hardware platform to utilize its platform-specific functions, such as generating keys and obtaining evidence, via the platform-type-specific plugin, and
 2. With the Credential Acquisition System Client, via the well-defined Credential Acquisition API (CAAPI), also outlined later in this document.
 
-## Architecture Meeting Requirements
+## Architecture Meeting Design Goals
 
-In the text that follows, numbers in the format [Req #] refer to the corresponding numbered items in the list of Requirements in the opening section of this document.
+In the text that follows, numbers in the format [Goal #] refer to the corresponding numbered items in the list of Design Goals in the opening section of this document.
 
-CAAPI and the Platform Plug-in being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Req 8].
+CAAPI and the Platform Plug-in being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Goal 8].
 The server side of CAAPI is part of the CAS Client.
-There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms [Req 4]: EST Client, SPIRE Agent, etc.
-There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Req 5].
+There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms [Goal 4]: EST Client, SPIRE Agent, etc.
+There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Goal 5].
 Existing CAS Clients are extended to support Remote Attestation via dedicated CAS Client Plug-ins.
 
-The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester’s knowledge or involvement [Req 1].
+The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester’s knowledge or involvement [Goal 1].
 If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result.
 It is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type it requires.
 
-The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester’s behalf [Req 7].
-The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support [Req 2].
+The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester’s behalf [Goal 7].
+The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support [Goal 2].
 Existing Credential Acquisition Servers are extended to support Remote Attestation via dedicated CAS Server Plug-ins.
 The CAS Server's interactions with the Verifier are those of a conduit, not of a Relying Party.
-When Initiate-Credential-Acquisition returns a Verifier-originated Handle, the CAS Server obtains that Handle from the Verifier and forwards it; it MUST NOT generate `present-nonce` or `present-epoch` values.
+When Initiate-Credential-Acquisition returns a Verifier-originated or RATS Relying Party-originated Freshness Handle, the CAS Server obtains that Handle and forwards it; it MUST NOT generate `present-nonce` or `present-epoch` values.
 In the Passport model, the CAS Server forwards Evidence to the Verifier and forwards the resulting Attestation Results to the Credential Authority or Secret Vault, which remain the Relying Parties that execute Appraisal Policy for Attestation Results.
 In the Background Check model, the Relying Party typically obtains Attestation Results from the Verifier directly; the CAS Server need not be on that path.
 The CAS Server MUST NOT appraise, modify, or replace Attestation Results.
 These Verifier exchanges are opaque to the Attester.
 
-This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs [Req 9].
-It restricts the unavoidable expansion of the Attesting Environment to the smallest possible amount [Req 3].
-There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Req 6].
+This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs [Goal 9].
+It restricts the unavoidable expansion of the Attesting Environment to the smallest possible amount [Goal 3].
+There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Goal 6].
 
 Under the covers and opaquely to the Attester, the Credential Acquisition Interface discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval.
 Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads).
-In both cases, the associated secrets remain opaque to the CAS at all times [Req 10] even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.
+In both cases, the associated secrets remain opaque to the CAS at all times [Goal 10] even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.
 
-* Enrollment: the Credential Acquisition Interface generates and includes alongside Evidence a CSR. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss, with reference to {{CSR-ATTEST}}).
-* Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them.
+* Enrollment: the Credential Acquisition Interface generates a CSK and CSR and includes alongside Evidence CSKpub and the CSR. There MUST exist a binding between the CSR/CSKpub and Evidence. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss, with reference to {{CSR-ATTEST}}). A Credential Authority MAY use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.
+* Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault MAY use a Credential Hint to locate the credential to return.
+
+During both Enrollment and Retrieval, the Attester MAY supply a Credential Hint.
+The RATS Relying Party MAY reject the request if it will not honor the hint.
 
 ## Summary of RATS Roles
 
@@ -272,7 +295,7 @@ In both cases, the associated secrets remain opaque to the CAS at all times [Req
 | Platform Plug-in | Part of Attester | Invoked by CAI to perform platform-specific Remote Attestation and key generation operations |
 | CAAPI Client | Part of Attester | Invoked by CAI to communicate with CAS Client |
 | CAS Client | None: Conduit only | CAS Client extended by Remote Attestation Plug-in, SHOULD be outside the Attester's trust boundary |
-| CAS Server | None: Conduit only | CAS Server extended by Remote Attestation Plug-in; forwards Handles, Evidence, and Attestation Results; does not appraise |
+| CAS Server | None: Conduit only | CAS Server extended by Remote Attestation Plug-in; forwards Freshness Handles, Evidence, and Attestation Results; does not appraise |
 | Secret Vault | RATS Relying Party | Invoked in the Retrieval variant of this architecture; SHOULD encrypt retrieved results to CEKpub in order to keep it from leaking to the CAS Server |
 | Credential Authority | RATS Relying Party | Invoked in the Enrollment variant of this architecture |
 | Verifier | Verifier | No changes in RATS Verifier role or implementation |
@@ -287,9 +310,9 @@ These APIs are invoked by the Credential Acquisition Interface, covered in the n
 CAAPI can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC.
 Here only the high-level description is provided.
 
-## Initiate-Credential-Acquisition
+## Initiate-Credential-Acquisition {#Initiate-Credential-Acquisition}
 
-Initiates the credential acquisition process by obtaining Freshness and validating that the indicated Target name and Credential Type are supported by the CAS.
+Initiates the credential acquisition process by obtaining Freshness and validating that the indicated Target name, Credential Type, and Credential Hint, if any, are supported by the CAS.
 
 Parameters:
 
@@ -300,21 +323,16 @@ Returns:
 
 * On success:
     * Credential acquisition mechanism: "enroll" or "retrieve"
-    * Freshness kind (see {{INTERACTION-MODELS}}); one of:
-        * absent-timestamp: stamp a trusted clock ({{RFC9334}} §10.1)
-        * absent-none: empty nonce
-        * absent-epoch: epoch already held locally
-        * present-nonce: single use
-        * present-epoch: current marker; retry if the epoch moved
+    * Freshness Kind ({{freshness-kind}}): one of `absent-timestamp`, `absent-none`, `absent-epoch`, `present-nonce`, or `present-epoch`
+    * Freshness Handle, when the Freshness Kind is `present-nonce` or `present-epoch`
     * Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
     * Unsupported Target
-    * Invalid Credential Type
-    * Server error: failed remote attestation
+    * Unsupported Credential Type
     * Server error: permission failure
-    * Server error: server unavailable; try again later
-    * Server error: server unreachable; try again later
+    * Server error: server too busy; try again later
+    * Server error: server unreachable
     * etc. (TBD)
 
 ## Enroll-Credential
@@ -325,21 +343,22 @@ Parameters:
 
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
-* Evidence, bound to the previously returned Freshness, if any
-* CSR matching the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)
+* Evidence, bound to the previously returned Freshness Handle, if any
+* CSR matching, and bound to, the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)
+* Credential Hint (optional)
 
 Returns:
 
-* On success: plaintext newly enrolled (minted) credential or the requested type
+* On success: plaintext newly enrolled (minted) credential of the requested type
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
     * Unsupported Target
-    * Invalid Credential Type
-    * Server error: failed remote attestation
+    * Unsupported Credential Type
+    * Rejected or unsupported Credential Hint
+    * Server error: Remote Attestation failure
     * Server error: permission failure
-    * Server error: remote attestation failure
-    * Server error: server unavailable; try again later
-    * Server error: server unreachable; try again later
+    * Server error: server too busy; try again later
+    * Server error: server unreachable
     * etc. (TBD)
 
 ## Retrieve-Credential
@@ -350,41 +369,43 @@ Parameters:
 
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
-* Evidence, bound to the previously returned Freshness, if any
+* Evidence, bound to the previously returned Freshness Handle, if any
 * CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)
+* Credential Hint (optional)
 
 Returns:
 
-* On success: wrapped (encrypted to CEKpub) credential or the requested type
+* On success: wrapped (encrypted to CEKpub) credential of the requested type
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
     * Unsupported Target
     * Invalid Credential Type
+    * Rejected or unsupported Credential Hint
     * Server error: failed remote attestation
     * Server error: permission failure
     * Server error: remote attestation failure
-    * Server error: server unavailable; try again later
-    * Server error: server unreachable; try again later
+    * Server error: server too busy; try again later
+    * Server error: server unreachable
     * etc. (TBD)
 
 ## CAAPI Invocation Sequence
 
-The caller (normally the Credential Acquisition Interface) first decides which Target it wishes to authenticate to, and using which Credential Type.
-CAAPI offers no facilities for this, so it must be decided out of band.
+The caller (normally the Credential Acquisition Interface) first decides which Target it wishes to authenticate to, using which Credential Type.
+CAAPI offers no facilities for discovering these; they are decided out of band, for example from Attester runtime configuration.
 
 The typical invocation flow is:
 
 1. CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)
     * Returns Freshness kind and the Credential Acquisition Mode for this Target and Credential Type
 2. Platform Plug-in: Generate keys and Evidence for the Credential Acquisition Mode and Freshness kind returned in step 1:
-    * Freshness kind of `present-nonce` or `present-epoch`: embed the Handle in Evidence
+    * Freshness kind of `present-nonce` or `present-epoch`: embed the Freshness Handle in Evidence
     * Freshness kind of `absent-timestamp`: stamp Evidence from a trusted clock ({{RFC9334}}, Section 10.1)
     * Freshness kind of `absent-epoch`: embed the locally held epoch marker
     * Freshness kind of `absent-none`: no freshness claim
-    * In all cases, include in Evidence CSK plus CSR (enrollment) or CEK (retrieval)
+    * In all cases, include in Evidence CSKpub plus CSR (enrollment) or CEKpub (retrieval)
 3. CAAPI: Depending on which Credential Acquisition Mode is returned, either
-    * Enroll-Credential(Target, Credential Type, CSR, Evidence)
-    * Retrieve-Credential(Target, Credential Type, CEKpub, Evidence)
+    * Enroll-Credential(Target, Credential Type, Credential Hint, CSR, Evidence)
+    * Retrieve-Credential(Target, Credential Type, Credential Hint, CEKpub, Evidence)
 4. CAI examining Enroll-Credential or Retrieve-Credential results:
     * If Enroll-Credential or Retrieve-Credential fails because a `present-epoch` marker has moved (or a `present-nonce` is no longer valid), it retries from Initiate-Credential-Acquisition.
     * These retries are not visible to the Attester.
@@ -404,19 +425,22 @@ Parameters:
 
 * Target name, e.g., the server URI to which the Attester wishes to authenticate
 * Credential Type the Attester plans to use with this Target
+* Credential Hint (optional)
+
+All of these parameters the Attester MAY learn from runtime configuration.
 
 Returns:
 
-* On success: newly acquired credential or the requested type
+* On success: newly acquired credential of the requested type
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
     * Unsupported Target
-    * Invalid Credential Type
-    * Server error: failed remote attestation
+    * Unsupported Credential Type
+    * Rejected or unsupported Credential Hint
+    * Server error: Remote Attestation failure
     * Server error: permission failure
-    * Server error: remote attestation failure
-    * Server error: server unavailable; try again later
-    * Server error: server unreachable; try again later
+    * Server error: server too busy; try again later
+    * Server error: server unreachable
     * etc. (TBD)
 
 
@@ -436,11 +460,21 @@ It leaves open the possibility that the CAS Server would retrieve credentials fr
 Likewise, it leaves open the possibility that there is no trust boundary between the Attester and CAS Client, and the CAS Client is therefore capable of inspecting the secrets the Attester generates and the secrets the CAS Server returns.
 Both of these options are discouraged.
 
+The CAS is expected to remain benevolent and not tamper with or leak the traffic between the Attester, the Verifier, and the RATS Relying Parties. However, the CAS is still untrusted, and the burden on protection from such attacks rests with these trusted endpoints.
+
+## Credential Hint
+
+The Credential Hint is a request, not an authorization.
+A Credential Authority or Secret Vault MAY use it when selecting issued credential properties, or locating a stored credential, and MAY ignore or reject it.
+The hint MUST NOT cause issuance or release of a credential that Appraisal Policy for Attestation Results or local issuance policy would otherwise deny.
+
 ## CAS Client Authentication to CAS Server
 
 In this architecture, Remote Attestation is used to authenticate the Attester to the services (Secret Vault or Credential Authority) involved in Credential Issuance.
 In any given implementation, the CAS Client MAY still authenticate to the CAS Server.
-TODO: Discsus if binding is necessary between the two authentications.
+
+Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.
+TODO: Define what that binding looks like.
 
 
 # IANA Considerations {#iana}
@@ -454,4 +488,4 @@ This document has no IANA actions.
 # Acknowledgments
 {:numbered="false"}
 
-TODO acknowledge.
+The authors thank the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) Special Interest Group {{TWISIGCharter}} for the definitions {{TWISIGDef}} and requirements {{TWISIGReq}} that motivated this work.
