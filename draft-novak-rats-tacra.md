@@ -250,20 +250,20 @@ CAI interacts with the outside world on behalf of the Attester via two channels:
 
 ## Architecture Meeting Design Goals
 
-In the text that follows, numbers in the format [Goal #] refer to the corresponding numbered items in the list of Design Goals in the opening section of this document.
+In the text that follows, numbers in the format "(Goal #)" refer to the corresponding numbered items in the list of Design Goals in the opening section of this document.
 
-CAAPI and the Platform Plug-in being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester [Goal 8].
+CAAPI and the Platform Plug-in being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester (Goal 8).
 The server side of CAAPI is part of the CAS Client.
-There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms [Goal 4]: EST Client, SPIRE Agent, etc.
-There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets [Goal 5].
+There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms (Goal 4): EST Client, SPIRE Agent, etc.
+There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets (Goal 5).
 Existing CAS Clients are extended to support Remote Attestation via dedicated CAS Client Plug-ins.
 
-The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement [Goal 1].
+The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement (Goal 1).
 If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result.
 It is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type it requires.
 
-The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester's behalf [Goal 7].
-The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support [Goal 2].
+The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester's behalf (Goal 7).
+The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support (Goal 2).
 Existing Credential Acquisition Servers are extended to support Remote Attestation via dedicated CAS Server Plug-ins.
 The CAS Server's interactions with the Verifier are those of a conduit, not of a Relying Party.
 When Initiate-Credential-Acquisition returns a Verifier-originated or RATS Relying Party-originated Freshness Handle, the CAS Server obtains that Handle and forwards it; it MUST NOT generate `present-nonce` or `present-epoch` values.
@@ -272,13 +272,13 @@ In the Background Check model, the Relying Party typically obtains Attestation R
 The CAS Server MUST NOT appraise, modify, or replace Attestation Results.
 These Verifier exchanges are opaque to the Attester.
 
-This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs [Goal 9].
-It restricts the unavoidable expansion of the Attesting Environment to the smallest possible amount [Goal 3].
-There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used [Goal 6].
+This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs (Goal 9).
+It restricts the unavoidable expansion of the Attesting Environment to the smallest possible amount (Goal 3).
+There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used (Goal 6).
 
 Under the covers and opaquely to the Attester, the Credential Acquisition Interface discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval.
 Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads).
-In both cases, the associated secrets remain opaque to the CAS at all times [Goal 10] even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.
+In both cases, the associated secrets remain opaque to the CAS at all times (Goal 10) even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.
 
 * Enrollment: the Credential Acquisition Interface generates a CSK and CSR and includes alongside Evidence CSKpub and the CSR. There MUST exist a binding between the CSR/CSKpub and Evidence. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss, with reference to {{CSR-ATTEST}}). A Credential Authority MAY use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.
 * Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault MAY use a Credential Hint to locate the credential to return.
