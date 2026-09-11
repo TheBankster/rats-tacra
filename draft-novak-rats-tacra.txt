@@ -456,7 +456,7 @@ Table of Contents
    Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated
    Certificate Management Environment (ACMEv2), etc., that comprises a
    client and a server.  The CAS Client is presumed to be running on the
-   Attester’s system, but outside the Attesting Environment.  The CAS
+   Attester's system, but outside the Attesting Environment.  The CAS
    Server is a remote service invoked by the CAS Client over the CAS
    protocol.  Which CAS protocol is used MUST remain opaque to the
    Attester.
@@ -484,26 +484,26 @@ Table of Contents
 
 4.4.  Architecture Meeting Design Goals
 
-   In the text that follows, numbers in the format [Goal #] refer to the
-   corresponding numbered items in the list of Design Goals in the
+   In the text that follows, numbers in the format "(Goal #)" refer to
+   the corresponding numbered items in the list of Design Goals in the
    opening section of this document.
 
    CAAPI and the Platform Plug-in being the only two communication
    mechanisms needed to interact with the outside world, no network or
-   storage stack are needed by the Attester [Goal 8].  The server side
+   storage stack are needed by the Attester (Goal 8).  The server side
    of CAAPI is part of the CAS Client.  There can be as many Credential
    Acquisition Client implementations as there are Credential
-   Acquisition Mechanisms [Goal 4]: EST Client, SPIRE Agent, etc.  There
+   Acquisition Mechanisms (Goal 4): EST Client, SPIRE Agent, etc.  There
    is no restriction against multiple Credential Acquisition Mechanisms
    collectively serving the same Attester, with different mechanisms
-   utilized for different targets [Goal 5].  Existing CAS Clients are
+   utilized for different targets (Goal 5).  Existing CAS Clients are
    extended to support Remote Attestation via dedicated CAS Client Plug-
    ins.
 
    The Credential Acquisition System controls which Credential Types and
    which Credential Acquisition Mechanisms (enrollment, retrieval) can
    be provisioned to the Attester for any Attester-supplied target,
-   without the Attester’s knowledge or involvement [Goal 1].  If a
+   without the Attester's knowledge or involvement (Goal 1).  If a
    Credential Type specified by the Attester is unavailable due to
    Credential Acquisition System limitations, an error will result.  It
    is an administrative error to pair an Attester with a Credential
@@ -514,9 +514,9 @@ Table of Contents
    corresponding Credential Acquisition Mechanism and interacts with the
    RATS Verifier, the Identity Provider (e.g., a Credential Authority
    for minting new certificates) and the Secret Vault for fetching
-   existing keys or credentials, on the Attester’s behalf [Goal 7].  The
+   existing keys or credentials, on the Attester's behalf (Goal 7).  The
    Credential Types supported by this Architecture are limited only by
-   what the Credential Acquisition System can support [Goal 2].
+   what the Credential Acquisition System can support (Goal 2).
    Existing Credential Acquisition Servers are extended to support
    Remote Attestation via dedicated CAS Server Plug-ins.  The CAS
    Server's interactions with the Verifier are those of a conduit, not
@@ -534,11 +534,11 @@ Table of Contents
    Verifier exchanges are opaque to the Attester.
 
    This arrangement shields the Attester developers from having to know
-   the details of the platform on which the Attester runs [Goal 9].  It
+   the details of the platform on which the Attester runs (Goal 9).  It
    restricts the unavoidable expansion of the Attesting Environment to
-   the smallest possible amount [Goal 3].  There is no difference, from
+   the smallest possible amount (Goal 3).  There is no difference, from
    the standpoint of the Attester, whether the RATS Passport or
-   Background Check model is being used [Goal 6].
+   Background Check model is being used (Goal 6).
 
    Under the covers and opaquely to the Attester, the Credential
    Acquisition Interface discovers and utilizes one of two Credential
@@ -546,7 +546,7 @@ Table of Contents
    to minting new proof-of-possession credentials, and Retrieval is used
    to fetch preshared keys, bearer tokens and shared proof-of-possession
    credentials (e.g., for Replica workloads).  In both cases, the
-   associated secrets remain opaque to the CAS at all times [Goal 10]
+   associated secrets remain opaque to the CAS at all times (Goal 10)
    even if the credential, such as an X.509 certificate, is public and
    can be returned in plaintext.
 
@@ -1003,20 +1003,20 @@ Table of Contents
    [TWISIGCharter]
               Confidential Computing Consortium Trustworthy Workload
               Identity SIG, "Trustworthy Workload Identity (TWI) Special
-              Interest Group — Charter", n.d., <https://github.com/
+              Interest Group - Charter", n.d., <https://github.com/
               confidential-computing/governance/blob/main/SIGs/TWI/
               TWI_Charter.md>.
 
    [TWISIGDef]
               Confidential Computing Consortium Trustworthy Workload
               Identity SIG, "Trustworthy Workload Identity (TWI) Special
-              Interest Group — Definitions", n.d., <https://github.com/
+              Interest Group - Definitions", n.d., <https://github.com/
               confidential-computing/twi/blob/main/TWI_Definitions.md>.
 
    [TWISIGReq]
               Confidential Computing Consortium Trustworthy Workload
               Identity SIG, "Trustworthy Workload Identity (TWI) Special
-              Interest Group — Requirements", n.d., <https://github.com/
+              Interest Group - Requirements", n.d., <https://github.com/
               confidential-computing/twi/blob/main/TWI_Requirements.md>.
 
    [WIMSE]    Campbell, B., Salowey, J. A., Schwenkschuster, A.,
