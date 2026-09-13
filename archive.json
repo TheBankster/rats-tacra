@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-10T02:31:17.638304+00:00",
+  "timestamp": "2026-09-13T02:32:40.953908+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -55,5 +55,32 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOULZBls8AAAABDTRowA",
+      "title": "Resolve CSR/CEK-to-Evidence binding; add channel-binding security consideration",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/1",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "As discussed on the RATS list (my feedback of 12 September) and for the Tuesday CCC TWI SIG, this resolves the open binding TODOs and adds the channel-binding consideration. It is a proposal; happy to adjust normative strength or wording.\n\n**What changed**\n\n- New subsection *Binding Credential Keys to Evidence* (`{#binding}`): a concrete, verifiable construction for the CSR/CEKpub-to-Evidence binding \u2014 a collision-resistant digest of the CSR (Enrollment) or of CEKpub (Retrieval) placed in the Evidence freshness input together with the Freshness Handle, recomputed and checked by the Credential Authority / Secret Vault. It also states the three platform shapes the Platform Plug-in must handle: direct-in-report, nested via a vTPM quote where a paravisor owns the field, and provider-scoped where a fleet key masks the machine. Resolves the TBD on the Enrollment bullet and the TODOs on the Enroll-/Retrieve-Credential parameters.\n- New Security Considerations subsection *Binding Evidence to the Credential-Acquisition Channel* (`{#channel-binding}`): the binding above ties the CSR/CEKpub to the platform and to freshness, but not to the channel; over the untrusted CAS conduit a relay can obtain a credential unless the exchange also binds a value derived from the channel's shared secret (the RFC 9266 TLS exporter). Also resolves the CAS-client-authentication TODO with a pointer to that value.\n- Adds RFC 9266, ID-Crisis (ASIA CCS 2026), and Intra-handshake.fail (CVE-2026-33697) to informative references.\n\n**Grounding (measured, reproducible)**\n\nThe enrollment construction is verified end-to-end on AMD SEV-SNP: a worked example builds the CSR in the guest, binds `REPORT_DATA = SHA-512(nonce || CSR)`, and a verifier checks the report and its VCEK chain to ARK-Milan (from the AMD KDS) plus the CSR proof of possession. The three platform shapes are measured across AWS, Google Cloud, and Azure. Artifact (probe, verifier, raw reports and certificates): https://github.com/nikolaichuk7/geoar-verifier , under `tacra/`.\n\nBuilds cleanly with kramdown-rfc; no new TODOs introduced.\n",
+      "createdAt": "2026-09-13T01:48:49Z",
+      "updatedAt": "2026-09-13T01:48:49Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "7b6461435423f29656514baea71d0365959df873",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "binding-to-evidence",
+      "headRefOid": "891f596a7bcfcdd0f22b3659753f039a82fd2b77",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    }
+  ]
 }
