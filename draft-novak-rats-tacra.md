@@ -48,11 +48,28 @@ informative:
   RFC7030: EST
   RFC7519: JWT
   RFC8555: ACMEv2
+  RFC9266:
   WIMSE: I-D.ietf-wimse-workload-creds
   CSR-ATTEST: I-D.ietf-lamps-csr-attestation
   INTERACTION-MODELS: I-D.ietf-rats-reference-interaction-models
   ATTESTATION-FRESHNESS: I-D.ietf-lamps-attestation-freshness
   DAA: I-D.ietf-rats-daa
+  ID-CRISIS:
+    target: https://doi.org/10.1145/3779208.3785387
+    title: "Identity Crisis in Confidential Computing: Formal Analysis of Attested TLS"
+    author:
+      - name: Muhammad Usama Sardar
+      - name: Mariam Moustafa
+      - name: Tuomas Aura
+    date: 2026
+  INTRA-HANDSHAKE-FAIL:
+    target: https://www.cve.org/CVERecord?id=CVE-2026-33697
+    title: "Intra-handshake.fail (CVE-2026-33697): High-severity CVE in Attested TLS"
+    author:
+      - name: Muhammad Usama Sardar
+      - name: Viacheslav Dubeyko
+      - name: Jean-Marie Jacquet
+    date: 2026
   TWISIGCharter:
     target: https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md
     title: Trustworthy Workload Identity (TWI) Special Interest Group - Charter
@@ -280,11 +297,34 @@ Under the covers and opaquely to the Attester, the Credential Acquisition Interf
 Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads).
 In both cases, the associated secrets remain opaque to the CAS at all times (Goal 10) even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.
 
-* Enrollment: the Credential Acquisition Interface generates a CSK and CSR and includes alongside Evidence CSKpub and the CSR. There MUST exist a binding between the CSR/CSKpub and Evidence. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss, with reference to {{CSR-ATTEST}}). A Credential Authority MAY use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.
+* Enrollment: the Credential Acquisition Interface generates a CSK and CSR and includes alongside Evidence CSKpub and the CSR. There MUST exist a binding between the CSR/CSKpub and Evidence, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. The binding MAY place the Evidence inside the CSR or the CSR inside the Evidence ({{CSR-ATTEST}}); this document RECOMMENDS the latter, achieved by including a collision-resistant digest of the CSR in the Evidence together with the Freshness Handle, as specified in {{binding}}. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. A Credential Authority MAY use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.
 * Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault MAY use a Credential Hint to locate the credential to return.
 
 During both Enrollment and Retrieval, the Attester MAY supply a Credential Hint.
 The RATS Relying Party MAY reject the request if it will not honor the hint.
+
+## Binding Credential Keys to Evidence {#binding}
+
+The Attester binds the key material of a credential-acquisition exchange to its Evidence by placing a collision-resistant digest into the freshness input of the Evidence, together with the Freshness Handle of {{freshness-kind}}.
+For Enrollment the digest is taken over the CSR (which carries CSKpub and proves possession of CSKpri); for Retrieval it is taken over CEKpub.
+
+Where the Evidence format provides a guest-chosen field for freshness, the binding is placed there directly.
+For example, using the field named REPORT_DATA in AMD SEV-SNP, REPORTDATA in Intel TDX, or the extraData of a TPM quote:
+
+~~~
+freshness_input = H( Freshness Handle || CSR )      ; Enrollment
+freshness_input = H( Freshness Handle || CEKpub )   ; Retrieval
+~~~
+
+The Credential Authority (Enrollment) or Secret Vault (Retrieval) recomputes freshness_input from the CSR or CEKpub it received and the Freshness Handle it issued, and rejects the request unless the value matches the one carried in the appraised Evidence.
+
+Producing this binding is the responsibility of the Platform Plug-in, because the shape of the freshness input is platform-specific:
+
+* Direct: the Attesting Environment writes the freshness input into a guest-chosen field of the hardware Evidence (e.g., AMD SEV-SNP, Intel TDX, AWS Nitro).
+* Nested: where a lower layer owns the hardware freshness field (e.g., a paravisor that fixes it at boot), the freshness input is carried instead through a nested attestation such as a vTPM quote whose report data the guest controls.
+* Provider-scoped: where the Evidence is signed by a key shared across a provider's fleet and the per-machine identity is masked, the binding remains valid but the Evidence identifies the provider's key domain rather than an individual machine; a Credential Authority whose policy requires a per-machine identity treats such Evidence accordingly.
+
+This binding ties the CSR or CEKpub to the Attester's platform and to freshness. It does not by itself tie the exchange to the channel over which the credential is acquired; see {{channel-binding}}.
 
 ## Summary of RATS Roles
 
@@ -344,7 +384,7 @@ Parameters:
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
 * Evidence, bound to the previously returned Freshness Handle, if any
-* CSR matching, and bound to, the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)
+* CSR bound to the Evidence as specified in {{binding}}; the CSR carries CSKpub and proves possession of CSKpri
 * Credential Hint (optional)
 
 Returns:
@@ -370,7 +410,7 @@ Parameters:
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
 * Evidence, bound to the previously returned Freshness Handle, if any
-* CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)
+* CEKpub bound to the Evidence as specified in {{binding}}
 * Credential Hint (optional)
 
 Returns:
@@ -462,6 +502,15 @@ Both of these options are discouraged.
 
 The CAS is expected to remain benevolent and not tamper with or leak the traffic between the Attester, the Verifier, and the RATS Relying Parties. However, the CAS is still untrusted, and the burden on protection from such attacks rests with these trusted endpoints.
 
+## Binding Evidence to the Credential-Acquisition Channel {#channel-binding}
+
+The binding of {{binding}} ties the Evidence to the Attester's platform, to the CSR or CEKpub, and to freshness, but not to the channel over which the credential is acquired.
+Because the CAS is an untrusted conduit, an attacker that can act as the Attester's peer on that channel can relay genuine Evidence and obtain a credential, while every check in {{binding}} still passes.
+This is possible whenever the attacker holds the Attester's channel key material, whether leaked, provisioned at runtime, or extracted on another machine: binding Evidence to a public key, with or without a nonce, does not correlate the Evidence with the channel ({{ID-CRISIS}}, {{INTRA-HANDSHAKE-FAIL}}).
+
+To prevent this, when a credential-acquisition exchange runs over a secure channel, the Attester SHOULD additionally include a value derived from that channel's shared secret, such as the TLS exporter of {{RFC9266}}, in the freshness input of {{binding}}, and the Relying Party SHOULD require it.
+The exchange then resists relay as long as one of the Attester's channel key material or the channel secret remains unknown to the attacker.
+
 ## Credential Hint
 
 The Credential Hint is a request, not an authorization.
@@ -474,7 +523,7 @@ In this architecture, Remote Attestation is used to authenticate the Attester to
 In any given implementation, the CAS Client MAY still authenticate to the CAS Server.
 
 Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.
-TODO: Define what that binding looks like.
+When such binding is required, a profile can reuse the channel-binding value of {{channel-binding}} so that CAS Client authentication and the Attester's Evidence refer to the same channel.
 
 
 # IANA Considerations {#iana}
