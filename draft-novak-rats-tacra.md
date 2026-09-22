@@ -54,22 +54,6 @@ informative:
   INTERACTION-MODELS: I-D.ietf-rats-reference-interaction-models
   ATTESTATION-FRESHNESS: I-D.ietf-lamps-attestation-freshness
   DAA: I-D.ietf-rats-daa
-  ID-CRISIS:
-    target: https://doi.org/10.1145/3779208.3785387
-    title: "Identity Crisis in Confidential Computing: Formal Analysis of Attested TLS"
-    author:
-      - name: Muhammad Usama Sardar
-      - name: Mariam Moustafa
-      - name: Tuomas Aura
-    date: 2026
-  INTRA-HANDSHAKE-FAIL:
-    target: https://www.cve.org/CVERecord?id=CVE-2026-33697
-    title: "Intra-handshake.fail (CVE-2026-33697): High-severity CVE in Attested TLS"
-    author:
-      - name: Muhammad Usama Sardar
-      - name: Viacheslav Dubeyko
-      - name: Jean-Marie Jacquet
-    date: 2026
   TWISIGCharter:
     target: https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md
     title: Trustworthy Workload Identity (TWI) Special Interest Group - Charter
@@ -506,7 +490,7 @@ The CAS is expected to remain benevolent and not tamper with or leak the traffic
 
 The binding of {{binding}} ties the Evidence to the Attester's platform, to the CSR or CEKpub, and to freshness, but not to the channel over which the credential is acquired.
 Because the CAS is an untrusted conduit, an attacker that can act as the Attester's peer on that channel can relay genuine Evidence and obtain a credential, while every check in {{binding}} still passes.
-This is possible whenever the attacker holds the Attester's channel key material, whether leaked, provisioned at runtime, or extracted on another machine: binding Evidence to a public key, with or without a nonce, does not correlate the Evidence with the channel ({{ID-CRISIS}}, {{INTRA-HANDSHAKE-FAIL}}).
+This is possible whenever the attacker holds the Attester's channel key material, whether leaked, provisioned at runtime, or extracted on another machine: binding Evidence to a public key, with or without a nonce, does not correlate the Evidence with the channel.
 
 To prevent this, when a credential-acquisition exchange runs over a secure channel, the Attester SHOULD additionally include a value derived from that channel's shared secret, such as the TLS exporter of {{RFC9266}}, in the freshness input of {{binding}}, and the Relying Party SHOULD require it.
 The exchange then resists relay as long as one of the Attester's channel key material or the channel secret remains unknown to the attacker.
