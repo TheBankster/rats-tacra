@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-24T02:36:14.789076+00:00",
+  "timestamp": "2026-09-27T02:59:53.929617+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -68,18 +68,26 @@
       "labels": [],
       "body": "As discussed on the RATS list (my feedback of 12 September) and for the Tuesday CCC TWI SIG, this resolves the open binding TODOs and adds the channel-binding consideration. It is a proposal; happy to adjust normative strength or wording.\n\n**What changed**\n\n- New subsection *Binding Credential Keys to Evidence* (`{#binding}`): a concrete, verifiable construction for the CSR/CEKpub-to-Evidence binding \u2014 a collision-resistant digest of the CSR (Enrollment) or of CEKpub (Retrieval) placed in the Evidence freshness input together with the Freshness Handle, recomputed and checked by the Credential Authority / Secret Vault. It also states the three platform shapes the Platform Plug-in must handle: direct-in-report, nested via a vTPM quote where a paravisor owns the field, and provider-scoped where a fleet key masks the machine. Resolves the TBD on the Enrollment bullet and the TODOs on the Enroll-/Retrieve-Credential parameters.\n- New Security Considerations subsection *Binding Evidence to the Credential-Acquisition Channel* (`{#channel-binding}`): the binding above ties the CSR/CEKpub to the platform and to freshness, but not to the channel; over the untrusted CAS conduit a relay can obtain a credential unless the exchange also binds a value derived from the channel's shared secret (the RFC 9266 TLS exporter). Also resolves the CAS-client-authentication TODO with a pointer to that value.\n- Adds RFC 9266, ID-Crisis (ASIA CCS 2026), and Intra-handshake.fail (CVE-2026-33697) to informative references.\n\n**Grounding (measured, reproducible)**\n\nThe enrollment construction is verified end-to-end on AMD SEV-SNP: a worked example builds the CSR in the guest, binds `REPORT_DATA = SHA-512(nonce || CSR)`, and a verifier checks the report and its VCEK chain to ARK-Milan (from the AMD KDS) plus the CSR proof of possession. The three platform shapes are measured across AWS, Google Cloud, and Azure. Artifact (probe, verifier, raw reports and certificates): https://github.com/nikolaichuk7/geoar-verifier , under `tacra/`.\n\nBuilds cleanly with kramdown-rfc; no new TODOs introduced.\n",
       "createdAt": "2026-09-13T01:48:49Z",
-      "updatedAt": "2026-09-22T16:27:50Z",
+      "updatedAt": "2026-09-27T00:00:19Z",
       "baseRepository": "TheBankster/rats-tacra",
       "baseRefName": "master",
       "baseRefOid": "7b6461435423f29656514baea71d0365959df873",
       "headRepository": "nikolaichuk7/rats-tacra",
       "headRefName": "binding-to-evidence",
-      "headRefOid": "3ac51453e4f09b404db1af12838d093f1c4a3993",
+      "headRefOid": "31daa0c50113a6911c9331899b6d458a7cd18d5d",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "NONE",
+          "body": "Pushed 31daa0c to keep the binding text in step with the EST profile after Mark's review there (TheBankster/lamps-tacra-est#1):\n\n- The second value of the freshness input now names the RATS Relying Party that relies on the Evidence (the Credential Authority or the Secret Vault), not the credential-acquisition service. Evidence is produced for a Verifier or a Relying Party, never for the CAS. The CAI holds the identifier for the Target or, where a profile allows, takes it from the Initiate result; only a held one makes the Relying Party the intended one.\n- The first value is the freshness element of every kind: the Handle, the local epoch identifier, the Attester's timestamp, or nothing for absent-none. The recomputation uses it, and the substitution list notes that freshness that isn't single-use needs the Relying Party identifier to keep Evidence to one Relying Party.\n\nNo other change to this PR.\n",
+          "createdAt": "2026-09-27T00:00:19Z",
+          "updatedAt": "2026-09-27T00:00:19Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOULZBls8AAAABNpANvQ",
