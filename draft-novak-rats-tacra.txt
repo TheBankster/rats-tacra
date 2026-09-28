@@ -5,10 +5,10 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 15 March 2027                          Sandelman Software Works
+Expires: 1 April 2027                           Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
-                                                       11 September 2026
+                                                       28 September 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 March 2027.
+   This Internet-Draft will expire on 1 April 2027.
 
 Copyright Notice
 
@@ -641,6 +641,9 @@ Table of Contents
 
    *  Credential Type the Attester plans to use with this Target
 
+   *  Credential Hint (optional) the Attester wishes to communicate when
+      obtaining the credential
+
    Returns:
 
    *  On success:
@@ -663,6 +666,8 @@ Table of Contents
       -  Unsupported Target
 
       -  Unsupported Credential Type
+
+      -  Invalid Credential Hint
 
       -  Server error: permission failure
 
@@ -690,7 +695,8 @@ Table of Contents
    *  CSR matching, and bound to, the Evidence (TODO: discuss CSR-to-
       Evidence binding/relationship)
 
-   *  Credential Hint (optional)
+   *  Credential Hint (optional) matching that of the corresponding
+      Initiate-Credential-Acquisition call
 
    Returns:
 
@@ -704,6 +710,8 @@ Table of Contents
       -  Unsupported Target
 
       -  Unsupported Credential Type
+
+      -  Invalid Credential Hint
 
       -  Rejected or unsupported Credential Hint
 
@@ -969,9 +977,9 @@ Table of Contents
               Birkholz, H., Eckel, M., Pan, W., and E. Voit, "Reference
               Interaction Models for Remote Attestation Procedures",
               Work in Progress, Internet-Draft, draft-ietf-rats-
-              reference-interaction-models-17, 2 April 2026,
+              reference-interaction-models-18, 17 September 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-rats-
-              reference-interaction-models-17>.
+              reference-interaction-models-18>.
 
    [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key
