@@ -318,6 +318,7 @@ Parameters:
 
 * Target name, e.g., the server URI to which the Attester wishes to authenticate
 * Credential Type the Attester plans to use with this Target
+* Credential Hint (optional) the Attester wishes to communicate when obtaining the credential
 
 Returns:
 
@@ -330,6 +331,7 @@ Returns:
     * Invalid Target
     * Unsupported Target
     * Unsupported Credential Type
+    * Invalid Credential Hint
     * Server error: permission failure
     * Server error: server too busy; try again later
     * Server error: server unreachable
@@ -345,7 +347,7 @@ Parameters:
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
 * Evidence, bound to the previously returned Freshness Handle, if any
 * CSR matching, and bound to, the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)
-* Credential Hint (optional)
+* Credential Hint (optional) matching that of the corresponding Initiate-Credential-Acquisition call
 
 Returns:
 
@@ -354,6 +356,7 @@ Returns:
     * Invalid Target
     * Unsupported Target
     * Unsupported Credential Type
+    * Invalid Credential Hint
     * Rejected or unsupported Credential Hint
     * Server error: Remote Attestation failure
     * Server error: permission failure
