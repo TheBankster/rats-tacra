@@ -559,20 +559,20 @@ Table of Contents
       specified in Section 4.5, so that the Credential Authority can be
       sure the CSR was produced on the Attester's platform that the
       Evidence describes.  Carrying Evidence inside the CSR
-      ([CSR-ATTEST]) does not replace this binding.  A Credential
-      Authority MAY use a Credential Hint when assigning a Subject
-      Alternative Name or other certificate properties.
+      ([CSR-ATTEST]) does not replace this binding.
 
    *  Retrieval: the Credential Acquisition Interface generates an
       asymmetric encryption key CEK.  CEKpub MUST be bound to the
       Evidence as specified in Section 4.5.  The resulting secrets are
       encrypted to CEKpub, ensuring that only the Attester in possession
-      of CEKpri can decrypt them.  A Secret Vault MAY use a Credential
-      Hint to locate the credential to return.
+      of CEKpri can decrypt them.
 
    During both Enrollment and Retrieval, the Attester MAY supply a
-   Credential Hint.  The RATS Relying Party MAY reject the request if it
-   will not honor the hint.
+   Credential Hint.  During Enrollment, a Credential Authority MAY use
+   the Credential Hint when assigning a Subject Alternative Name or
+   other certificate properties.  During Retrieval, a Secret Vault MAY
+   use the Credential Hint to locate the credential to return.  The RATS
+   Relying Party MAY reject the request if it will not honor the hint.
 
 4.5.  Binding Credential Keys to Evidence
 

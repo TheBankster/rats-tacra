@@ -1657,13 +1657,15 @@ Enrollment corresponds to minting new proof-of-possession credentials, and Retri
 In both cases, the associated secrets remain opaque to the CAS at all times (Goal 10) even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.<a href="#section-4.4-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-7.1">
-            <p id="section-4.4-7.1.1">Enrollment: the Credential Acquisition Interface generates a CSK and a CSR. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. The CSR <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. Carrying Evidence inside the CSR (<span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>) does not replace this binding. A Credential Authority <span class="bcp14">MAY</span> use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.<a href="#section-4.4-7.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.4-7.1.1">Enrollment: the Credential Acquisition Interface generates a CSK and a CSR. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. The CSR <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. Carrying Evidence inside the CSR (<span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>) does not replace this binding.<a href="#section-4.4-7.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.4-7.2">
-            <p id="section-4.4-7.2.1">Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK. CEKpub <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault <span class="bcp14">MAY</span> use a Credential Hint to locate the credential to return.<a href="#section-4.4-7.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.4-7.2.1">Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK. CEKpub <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them.<a href="#section-4.4-7.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-4.4-8">During both Enrollment and Retrieval, the Attester <span class="bcp14">MAY</span> supply a Credential Hint.
+During Enrollment, a Credential Authority <span class="bcp14">MAY</span> use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
+During Retrieval, a Secret Vault <span class="bcp14">MAY</span> use the Credential Hint to locate the credential to return.
 The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it will not honor the hint.<a href="#section-4.4-8" class="pilcrow">¶</a></p>
 </section>
 </div>
