@@ -293,16 +293,16 @@ The RATS Relying Party MAY reject the request if it will not honor the hint.
 The Evidence of a credential-acquisition exchange MUST carry a digest of four values in its freshness input, the field of the Evidence whose content the Attester chooses:
 
 1. the freshness element of the Freshness Kind ({{freshness-kind}}): the Freshness Handle for the `present-*` kinds, the locally held epoch marker for `absent-epoch`, the Attester's timestamp for `absent-timestamp`, and the empty string for `absent-none`;
-2. the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;
-3. the Target of the corresponding Initiate-Credential-Acquisition call;
+2. the Target of the corresponding Initiate-Credential-Acquisition call;
+3. the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;
 4. the subject: for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.
 
 The digest is computed over the octet string
 
 ~~~
 binding_input = len32(freshness) || freshness
-             || len32(rp_id)     || rp_id
              || len32(target)    || target
+             || len32(rp_id)     || rp_id
              || len32(subject)   || subject
 ~~~
 
