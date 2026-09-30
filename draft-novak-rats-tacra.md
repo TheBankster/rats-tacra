@@ -48,21 +48,9 @@ informative:
   RFC7030: EST
   RFC7519: JWT
   RFC8555: ACMEv2
-  RFC9266: Channel Binding for TLS 1.3
   WIMSE: I-D.ietf-wimse-workload-creds
   CSR-ATTEST: I-D.ietf-lamps-csr-attestation
   INTERACTION-MODELS: I-D.ietf-rats-reference-interaction-models
-  TACRA-EST:
-    target: https://TheBankster.github.io/lamps-tacra-est/draft-novak-lamps-tacra-est.html
-    title: Remote Attestation Extensions for EST
-    author:
-      - ins: M. Novak
-        name: Mark F. Novak
-      - ins: M. Richardson
-        name: Michael Richardson
-      - ins: H. Birkholz
-        name: Henk Birkholz
-    date: 2026
   ATTESTATION-FRESHNESS: I-D.ietf-lamps-attestation-freshness
   DAA: I-D.ietf-rats-daa
   TWISIGCharter:
@@ -178,16 +166,16 @@ That makes them proof-of-possession credentials, whereas JWTs are used without k
 
 This document classifies Evidence freshness for a credential-acquisition exchange by combining the methods in Section 10 of {{RFC9334}} with whether Initiate-Credential-Acquisition ({{Initiate-Credential-Acquisition}}) returns a Freshness Handle.
 
-`present-*` kinds return a Freshness Handle; the Attester embeds that Handle in Evidence.
-`absent-*` kinds return no Handle; the Attester uses a trusted clock, an epoch identifier already held locally, or no freshness claim.
+`present-*` kinds return a Freshness Handle; the Attester binds that Handle into Evidence ({{binding}}).
+`absent-*` kinds return no Handle; the Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.
 
 The Freshness Kind is one of:
 
-* `absent-timestamp`: no Freshness Handle is returned; the Attester stamps Evidence from a trusted clock ({{RFC9334}}, Section 10.1)
+* `absent-timestamp`: no Freshness Handle is returned; the Attester binds a timestamp from a trusted clock into Evidence ({{RFC9334}}, Section 10.1)
 * `absent-none`: no Freshness Handle is returned; Evidence carries no freshness claim
-* `absent-epoch`: no Freshness Handle is returned; the Attester embeds an epoch identifier already held locally ({{RFC9334}}, Section 10.3)
-* `present-nonce`: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester embeds that Handle in Evidence ({{RFC9334}}, Section 10.2)
-* `present-epoch`: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester embeds that Handle in Evidence and retries Initiate-Credential-Acquisition if the epoch has moved ({{RFC9334}}, Section 10.3)
+* `absent-epoch`: no Freshness Handle is returned; the Attester binds an epoch marker already held locally into Evidence ({{RFC9334}}, Section 10.3)
+* `present-nonce`: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester binds that Handle into Evidence ({{RFC9334}}, Section 10.2)
+* `present-epoch`: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester binds that Handle into Evidence and retries Initiate-Credential-Acquisition if the epoch has moved ({{RFC9334}}, Section 10.3)
 
 
 # Design Goals
@@ -292,43 +280,52 @@ Under the covers and opaquely to the Attester, the Credential Acquisition Interf
 Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads).
 In both cases, the associated secrets remain opaque to the CAS at all times (Goal 10) even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.
 
-* Enrollment: the Credential Acquisition Interface generates a CSK and CSR and includes alongside Evidence CSKpub and the CSR. There MUST exist a binding between the CSR/CSKpub and Evidence, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. The binding MAY place the Evidence inside the CSR or the CSR inside the Evidence ({{CSR-ATTEST}}); this document RECOMMENDS the latter, achieved by including a collision-resistant digest of the CSR in the Evidence together with the Freshness Handle, as specified in {{binding}}. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. A Credential Authority MAY use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.
-* Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault MAY use a Credential Hint to locate the credential to return.
+* Enrollment: the Credential Acquisition Interface generates a CSK and a CSR. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. The CSR MUST be bound to the Evidence as specified in {{binding}}, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. Carrying Evidence inside the CSR ({{CSR-ATTEST}}) does not replace this binding. A Credential Authority MAY use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.
+* Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK. CEKpub MUST be bound to the Evidence as specified in {{binding}}. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault MAY use a Credential Hint to locate the credential to return.
 
 During both Enrollment and Retrieval, the Attester MAY supply a Credential Hint.
 The RATS Relying Party MAY reject the request if it will not honor the hint.
 
 ## Binding Credential Keys to Evidence {#binding}
 
-The Attester binds the key material of a credential-acquisition exchange to its Evidence by placing a collision-resistant digest into the freshness input of the Evidence.
-The digest is taken over four values, encoded so that no two different sequences of values produce the same octets (for example, each preceded by its length):
+The Evidence of a credential-acquisition exchange MUST carry a digest of four values in its freshness input, the field of the Evidence whose content the Attester chooses:
 
-1. the freshness element of {{freshness-kind}}: the Freshness Handle for the `present-*` kinds, the locally held epoch identifier for `absent-epoch`, the Attester's timestamp for `absent-timestamp`, or nothing for `absent-none`;
-2. an identifier of the RATS Relying Party that will rely on the Evidence (the Credential Authority for Enrollment, the Secret Vault for Retrieval), which the Credential Acquisition Interface holds for the Target or, where a protocol profile allows, takes from the result of Initiate-Credential-Acquisition; Evidence is produced for a Verifier or a Relying Party, never for the CAS;
+1. the freshness element of the Freshness Kind ({{freshness-kind}}): the Freshness Handle for the `present-*` kinds, the locally held epoch marker for `absent-epoch`, the Attester's timestamp for `absent-timestamp`, and the empty string for `absent-none`;
+2. the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;
 3. the Target of the corresponding Initiate-Credential-Acquisition call;
-4. for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.
+4. the subject: for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.
 
-Where the Evidence format provides a guest-chosen field for freshness, the binding is placed there directly.
-For example, using the field named REPORT_DATA in AMD SEV-SNP, REPORTDATA in Intel TDX, or the extraData of a TPM quote:
+The digest is computed over the octet string
 
 ~~~
-freshness_input = H( Freshness, RRP, Target, CSR )      ; Enrollment
-freshness_input = H( Freshness, RRP, Target, CEKpub )   ; Retrieval
+binding_input = len32(freshness) || freshness
+             || len32(rp_id)     || rp_id
+             || len32(target)    || target
+             || len32(subject)   || subject
 ~~~
 
-A protocol profile fixes the encoding and H; the EST profile {{TACRA-EST}} prefixes each value with its length as a 32-bit integer and uses SHA-512 where the field is 64 octets.
+where `len32(x)` is the length of `x` in octets as a 32-bit big-endian unsigned integer; `freshness` is the freshness element; `rp_id` and `target` are the UTF-8 encodings of the Relying Party identifier and of the Target, each used as an exact octet string; and `subject` is the DER encoding of the CSR (Enrollment) or the DER-encoded SubjectPublicKeyInfo of CEKpub (Retrieval).
+The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
+The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, the Platform Plug-in uses the hash the platform prescribes.
 
-The Credential Authority (Enrollment) or Secret Vault (Retrieval) recomputes freshness_input from its own identifier, the freshness element of the request, the Target (for a `present-*` kind, the Target of the Initiate-Credential-Acquisition call to which the Freshness Handle belongs), and the CSR or CEKpub it received, and rejects the request unless the value matches the one carried in the appraised Evidence.
-Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substitution: without the Relying Party identifier the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and with a freshness element that is not single-use (an epoch, a timestamp) have it accepted by two; without the Target it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element it could replay; without the CSR or CEKpub it could substitute a key.
-Only an identifier the Credential Acquisition Interface holds makes the Relying Party the one the deployment intended; one taken from the result of Initiate-Credential-Acquisition keeps the Evidence to a single Relying Party, which the CAS chooses.
+The Verifier MUST report in the Attestation Results the value it found in the freshness input of the Evidence it appraised, and the hash used.
+The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from its own identifier, the freshness element and the Target of the request, and the CSR or CEKpub it received, and MUST reject the request unless the result equals the value reported in the Attestation Results.
+This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from appraised Evidence, not one supplied by the CAS.
 
-Producing this binding is the responsibility of the Platform Plug-in, because the shape of the freshness input is platform-specific:
+Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substitution: without the Relying Party identifier, the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and, with a freshness element that is not single-use (an epoch, a timestamp), have it accepted by two; without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
+Because the Credential Acquisition Interface holds the Relying Party identifier rather than receiving it from the CAS, the Evidence is accepted only by the Relying Party the deployment intended.
 
-* Direct: the Attesting Environment writes the freshness input into a guest-chosen field of the hardware Evidence (e.g., AMD SEV-SNP, Intel TDX, AWS Nitro).
-* Nested: where a lower layer owns the hardware freshness field (e.g., a paravisor that fixes it at boot), the freshness input is carried instead through a nested attestation such as a vTPM quote whose report data the guest controls.
-* Provider-scoped: where the Evidence is signed by a key shared across a provider's fleet and the per-machine identity is masked, the binding remains valid but the Evidence identifies the provider's key domain rather than an individual machine; a Credential Authority whose policy requires a per-machine identity treats such Evidence accordingly.
+Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
+It takes one of three forms:
 
-This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness. It does not by itself tie the exchange to the channel over which the credential is acquired; see {{channel-binding}}.
+* Direct: the Attesting Environment writes the digest into a guest-chosen field of the hardware Evidence, such as REPORT_DATA of an AMD SEV-SNP attestation report, REPORTDATA of an Intel TDX quote, or the user data of an AWS Nitro attestation document.
+* Nested: a lower layer owns that field (for example, a paravisor that fixes it at boot), and the digest travels in a nested attestation whose report data the guest controls, such as a vTPM quote.
+* Provider-scoped: the Evidence is signed by a key shared across a provider's fleet and identifies the provider's key domain rather than a machine. The binding holds, but a Relying Party whose policy requires a per-machine identity rejects such Evidence.
+
+A Relying Party MUST NOT assume the Direct form; the Verifier reports in the Attestation Results which form it appraised.
+
+This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness.
+It does not by itself tie the exchange to the channel over which the credential is acquired.
 
 ## Summary of RATS Roles
 
@@ -389,7 +386,8 @@ Parameters:
 
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
-* Evidence, bound to the previously returned Freshness Handle, if any
+* Freshness element of {{binding}}: the Freshness Handle returned by the corresponding Initiate-Credential-Acquisition call, the locally held epoch marker, or the Attester's timestamp; absent for `absent-none`
+* Evidence carrying the binding of {{binding}}
 * CSR bound to the Evidence as specified in {{binding}}; the CSR carries CSKpub and proves possession of CSKpri
 * Credential Hint (optional) matching that of the corresponding Initiate-Credential-Acquisition call
 
@@ -416,7 +414,8 @@ Parameters:
 
 * Target name matching that of the corresponding Initiate-Credential-Acquisition call
 * Credential Type matching that of the corresponding Initiate-Credential-Acquisition call
-* Evidence, bound to the previously returned Freshness Handle, if any
+* Freshness element of {{binding}}: the Freshness Handle returned by the corresponding Initiate-Credential-Acquisition call, the locally held epoch marker, or the Attester's timestamp; absent for `absent-none`
+* Evidence carrying the binding of {{binding}}
 * CEKpub bound to the Evidence as specified in {{binding}}
 * Credential Hint (optional)
 
@@ -444,15 +443,15 @@ The typical invocation flow is:
 
 1. CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)
     * Returns Freshness kind and the Credential Acquisition Mode for this Target and Credential Type
-2. Platform Plug-in: Generate keys and Evidence for the Credential Acquisition Mode and Freshness kind returned in step 1:
-    * Freshness kind of `present-nonce` or `present-epoch`: embed the Freshness Handle in Evidence
-    * Freshness kind of `absent-timestamp`: stamp Evidence from a trusted clock ({{RFC9334}}, Section 10.1)
-    * Freshness kind of `absent-epoch`: embed the locally held epoch marker
-    * Freshness kind of `absent-none`: no freshness claim
-    * In all cases, include in Evidence CSKpub plus CSR (enrollment) or CEKpub (retrieval)
+2. Platform Plug-in: Generate keys and Evidence for the Credential Acquisition Mode and Freshness kind returned in step 1, with the binding of {{binding}}, whose freshness element is:
+    * Freshness kind of `present-nonce` or `present-epoch`: the Freshness Handle
+    * Freshness kind of `absent-timestamp`: a timestamp from a trusted clock ({{RFC9334}}, Section 10.1)
+    * Freshness kind of `absent-epoch`: the locally held epoch marker
+    * Freshness kind of `absent-none`: empty (no freshness claim)
+    * In all cases, the binding covers the CSR (enrollment) or CEKpub (retrieval)
 3. CAAPI: Depending on which Credential Acquisition Mode is returned, either
-    * Enroll-Credential(Target, Credential Type, Credential Hint, CSR, Evidence)
-    * Retrieve-Credential(Target, Credential Type, Credential Hint, CEKpub, Evidence)
+    * Enroll-Credential(Target, Credential Type, Credential Hint, freshness element, CSR, Evidence)
+    * Retrieve-Credential(Target, Credential Type, Credential Hint, freshness element, CEKpub, Evidence)
 4. CAI examining Enroll-Credential or Retrieve-Credential results:
     * If Enroll-Credential or Retrieve-Credential fails because a `present-epoch` marker has moved (or a `present-nonce` is no longer valid), it retries from Initiate-Credential-Acquisition.
     * These retries are not visible to the Attester.
@@ -509,15 +508,6 @@ Both of these options are discouraged.
 
 The CAS is expected to remain benevolent and not tamper with or leak the traffic between the Attester, the Verifier, and the RATS Relying Parties. However, the CAS is still untrusted, and the burden on protection from such attacks rests with these trusted endpoints.
 
-## Binding Evidence to the Credential-Acquisition Channel {#channel-binding}
-
-The binding of {{binding}} ties the Evidence to the Attester's platform, to the intended Relying Party and Target, to the CSR or CEKpub, and to freshness, but not to the channel over which the credential is acquired.
-Because the CAS is an untrusted conduit, an attacker that can act as the Attester's peer on that channel can relay genuine Evidence and obtain a credential, while every check in {{binding}} still passes.
-This is possible whenever the attacker holds the Attester's channel key material, whether leaked, provisioned at runtime, or extracted on another machine: binding Evidence to a public key, with or without a nonce, does not correlate the Evidence with the channel.
-
-To prevent this, when a credential-acquisition exchange runs over a secure channel, the Attester SHOULD additionally include a value derived from that channel's shared secret, such as the TLS exporter of {{RFC9266}}, in the freshness input of {{binding}}, and the Relying Party SHOULD require it.
-The exchange then resists relay as long as one of the Attester's channel key material or the channel secret remains unknown to the attacker.
-
 ## Credential Hint
 
 The Credential Hint is a request, not an authorization.
@@ -530,7 +520,7 @@ In this architecture, Remote Attestation is used to authenticate the Attester to
 In any given implementation, the CAS Client MAY still authenticate to the CAS Server.
 
 Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.
-When such binding is required, a profile can reuse the channel-binding value of {{channel-binding}} so that CAS Client authentication and the Attester's Evidence refer to the same channel.
+TODO: Define what that binding looks like.
 
 
 # IANA Considerations {#iana}
