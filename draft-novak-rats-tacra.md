@@ -280,10 +280,12 @@ Under the covers and opaquely to the Attester, the Credential Acquisition Interf
 Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads).
 In both cases, the associated secrets remain opaque to the CAS at all times (Goal 10) even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.
 
-* Enrollment: the Credential Acquisition Interface generates a CSK and a CSR. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. The CSR MUST be bound to the Evidence as specified in {{binding}}, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. Carrying Evidence inside the CSR ({{CSR-ATTEST}}) does not replace this binding. A Credential Authority MAY use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.
-* Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK. CEKpub MUST be bound to the Evidence as specified in {{binding}}. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault MAY use a Credential Hint to locate the credential to return.
+* Enrollment: the Credential Acquisition Interface generates a CSK and a CSR. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. The CSR MUST be bound to the Evidence as specified in {{binding}}, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. Carrying Evidence inside the CSR ({{CSR-ATTEST}}) does not replace this binding.
+* Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK. CEKpub MUST be bound to the Evidence as specified in {{binding}}. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them.
 
 During both Enrollment and Retrieval, the Attester MAY supply a Credential Hint.
+During Enrollment, a Credential Authority MAY use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
+During Retrieval, a Secret Vault MAY use the Credential Hint to locate the credential to return.
 The RATS Relying Party MAY reject the request if it will not honor the hint.
 
 ## Binding Credential Keys to Evidence {#binding}
