@@ -330,7 +330,7 @@ Table of Contents
         whether it will have to retrieve an existing or enroll a new
         credential at runtime.
 
-   2.   MUST support most current and future credential formats:
+   2.   MUST support current and future credential formats:
 
         *  X.509 Certificates
 
