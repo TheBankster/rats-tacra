@@ -185,7 +185,7 @@ The requirements published by the TWI SIG are deliberately high-level.
 The design goals specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
 1. MUST support mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.
-2. MUST support most current and future credential formats:
+2. MUST support current and future credential formats:
    * X.509 Certificates
    * WIMSE Workload Identity Certificates (WICs)
    * WIMSE Workload Identity Tokens (WITs)
