@@ -1680,10 +1680,10 @@ The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it w
             <p id="section-4.5-2.1.1">the freshness element of the Freshness Kind (<a href="#freshness-kind" class="auto internal xref">Section 2.1</a>): the Freshness Handle for the <code>present-*</code> kinds, the locally held epoch marker for <code>absent-epoch</code>, the Attester's timestamp for <code>absent-timestamp</code>, and the empty string for <code>absent-none</code>;<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.5-2.2">
-            <p id="section-4.5-2.2.1">the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;<a href="#section-4.5-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.5-2.2.1">the Target of the corresponding Initiate-Credential-Acquisition call;<a href="#section-4.5-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.5-2.3">
-            <p id="section-4.5-2.3.1">the Target of the corresponding Initiate-Credential-Acquisition call;<a href="#section-4.5-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.5-2.3.1">the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;<a href="#section-4.5-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.5-2.4">
             <p id="section-4.5-2.4.1">the subject: for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.<a href="#section-4.5-2.4.1" class="pilcrow">¶</a></p>
@@ -1693,8 +1693,8 @@ The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it w
 <div class="alignLeft art-text artwork" id="section-4.5-4">
 <pre>
 binding_input = len32(freshness) || freshness
-             || len32(rp_id)     || rp_id
              || len32(target)    || target
+             || len32(rp_id)     || rp_id
              || len32(subject)   || subject
 </pre><a href="#section-4.5-4" class="pilcrow">¶</a>
 </div>

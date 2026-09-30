@@ -585,7 +585,10 @@ Table of Contents
        marker for absent-epoch, the Attester's timestamp for absent-
        timestamp, and the empty string for absent-none;
 
-   2.  the identifier of the Relying Party that will rely on the
+   2.  the Target of the corresponding Initiate-Credential-Acquisition
+       call;
+
+   3.  the identifier of the Relying Party that will rely on the
        Evidence: the Credential Authority for Enrollment, the Secret
        Vault for Retrieval.  The Credential Acquisition Interface holds
        this identifier in its configuration for each Target and
@@ -593,17 +596,14 @@ Table of Contents
        Evidence is produced for a Verifier or a Relying Party, never for
        the CAS;
 
-   3.  the Target of the corresponding Initiate-Credential-Acquisition
-       call;
-
    4.  the subject: for Enrollment, the CSR, which carries CSKpub and
        proves possession of CSKpri; for Retrieval, CEKpub.
 
    The digest is computed over the octet string
 
    binding_input = len32(freshness) || freshness
-                || len32(rp_id)     || rp_id
                 || len32(target)    || target
+                || len32(rp_id)     || rp_id
                 || len32(subject)   || subject
 
    where len32(x) is the length of x in octets as a 32-bit big-endian
