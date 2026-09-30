@@ -1057,7 +1057,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Novak, et al.</td>
-<td class="center">Expires 1 April 2027</td>
+<td class="center">Expires 3 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg {
 <dd class="internet-draft">draft-novak-rats-tacra-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-28" class="published">28 September 2026</time>
+<time datetime="2026-09-30" class="published">30 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-01">1 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-03">3 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ Likewise, the choice between RATS Passport and Background Check models is made o
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 1 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1204,7 +1204,10 @@ Likewise, the choice between RATS Passport and Background Check models is made o
                 <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-architecture-meeting-design" class="internal xref">Architecture Meeting Design Goals</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.5">
-                <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-summary-of-rats-roles" class="internal xref">Summary of RATS Roles</a></p>
+                <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-binding-credential-keys-to-" class="internal xref">Binding Credential Keys to Evidence</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.6">
+                <p id="section-toc.1-1.4.2.6.1"><a href="#section-4.6" class="auto internal xref">4.6</a>.  <a href="#name-summary-of-rats-roles" class="internal xref">Summary of RATS Roles</a></p>
 </li>
             </ul>
 </li>
@@ -1411,24 +1414,24 @@ That makes them proof-of-possession credentials, whereas JWTs are used without k
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-freshness-kind" class="section-name selfRef">Freshness Kind</a>
         </h3>
 <p id="section-2.1-1">This document classifies Evidence freshness for a credential-acquisition exchange by combining the methods in Section 10 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> with whether Initiate-Credential-Acquisition (<a href="#Initiate-Credential-Acquisition" class="auto internal xref">Section 5.1</a>) returns a Freshness Handle.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2"><code>present-*</code> kinds return a Freshness Handle; the Attester embeds that Handle in Evidence.
-<code>absent-*</code> kinds return no Handle; the Attester uses a trusted clock, an epoch identifier already held locally, or no freshness claim.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-2"><code>present-*</code> kinds return a Freshness Handle; the Attester binds that Handle into Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).
+<code>absent-*</code> kinds return no Handle; the Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
 <p id="section-2.1-3">The Freshness Kind is one of:<a href="#section-2.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2.1-4.1">
-            <p id="section-2.1-4.1.1"><code>absent-timestamp</code>: no Freshness Handle is returned; the Attester stamps Evidence from a trusted clock (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.1)<a href="#section-2.1-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-2.1-4.1.1"><code>absent-timestamp</code>: no Freshness Handle is returned; the Attester binds a timestamp from a trusted clock into Evidence (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.1)<a href="#section-2.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.1-4.2">
             <p id="section-2.1-4.2.1"><code>absent-none</code>: no Freshness Handle is returned; Evidence carries no freshness claim<a href="#section-2.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.1-4.3">
-            <p id="section-2.1-4.3.1"><code>absent-epoch</code>: no Freshness Handle is returned; the Attester embeds an epoch identifier already held locally (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.3)<a href="#section-2.1-4.3.1" class="pilcrow">¶</a></p>
+            <p id="section-2.1-4.3.1"><code>absent-epoch</code>: no Freshness Handle is returned; the Attester binds an epoch marker already held locally into Evidence (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.3)<a href="#section-2.1-4.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.1-4.4">
-            <p id="section-2.1-4.4.1"><code>present-nonce</code>: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester embeds that Handle in Evidence (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.2)<a href="#section-2.1-4.4.1" class="pilcrow">¶</a></p>
+            <p id="section-2.1-4.4.1"><code>present-nonce</code>: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester binds that Handle into Evidence (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.2)<a href="#section-2.1-4.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.1-4.5">
-            <p id="section-2.1-4.5.1"><code>present-epoch</code>: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester embeds that Handle in Evidence and retries Initiate-Credential-Acquisition if the epoch has moved (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.3)<a href="#section-2.1-4.5.1" class="pilcrow">¶</a></p>
+            <p id="section-2.1-4.5.1"><code>present-epoch</code>: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester binds that Handle into Evidence and retries Initiate-Credential-Acquisition if the epoch has moved (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.3)<a href="#section-2.1-4.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -1654,20 +1657,77 @@ Enrollment corresponds to minting new proof-of-possession credentials, and Retri
 In both cases, the associated secrets remain opaque to the CAS at all times (Goal 10) even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.<a href="#section-4.4-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-7.1">
-            <p id="section-4.4-7.1.1">Enrollment: the Credential Acquisition Interface generates a CSK and CSR and includes alongside Evidence CSKpub and the CSR. There <span class="bcp14">MUST</span> exist a binding between the CSR/CSKpub and Evidence. It is possible to include Evidence in the CSR, or vice versa: include the CSR in Evidence. The details of how this is decided at runtime are TBD (TODO: discuss, with reference to <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>). A Credential Authority <span class="bcp14">MAY</span> use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.<a href="#section-4.4-7.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.4-7.1.1">Enrollment: the Credential Acquisition Interface generates a CSK and a CSR. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. The CSR <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. Carrying Evidence inside the CSR (<span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>) does not replace this binding. A Credential Authority <span class="bcp14">MAY</span> use a Credential Hint when assigning a Subject Alternative Name or other certificate properties.<a href="#section-4.4-7.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.4-7.2">
-            <p id="section-4.4-7.2.1">Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK and includes CEKpub in Evidence. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault <span class="bcp14">MAY</span> use a Credential Hint to locate the credential to return.<a href="#section-4.4-7.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.4-7.2.1">Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK. CEKpub <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them. A Secret Vault <span class="bcp14">MAY</span> use a Credential Hint to locate the credential to return.<a href="#section-4.4-7.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-4.4-8">During both Enrollment and Retrieval, the Attester <span class="bcp14">MAY</span> supply a Credential Hint.
 The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it will not honor the hint.<a href="#section-4.4-8" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="summary-of-rats-roles">
+<div id="binding">
 <section id="section-4.5">
+        <h3 id="name-binding-credential-keys-to-">
+<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-binding-credential-keys-to-" class="section-name selfRef">Binding Credential Keys to Evidence</a>
+        </h3>
+<p id="section-4.5-1">The Evidence of a credential-acquisition exchange <span class="bcp14">MUST</span> carry a digest of four values in its freshness input, the field of the Evidence whose content the Attester chooses:<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.5-2">
+<li id="section-4.5-2.1">
+            <p id="section-4.5-2.1.1">the freshness element of the Freshness Kind (<a href="#freshness-kind" class="auto internal xref">Section 2.1</a>): the Freshness Handle for the <code>present-*</code> kinds, the locally held epoch marker for <code>absent-epoch</code>, the Attester's timestamp for <code>absent-timestamp</code>, and the empty string for <code>absent-none</code>;<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.5-2.2">
+            <p id="section-4.5-2.2.1">the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;<a href="#section-4.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.5-2.3">
+            <p id="section-4.5-2.3.1">the Target of the corresponding Initiate-Credential-Acquisition call;<a href="#section-4.5-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.5-2.4">
+            <p id="section-4.5-2.4.1">the subject: for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.<a href="#section-4.5-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.5-3">The digest is computed over the octet string<a href="#section-4.5-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.5-4">
+<pre>
+binding_input = len32(freshness) || freshness
+             || len32(rp_id)     || rp_id
+             || len32(target)    || target
+             || len32(subject)   || subject
+</pre><a href="#section-4.5-4" class="pilcrow">¶</a>
+</div>
+<p id="section-4.5-5">where <code>len32(x)</code> is the length of <code>x</code> in octets as a 32-bit big-endian unsigned integer; <code>freshness</code> is the freshness element, a timestamp being an 8-octet big-endian unsigned count of seconds since 1970-01-01T00:00:00Z; <code>rp_id</code> and <code>target</code> are the UTF-8 encodings of the Relying Party identifier and of the Target, each used as an exact octet string; and <code>subject</code> is the DER encoding of the CSR (Enrollment) or the DER-encoded SubjectPublicKeyInfo of CEKpub (Retrieval).
+The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
+The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, a protocol profile fixes a hash whose output is the size of the field.<a href="#section-4.5-5" class="pilcrow">¶</a></p>
+<p id="section-4.5-6">The Verifier <span class="bcp14">MUST</span> report in the Attestation Results the value in the freshness input of the Evidence it appraised: the value it read from the Evidence, or, where the value to expect is submitted with the Evidence as in challenge-response appraisal, that value after checking that the Evidence carries it.
+The Credential Authority (Enrollment) or Secret Vault (Retrieval) <span class="bcp14">MUST</span> recompute the digest from its own identifier, the freshness element and the Target of the request, and the CSR or CEKpub it received, and <span class="bcp14">MUST</span> reject the request unless the result equals the value reported in the Attestation Results.
+This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.
+The Freshness Kind reaches the Attester through the CAS, so the Relying Party <span class="bcp14">MUST</span> take the Freshness Kind for a Target from its own policy, not from the request, and <span class="bcp14">MUST</span> check the freshness element under that kind.<a href="#section-4.5-6" class="pilcrow">¶</a></p>
+<p id="section-4.5-7">Because the CAS is untrusted (<a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>), each value closes a substitution: without the Relying Party identifier, the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and, with a freshness element that is not single-use (an epoch, a timestamp), have it accepted by two; without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
+Because the Credential Acquisition Interface holds the Relying Party identifier rather than receiving it from the CAS, the Evidence is accepted only by the Relying Party the deployment intended.<a href="#section-4.5-7" class="pilcrow">¶</a></p>
+<p id="section-4.5-8">Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
+It takes one of three forms:<a href="#section-4.5-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.5-9.1">
+            <p id="section-4.5-9.1.1">Direct: the Attesting Environment writes the digest into a guest-chosen field of the hardware Evidence, such as REPORT_DATA of an AMD SEV-SNP attestation report, REPORTDATA of an Intel TDX quote, or the user data of an AWS Nitro attestation document.<a href="#section-4.5-9.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.5-9.2">
+            <p id="section-4.5-9.2.1">Nested: a lower layer owns that field (for example, a paravisor that fixes it at boot), and the digest travels in a nested attestation whose report data the guest controls, such as a vTPM quote.<a href="#section-4.5-9.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.5-9.3">
+            <p id="section-4.5-9.3.1">Provider-scoped: the Evidence is signed by a key shared across a provider's fleet and identifies the provider's key domain rather than a machine. The binding holds, but a Relying Party whose policy requires a per-machine identity rejects such Evidence.<a href="#section-4.5-9.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.5-10">A Relying Party <span class="bcp14">MUST NOT</span> assume the Direct form; it learns the form from the Attestation Results or from its appraisal policy.<a href="#section-4.5-10" class="pilcrow">¶</a></p>
+<p id="section-4.5-11">This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness.
+It does not by itself tie the exchange to the channel over which the credential is acquired.
+Nor does it cover the Credential Type or the Credential Hint, which the CAS can change; a Relying Party <span class="bcp14">MUST NOT</span> issue or release a credential beyond what its policy allows for the attested context.<a href="#section-4.5-11" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="summary-of-rats-roles">
+<section id="section-4.6">
         <h3 id="name-summary-of-rats-roles">
-<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-summary-of-rats-roles" class="section-name selfRef">Summary of RATS Roles</a>
+<a href="#section-4.6" class="section-number selfRef">4.6. </a><a href="#name-summary-of-rats-roles" class="section-name selfRef">Summary of RATS Roles</a>
         </h3>
 <span id="name-rats-roles-in-tacra"></span><div id="tab-rats-roles">
 <table class="center" id="table-1">
@@ -1833,13 +1893,16 @@ Here only the high-level description is provided.<a href="#section-5-1" class="p
             <p id="section-5.2-3.2.1">Credential Type matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.2-3.3">
-            <p id="section-5.2-3.3.1">Evidence, bound to the previously returned Freshness Handle, if any<a href="#section-5.2-3.3.1" class="pilcrow">¶</a></p>
+            <p id="section-5.2-3.3.1">Freshness element of <a href="#binding" class="auto internal xref">Section 4.5</a>: the Freshness Handle returned by the corresponding Initiate-Credential-Acquisition call, the locally held epoch marker, or the Attester's timestamp; absent for <code>absent-none</code><a href="#section-5.2-3.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.2-3.4">
-            <p id="section-5.2-3.4.1">CSR matching, and bound to, the Evidence (TODO: discuss CSR-to-Evidence binding/relationship)<a href="#section-5.2-3.4.1" class="pilcrow">¶</a></p>
+            <p id="section-5.2-3.4.1">Evidence carrying the binding of <a href="#binding" class="auto internal xref">Section 4.5</a><a href="#section-5.2-3.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.2-3.5">
-            <p id="section-5.2-3.5.1">Credential Hint (optional) matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.2-3.5.1" class="pilcrow">¶</a></p>
+            <p id="section-5.2-3.5.1">CSR bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>; the CSR carries CSKpub and proves possession of CSKpri<a href="#section-5.2-3.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-3.6">
+            <p id="section-5.2-3.6.1">Credential Hint (optional) matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.2-3.6.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-5.2-4">Returns:<a href="#section-5.2-4" class="pilcrow">¶</a></p>
@@ -1900,13 +1963,16 @@ Here only the high-level description is provided.<a href="#section-5-1" class="p
             <p id="section-5.3-3.2.1">Credential Type matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-3.3">
-            <p id="section-5.3-3.3.1">Evidence, bound to the previously returned Freshness Handle, if any<a href="#section-5.3-3.3.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-3.3.1">Freshness element of <a href="#binding" class="auto internal xref">Section 4.5</a>: the Freshness Handle returned by the corresponding Initiate-Credential-Acquisition call, the locally held epoch marker, or the Attester's timestamp; absent for <code>absent-none</code><a href="#section-5.3-3.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-3.4">
-            <p id="section-5.3-3.4.1">CEKpub matching the Evidence (TODO: discuss CEK-to-Evidence binding/relationship)<a href="#section-5.3-3.4.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-3.4.1">Evidence carrying the binding of <a href="#binding" class="auto internal xref">Section 4.5</a><a href="#section-5.3-3.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-3.5">
-            <p id="section-5.3-3.5.1">Credential Hint (optional)<a href="#section-5.3-3.5.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-3.5.1">CEKpub bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a><a href="#section-5.3-3.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-3.6">
+            <p id="section-5.3-3.6.1">Credential Hint (optional)<a href="#section-5.3-3.6.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-5.3-4">Returns:<a href="#section-5.3-4" class="pilcrow">¶</a></p>
@@ -1970,22 +2036,22 @@ CAAPI offers no facilities for discovering these; they are decided out of band, 
             </ul>
 </li>
           <li id="section-5.4-3.2">
-            <p id="section-5.4-3.2.1">Platform Plug-in: Generate keys and Evidence for the Credential Acquisition Mode and Freshness kind returned in step 1:<a href="#section-5.4-3.2.1" class="pilcrow">¶</a></p>
+            <p id="section-5.4-3.2.1">Platform Plug-in: Generate keys and Evidence for the Credential Acquisition Mode and Freshness kind returned in step 1, with the binding of <a href="#binding" class="auto internal xref">Section 4.5</a>, whose freshness element is:<a href="#section-5.4-3.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-3.2.2.1">
-                <p id="section-5.4-3.2.2.1.1">Freshness kind of <code>present-nonce</code> or <code>present-epoch</code>: embed the Freshness Handle in Evidence<a href="#section-5.4-3.2.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.2.2.1.1">Freshness kind of <code>present-nonce</code> or <code>present-epoch</code>: the Freshness Handle<a href="#section-5.4-3.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.4-3.2.2.2">
-                <p id="section-5.4-3.2.2.2.1">Freshness kind of <code>absent-timestamp</code>: stamp Evidence from a trusted clock (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.1)<a href="#section-5.4-3.2.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.2.2.2.1">Freshness kind of <code>absent-timestamp</code>: a timestamp from a trusted clock (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.1)<a href="#section-5.4-3.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.4-3.2.2.3">
-                <p id="section-5.4-3.2.2.3.1">Freshness kind of <code>absent-epoch</code>: embed the locally held epoch marker<a href="#section-5.4-3.2.2.3.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.2.2.3.1">Freshness kind of <code>absent-epoch</code>: the locally held epoch marker<a href="#section-5.4-3.2.2.3.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.4-3.2.2.4">
-                <p id="section-5.4-3.2.2.4.1">Freshness kind of <code>absent-none</code>: no freshness claim<a href="#section-5.4-3.2.2.4.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.2.2.4.1">Freshness kind of <code>absent-none</code>: empty (no freshness claim)<a href="#section-5.4-3.2.2.4.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.4-3.2.2.5">
-                <p id="section-5.4-3.2.2.5.1">In all cases, include in Evidence CSKpub plus CSR (enrollment) or CEKpub (retrieval)<a href="#section-5.4-3.2.2.5.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.2.2.5.1">In all cases, the binding covers the CSR (enrollment) or CEKpub (retrieval)<a href="#section-5.4-3.2.2.5.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
@@ -1993,10 +2059,10 @@ CAAPI offers no facilities for discovering these; they are decided out of band, 
             <p id="section-5.4-3.3.1">CAAPI: Depending on which Credential Acquisition Mode is returned, either<a href="#section-5.4-3.3.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-3.3.2.1">
-                <p id="section-5.4-3.3.2.1.1">Enroll-Credential(Target, Credential Type, Credential Hint, CSR, Evidence)<a href="#section-5.4-3.3.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.3.2.1.1">Enroll-Credential(Target, Credential Type, Credential Hint, freshness element, CSR, Evidence)<a href="#section-5.4-3.3.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.4-3.3.2.2">
-                <p id="section-5.4-3.3.2.2.1">Retrieve-Credential(Target, Credential Type, Credential Hint, CEKpub, Evidence)<a href="#section-5.4-3.3.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-5.4-3.3.2.2.1">Retrieve-Credential(Target, Credential Type, Credential Hint, freshness element, CEKpub, Evidence)<a href="#section-5.4-3.3.2.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
@@ -2101,7 +2167,7 @@ They are supported in the interest of maximizing compatibility.
 While the specification takes care to deliver bearer token credentials to the Attester securely, subsequent usage, such as using them in authentication against the RUP, still risks leaking them.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="credential-acquisition-system-considered-untrustworthy">
+<div id="untrusted-cas">
 <section id="section-7.2">
         <h3 id="name-credential-acquisition-syst">
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-credential-acquisition-syst" class="section-name selfRef">Credential Acquisition System Considered Untrustworthy</a>
