@@ -518,6 +518,14 @@ The Credential Hint is a request, not an authorization.
 A Credential Authority or Secret Vault MAY use it when selecting issued credential properties, or locating a stored credential, and MAY ignore or reject it.
 The hint MUST NOT cause issuance or release of a credential that Appraisal Policy for Attestation Results or local issuance policy would otherwise deny.
 
+## Credential Scope {#credential-scope}
+
+The binding ({{binding}}) ensures that Evidence produced for one Target does not obtain a credential for another.
+It does not limit where the credential is honored once issued or released: that is the credential's scope, set, as for any credential, by the policy of the Credential Authority or Secret Vault and by the RATS-unaware Relying Parties that accept the credential.
+A certificate, for example, is bound to the identities in its subject alternative names (Section 4.2.1.6 of {{RFC5280}}), and a JSON Web Token can name its intended recipients in its audience claim, which a recipient not named there rejects (Section 4.1.3 of {{RFC7519}}).
+The scope comes from that policy and not from the request: the Credential Type and the Credential Hint, which the binding does not cover, cannot widen it ({{binding}}, {{credential-hint}}).
+A deployment that needs a credential usable only at the requested Target issues or releases it with that scope.
+
 ## CAS Client Authentication to CAS Server
 
 In this architecture, Remote Attestation is used to authenticate the Attester to the services (Secret Vault or Credential Authority) involved in Credential Issuance.
