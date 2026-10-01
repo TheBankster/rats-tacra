@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-29T03:38:34.420759+00:00",
+  "timestamp": "2026-10-01T03:31:02.013189+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -99,25 +99,55 @@
       "labels": [],
       "body": "```\n2) Is there any consideration of whether the issued credential may include information that a RATS-aware Relying Party could act on (without disturbing the RATS-unaware RPs)? For example, in work that I do, the certificate policy OID included in an issued certificate varies based on presentation of attestation evidence. The sentence \"while its clients and servers do not notice anything different\" would be better as \"while its clients and servers need not notice anything different\".\n```\n",
       "createdAt": "2026-09-28T18:55:36Z",
-      "updatedAt": "2026-09-28T18:55:36Z",
+      "updatedAt": "2026-09-30T17:23:14Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, and without disturbing RATS-unaware relying parties: carry it in a non-critical certificate extension, which parties that do not know it ignore. The reference CA does this, with the Target, the launch measurement, the platform and the platform form ([est_server.py#L91](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/impl/est_server.py#L91)). A certificate policy OID chosen by the attestation outcome, as Carl describes, is the same idea at a coarser grain. Suggested sentence for TACRA: a Credential Authority MAY record Attestation Results in the credential, in a form RATS-unaware relying parties ignore. Leaving open until that sentence is in.",
+          "createdAt": "2026-09-29T18:35:02Z",
+          "updatedAt": "2026-09-29T18:35:02Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "If the RUP is guaranteed to ignore the additional information, then there is no harm in including it (unless it's too large, perhaps?).\nI think the proper wording would be to note that the onus is on the credential authority to ensure that the RUP is not broken by what it issues.",
+          "createdAt": "2026-09-30T17:18:02Z",
+          "updatedAt": "2026-09-30T17:18:02Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Agreed that the onus belongs on the Credential Authority. A sentence that combines both points:\n\n> A Credential Authority MAY include information from the Attestation Results in the credential; it is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties, for example by using a non-critical extension and keeping it small.\n\nI can put it in a small PR together with the freshness sentence from PR #1.\n",
+          "createdAt": "2026-09-30T17:23:14Z",
+          "updatedAt": "2026-09-30T17:23:14Z"
+        }
+      ]
     },
     {
       "number": 5,
       "id": "I_kwDOULZBls8AAAABTvU1uA",
       "title": "split out requirements",
       "url": "https://github.com/TheBankster/rats-tacra/issues/5",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcr",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "```\n3) Given this draft is a set of requirements and the beginnings of an ecosystem of specifications, would it be best to split the requirements out into a separate draft? This would allow the requirements to proceed independent of the API and API instantiations (and may better align with the TWI SIG's publications of a requirements document). \n```\n",
       "createdAt": "2026-09-28T18:55:57Z",
-      "updatedAt": "2026-09-28T18:55:57Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2026-09-29T13:13:08Z",
+      "closedAt": "2026-09-29T13:13:07Z",
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Eventually this may be a good idea. Right now the document is a tight coupling of: requirements, architectural description including high-level specification of APIs and flows, and a discussion of how these decisions meet all of the requirements. Splitting these out right now is likely to create additional inefficiencies and friction in keeping things in sync.\nSo, closing the issue but may reopen it or a similar one later.",
+          "createdAt": "2026-09-29T13:13:07Z",
+          "updatedAt": "2026-09-29T13:13:07Z"
+        }
+      ]
     },
     {
       "number": 6,
@@ -131,9 +161,17 @@
       "labels": [],
       "body": "```\n\n4) The architecture diagram in Figure 1 in Section 4.3 is very difficult to make sense of and is probably just too busy. For example, I can't tell where key generation would occur, but it looks to be on an arrow. The end of that arrow is Credential Authority, which would seem to be an EST server (where EST is used) but the CAS server box above appears to be labeled as an EST server. Prose clarifies that key generation is a Platform ABI function, though. Why does the CAS contact the Verifier? Oughtn't Verifier interactions be driven by the Secret Vault and Credential Authority?\n```\n",
       "createdAt": "2026-09-28T18:56:17Z",
-      "updatedAt": "2026-09-28T18:56:17Z",
+      "updatedAt": "2026-09-29T13:28:53Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Starting with the last part of the question: the Verifier would be contacted by SV and CA in Background Check mode. For Passport mode, the interaction is driven by the CAS Server.\nThe diagram is indeed busy, but we could address that by also adding smaller more focused diagrams to illustrate partial interactions. For instance, have one big-picture diagram, and then additional diagrams focusing on parts of the busy picture illustrating all the sub-interactions within it. Keeping the issue open until the additional diagrams are added into the draft text.",
+          "createdAt": "2026-09-29T13:28:53Z",
+          "updatedAt": "2026-09-29T13:28:53Z"
+        }
+      ]
     },
     {
       "number": 7,
@@ -147,9 +185,31 @@
       "labels": [],
       "body": "```\n5) Re: design goal 1, how does an attester prove that it should be able to retrieve a given set of credentials or cause issuance of new credentials for a given name?\n```\n",
       "createdAt": "2026-09-28T18:56:43Z",
-      "updatedAt": "2026-09-28T18:56:43Z",
+      "updatedAt": "2026-09-30T17:38:38Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "By its Evidence, judged against the Relying Party's policy. The Verifier appraises the launch measurement against reference values ([verifier.py#L145](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/impl/verifier.py#L145)), and the Credential Authority or Secret Vault decides what that measurement entitles: the CA certifies only names inside the attested identity context ([est_server.py#L82-L84](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/impl/est_server.py#L82-L84)), and the Vault derives the group, and with it the secret, from the Attestation Results ([est_server.py#L111](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/impl/est_server.py#L111)). The Credential Hint only selects among what policy already allows, as the Credential Hint section of Security Considerations says. Suggest one sentence under design goal 1 to that effect; I can include it in the Trust Model PR.",
+          "createdAt": "2026-09-29T18:35:05Z",
+          "updatedAt": "2026-09-29T18:35:05Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Retrieve vs. enroll is an administrative decision; it is in no way impacted by Attester. The system decides. For cloud where replica workloads dominate, the answer will most of the time will be retrieve. For IoT sensors and managed endpoints that obtain credentials relatively infrequently and don't exhibit \"horizontal scale-out\" characteristics, the answer would predominantly be enroll. The architecture is flexible enough to allow the system to give the Attester one or the other based on other factors (e.g., what was the last time enrollment took place, maybe enrolled credentials can be placed inside the Secret Vault as a reason for caching them for a bit).\nWhat should the TACRA draft say about this, if anything?",
+          "createdAt": "2026-09-30T17:26:14Z",
+          "updatedAt": "2026-09-30T17:26:14Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Little, I think; Section 4.4 already says it: \"The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement (Goal 1).\" One sentence could say why that is safe although the CAS is untrusted: the mode only decides which Relying Party the Attester binds and asks, since the Credential Acquisition Interface holds the Relying Party identifier for each Target and Credential Acquisition Mode (Section 4.5, item 3), and that Relying Party issues or releases only what its own policy allows for the attested context (Section 4.5, last paragraph). Your examples, replica workloads retrieving, IoT sensors and managed endpoints enrolling, a Secret Vault caching enrolled credentials, could go in as a non-normative note on how a deployment sets that policy.\n",
+          "createdAt": "2026-09-30T17:38:38Z",
+          "updatedAt": "2026-09-30T17:38:38Z"
+        }
+      ]
     },
     {
       "number": 8,
@@ -163,25 +223,41 @@
       "labels": [],
       "body": "```\n7) Should design goal 5 account for using different mechanisms based on whether or not the target is RATS aware (or is RATS awareness being abstracted away by credential type details)? Does it matter if the credential that is returned is used more broadly than the requested target? Is there any concern about requesting new credentials per target when reuse is possible? Should this draft address key lifetime concepts, like rotation, deletion, revocation, etc.?\n```\n",
       "createdAt": "2026-09-28T18:57:15Z",
-      "updatedAt": "2026-09-28T18:57:15Z",
+      "updatedAt": "2026-09-29T13:51:47Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "This will be split into several sub-issues as it's asking several separate questions.",
+          "createdAt": "2026-09-29T13:51:47Z",
+          "updatedAt": "2026-09-29T13:51:47Z"
+        }
+      ]
     },
     {
       "number": 9,
       "id": "I_kwDOULZBls8AAAABTvWDsA",
       "title": "is secret vault an implementation detail?",
       "url": "https://github.com/TheBankster/rats-tacra/issues/9",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcr",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "```\n8) Re: design goal 7, is the \"secret vault\" an implementation detail of the CAS? Likewise, for verifiers and credential authorities. If so, I'd drop this design goal. \n```\n",
       "createdAt": "2026-09-28T18:57:38Z",
-      "updatedAt": "2026-09-28T18:57:38Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2026-09-29T13:50:11Z",
+      "closedAt": "2026-09-29T13:50:11Z",
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "This was a deliberate word choice: Credential Authority (a place that mints new credentials) vs. e.g. Certificate Authority, which would be an implementation detail. Similarly, Secret Vault (a place where secrets are stored) vs. e.g. a Hardware Security Module, would be an implementation detail.\nSo, both Secret Vault and Credential Authority (both RATS Relying Parties) are critical to this architecture and not implementation details.",
+          "createdAt": "2026-09-29T13:50:11Z",
+          "updatedAt": "2026-09-29T13:50:11Z"
+        }
+      ]
     },
     {
       "number": 10,
@@ -195,9 +271,24 @@
       "labels": [],
       "body": "```\n9) Re: design goal 9, this should be a SHOULD. Also design goal 2's requirement to support \"most\" credential formats is inconsistent with this one.\n\n```\n",
       "createdAt": "2026-09-28T18:58:11Z",
-      "updatedAt": "2026-09-28T18:58:11Z",
+      "updatedAt": "2026-09-30T18:23:50Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "We ought to add an explicit list of minimum requirements for a platform to satisfy.\n",
+          "createdAt": "2026-09-29T13:45:00Z",
+          "updatedAt": "2026-09-30T18:23:50Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "On the explicit list Mark proposed, here is what \"minimum requirements around secure cryptography and evidence generation\" comes to on the platforms in use today: (1) Evidence signed by a key that chains to the platform vendor; (2) a value the workload chooses, carried in that Evidence and at least as large as the binding digest (64 octets of REPORT_DATA or REPORTDATA on SEV-SNP and TDX; on Azure the paravisor holds that field, so the value travels through the vTPM quote); (3) a way for the workload to request Evidence at run time; (4) key generation inside the workload's trust boundary. The platform shapes are measured across Google Cloud, AWS and Azure in [geoar-verifier](https://github.com/nikolaichuk7/geoar-verifier) and described in PR #1.",
+          "createdAt": "2026-09-29T18:35:07Z",
+          "updatedAt": "2026-09-29T18:35:07Z"
+        }
+      ]
     },
     {
       "number": 11,
@@ -211,42 +302,214 @@
       "labels": [],
       "body": "```\n13) In general, the draft would benefit from describing how trust moves in the architecture, i.e., how do the attester, Secret Vault, and Credential Authority establish trust in the CAS, how do the Secret Vault and Credential Authority trust the Verifier, etc.\n```\n",
       "createdAt": "2026-09-28T18:58:44Z",
-      "updatedAt": "2026-09-28T18:58:44Z",
+      "updatedAt": "2026-09-29T18:35:09Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "The CAS is untrusted in this architecture. It is the conduit for connecting the Attester with the Verifier and the RRP, without exposing secrets to the conduit. The Verifier trust model in RATS requires RATS Relying Parties (so, Secret Vault and Credential Authority in TACRA) to trust it. TACRA does not change that trust relationship, and it does rely on it.\nA bunch of trust and binding issues (also related to relay attacks where things might end up in the wrong place) are discussed here https://github.com/TheBankster/lamps-tacra-est/pull/1/ and will likely end up getting folded into the TACRA draft. Stay tuned.\nPerhaps there is room for adding a \"Trust Model\" section to the TACRA draft making all of these decisions and tradeoffs explicit.",
+          "createdAt": "2026-09-29T13:37:44Z",
+          "updatedAt": "2026-09-29T13:38:58Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Agree with Mark's answer. One addition for the Trust Model section: today's text asks the CAS to \"remain benevolent\". With the bindings of PR #1 (the RRP identifier and the Target inside the Evidence) and the Secret Vault's origin authenticated to the Attester, a CAS that is not benevolent can still delay or drop a request, but it cannot take the request to a Relying Party the Attester did not intend (when the Attester holds the RRP identifier), nor to another Target, nor substitute a bundle. The formal models in [formal/](https://github.com/nikolaichuk7/tacra-est/tree/dcca431/formal) check exactly these cases, and the analysis by role is in [docs/SECURITY-ANALYSIS.md](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/docs/SECURITY-ANALYSIS.md). So the Trust Model can state the CAS as untrusted without the benevolence assumption. It will be the second PR of the plan I sent Mark.",
+          "createdAt": "2026-09-29T18:35:09Z",
+          "updatedAt": "2026-09-29T18:35:09Z"
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "id": "I_kwDOULZBls8AAAABT6yCSw",
+      "title": "Should design goal 5 account for using different mechanisms based on whether or not the target is RATS aware (or is RATS awareness being abstracted away by credential type details)?",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/12",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Should design goal 5 account for using different mechanisms based on whether or not the target is RATS aware (or is RATS awareness being abstracted away by credential type details)?",
+      "createdAt": "2026-09-29T13:52:42Z",
+      "updatedAt": "2026-09-29T18:35:11Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "My view: design goal 5 need not change. What differs between RATS-aware and RATS-unaware targets is only what the credential carries: a RATS-unaware target uses it as it uses any other credential, and a RATS-aware one can also read the attestation details the Credential Authority records (#4). The acquisition itself stays the same, so the awareness is abstracted by the credential rather than by the mechanism.",
+          "createdAt": "2026-09-29T18:35:11Z",
+          "updatedAt": "2026-09-29T18:35:11Z"
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "id": "I_kwDOULZBls8AAAABT6yWlg",
+      "title": "Does it matter if the credential that is returned is used more broadly than the requested target?",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/13",
+      "state": "CLOSED",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Does it matter if the credential that is returned is used more broadly than the requested target?",
+      "createdAt": "2026-09-29T13:53:06Z",
+      "updatedAt": "2026-09-30T17:43:00Z",
+      "closedAt": "2026-09-30T17:43:00Z",
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Two separate things. The Evidence binds the Target, so a credential cannot be obtained for one Target with Evidence produced for another (the Target-substitution drills D9 and D10 in [tacra-est](https://github.com/nikolaichuk7/tacra-est/tree/dcca431)). How widely the credential is honoured afterwards is its scope, set by Credential Authority policy (the names it will certify, [est_server.py#L82-L84](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/impl/est_server.py#L82-L84)) and by the relying parties that trust it, as with any credential today. Suggest TACRA states the second explicitly.",
+          "createdAt": "2026-09-29T18:35:13Z",
+          "updatedAt": "2026-09-29T18:35:13Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Serhii, would you suggest the exact wording for what you are saying here? Maybe as a PR?",
+          "createdAt": "2026-09-30T17:27:33Z",
+          "updatedAt": "2026-09-30T17:27:33Z"
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "id": "I_kwDOULZBls8AAAABT6yx1g",
+      "title": "Is there any concern about requesting new credentials per target when reuse is possible?",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/14",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Is there any concern about requesting new credentials per target when reuse is possible?",
+      "createdAt": "2026-09-29T13:53:36Z",
+      "updatedAt": "2026-09-30T17:21:16Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There is a hardware cost to acquiring per Target: on Google Cloud SEV-SNP a guest gets about one attestation report per second sustained, and one request in ten waits about 10 s ([docs/RESULTS.md, section 4](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/docs/RESULTS.md#4-how-long-a-report-takes-and-the-hosts-throttle)). An Attester that acquires per Target should expect that wait, and a Handle lifetime needs a floor of tens of seconds. Reuse across Targets trades the cost against a wider scope for the credential (#13).",
+          "createdAt": "2026-09-29T18:35:15Z",
+          "updatedAt": "2026-09-29T18:35:15Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "The decision of whether to issue new (enroll) or reuse existing (retrieve) is not made by Attester, but by the system administrator, reflected in what the system is configured to do when attest-initiate is called.\nI suspect in most real-world scenarios involving cloud, the preferred mode will be retrieve as cloud is based on large numbers of replica workloads. For longer-lived credentials that don't go to replica workloads (e.g., IoT sensors, managed endpoints) the predominant mode would be enroll, but the frequency of enrollment will be much less than that of retrieval.",
+          "createdAt": "2026-09-30T17:21:16Z",
+          "updatedAt": "2026-09-30T17:21:16Z"
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "id": "I_kwDOULZBls8AAAABT6y_-g",
+      "title": "Should this draft address key lifetime concepts, like rotation, deletion, revocation, etc.?",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/15",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Should this draft address key lifetime concepts, like rotation, deletion, revocation, etc.?",
+      "createdAt": "2026-09-29T13:53:52Z",
+      "updatedAt": "2026-09-30T22:06:39Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, briefly. Short-lived credentials re-acquired by attestation are the simplest rotation, and every renewal re-attests. Revocation has a TACRA-specific trigger worth a sentence: when a platform vulnerability is published, credentials issued on Evidence from the affected firmware or TCB versions should be revocable, which requires the Credential Authority to record what it relied on (#4). Deleting CSKpri or CEKpri is inside the Attester's boundary.",
+          "createdAt": "2026-09-29T18:35:17Z",
+          "updatedAt": "2026-09-29T18:35:17Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Should this go into the Security Considerations section? Or elsewhere?",
+          "createdAt": "2026-09-30T18:24:44Z",
+          "updatedAt": "2026-09-30T18:24:44Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Security Considerations, I think, as a subsection after Credential Scope: the scope says where a credential is honored, the lifetime says for how long. A possible text:\n\n> ## Credential and Key Lifetime\n>\n> A credential stays usable after the Evidence it was issued on has aged, for as long as it remains valid: a certificate while its validity period includes the current time and it is not revoked (Section 6.1.3 of {{RFC5280}}), a JSON Web Token that carries an \"exp\" claim, until that time (Section 4.1.4 of {{RFC7519}}).\n> Short-lived certificates are an alternative to revocation ({{?RFC8739}}, where the CA reissues them automatically from the same CSR); a credential re-acquired through Acquire-Credential is instead re-attested each time, so the sequence ends once the Attester's Evidence is no longer accepted.\n> Issuance conditioned on Remote Attestation adds a trigger for revocation: when a platform vulnerability leads the Verifier to reject Evidence it used to accept, for example Evidence from affected firmware versions, credentials already issued on such Evidence stay valid until they expire unless they are revoked (Section 3.3 of {{RFC5280}}).\n> Revoking them requires the Credential Authority to know which Attestation Results each credential was issued on, from its own records or from the credential itself.\n> A retrieved credential cannot be recalled from an Attester that has received it: when the Evidence it was released on is later found untrustworthy, the credential has to be revoked or replaced, in the Secret Vault and at the RATS-unaware Relying Parties that accept it, which affects every Attester that shares it.\n> Deleting CSKpri and CEKpri happens inside the Attesting Environment and is outside the scope of this document.\n\nThe fourth sentence relies on the one about Attestation Results in the credential from #4, which is in #18. I can send this as a separate PR.\n",
+          "createdAt": "2026-09-30T22:06:38Z",
+          "updatedAt": "2026-09-30T22:06:38Z"
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "id": "I_kwDOULZBls8AAAABUMz1kg",
+      "title": "Where does the Attester get the Relying Party ID from? Need to discuss alternatives.",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/17",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The one point you may want to change is where the Attester gets the Relying Party identifier. I've written it as held by the Credential Acquisition Interface for each Target and mode. If the SIG prefers another source, only that sentence changes.\n\n_Originally posted by @nikolaichuk7 in https://github.com/TheBankster/rats-tacra/issues/1#issuecomment-5911416826_\n            ",
+      "createdAt": "2026-09-30T17:40:26Z",
+      "updatedAt": "2026-09-30T17:47:47Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The formal study compares three sources ([formal/README.md, \"Where the bound identity comes from\"](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/README.md#where-the-bound-identity-comes-from-six-more-models); ProVerif output in [rrp-source](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260926T232411Z-rrp-source.txt) and [freshness-sources](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260926T233733Z-freshness-sources.txt)):\n\n1. **Held by the Credential Acquisition Interface for each Target and mode** (the current text, Section 4.5, item 3). Only the Relying Party the deployment intended can issue, with a fresh Handle and with a shared epoch alike. It is also the only source when Initiate-Credential-Acquisition is completed locally, as the EST profile allows, since there is no response to take it from. The cost is configuration in the Attester.\n2. **Taken from the Initiate-Credential-Acquisition response.** The Evidence is still accepted by only one Relying Party, but the CAS chooses which: it can initiate at another Credential Authority, hand that response to the Attester, and that Credential Authority issues.\n3. **Not bound.** A Handle minted per Relying Party session keeps the Evidence to one Relying Party by itself; freshness that is not single-use, such as an epoch, a timestamp or a Verifier Handle that several Relying Parties accept, lets two Relying Parties accept the same Evidence.\n\nThe EST profile pull request currently binds the held identifier when there is one and the response's otherwise, with a TODO pending this decision. A middle path the models do not cover yet is for the Credential Acquisition Interface to hold a set of acceptable identifiers per Target and take the response's value only when it is in that set. I can model that option, or any other the SIG wants to weigh, the same way, and where it applies also run it on SEV-SNP hardware with the reference implementation, as drills D3 and D3b already do for the first two sources ([drills.json](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/evidence/20260930T171748Z-gcp-sev-snp/drills.json)). I would post the results here.\n",
+          "createdAt": "2026-09-30T17:47:47Z",
+          "updatedAt": "2026-09-30T17:47:47Z"
+        }
+      ]
     }
   ],
   "pulls": [
     {
       "number": 1,
       "id": "PR_kwDOULZBls8AAAABDTRowA",
-      "title": "Resolve CSR/CEK-to-Evidence binding; add channel-binding security consideration",
+      "title": "Binding Credential Keys to Evidence",
       "url": "https://github.com/TheBankster/rats-tacra/pull/1",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nikolaichuk7",
-      "authorAssociation": "NONE",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "As discussed on the RATS list (my feedback of 12 September) and for the Tuesday CCC TWI SIG, this resolves the open binding TODOs and adds the channel-binding consideration. It is a proposal; happy to adjust normative strength or wording.\n\n**What changed**\n\n- New subsection *Binding Credential Keys to Evidence* (`{#binding}`): a concrete, verifiable construction for the CSR/CEKpub-to-Evidence binding \u2014 a collision-resistant digest of the CSR (Enrollment) or of CEKpub (Retrieval) placed in the Evidence freshness input together with the Freshness Handle, recomputed and checked by the Credential Authority / Secret Vault. It also states the three platform shapes the Platform Plug-in must handle: direct-in-report, nested via a vTPM quote where a paravisor owns the field, and provider-scoped where a fleet key masks the machine. Resolves the TBD on the Enrollment bullet and the TODOs on the Enroll-/Retrieve-Credential parameters.\n- New Security Considerations subsection *Binding Evidence to the Credential-Acquisition Channel* (`{#channel-binding}`): the binding above ties the CSR/CEKpub to the platform and to freshness, but not to the channel; over the untrusted CAS conduit a relay can obtain a credential unless the exchange also binds a value derived from the channel's shared secret (the RFC 9266 TLS exporter). Also resolves the CAS-client-authentication TODO with a pointer to that value.\n- Adds RFC 9266, ID-Crisis (ASIA CCS 2026), and Intra-handshake.fail (CVE-2026-33697) to informative references.\n\n**Grounding (measured, reproducible)**\n\nThe enrollment construction is verified end-to-end on AMD SEV-SNP: a worked example builds the CSR in the guest, binds `REPORT_DATA = SHA-512(nonce || CSR)`, and a verifier checks the report and its VCEK chain to ARK-Milan (from the AMD KDS) plus the CSR proof of possession. The three platform shapes are measured across AWS, Google Cloud, and Azure. Artifact (probe, verifier, raw reports and certificates): https://github.com/nikolaichuk7/geoar-verifier , under `tacra/`.\n\nBuilds cleanly with kramdown-rfc; no new TODOs introduced.\n",
+      "body": "This PR is now one section: how a credential key is bound to Evidence, and how the binding is checked. The channel-binding consideration is out; it comes back as its own PR.\n\n**Section 4.5, Binding Credential Keys to Evidence**\n- The Evidence MUST carry one digest over four values: the freshness element, the identifier of the Relying Party that will rely on the Evidence (the Credential Authority or the Secret Vault), the Target, and the CSR (Enrollment) or CEKpub (Retrieval).\n- The encoding is stated in TACRA: each value is preceded by its length as a 32-bit big-endian integer, a timestamp is 8 octets of seconds since 1970, and the digest is SHA-512 where the field is 64 octets (REPORT_DATA, REPORTDATA); for a field of another size a protocol profile fixes the hash. TACRA no longer refers to the EST profile.\n- The Verifier MUST report the bound value in the Attestation Results, either read from the Evidence or, as a challenge-response Verifier such as Veraison does, checked against the value submitted with it. The Credential Authority or Secret Vault MUST recompute the digest and reject a mismatch. This is the same in the Passport and Background Check models.\n- The Credential Acquisition Interface holds the Relying Party identifier for each Target and mode; it does not take it from the CAS.\n- The Relying Party takes the Freshness Kind for a Target from its own policy, not from the request: the CAS returns the kind, so a Relying Party that believed it could be led to accept a weaker one.\n- The Credential Type and the Credential Hint are not bound; the Relying Party's policy for the attested context bounds what either can obtain.\n- Three platform forms: Direct, Nested, Provider-scoped. A Relying Party MUST NOT assume the Direct form.\n\n**Consequential edits**\n- Enroll-Credential and Retrieve-Credential take the freshness element, which the recompute needs.\n- \"bind\" replaces \"embed\" in the Freshness Kind list and the invocation sequence, so the text says one thing about where the Handle goes.\n- Enrollment and Retrieval each have one MUST pointing to the binding; carrying Evidence inside the CSR ({{CSR-ATTEST}}) does not replace it.\n\n**Evidence**\n- The encoding reproduces the test vector of the EST profile: 320 octets, SHA-512 `cbff0ef7\u20268beb`.\n- The reference implementation computes the same bytes: [impl/common.py#L50-L57](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/impl/common.py#L50-L57).\n- Why the Relying Party identifier is bound, and why it is held by the Attester: [formal/results/proverif-20260926T232411Z-rrp-source.txt](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/formal/results/proverif-20260926T232411Z-rrp-source.txt). Without it, a freshness element that is not single-use lets one Evidence be accepted by two Credential Authorities; an identifier taken from the CAS keeps the Evidence to one Relying Party, but one the CAS chooses.\n",
       "createdAt": "2026-09-13T01:48:49Z",
-      "updatedAt": "2026-09-27T00:00:19Z",
+      "updatedAt": "2026-09-30T17:11:59Z",
       "baseRepository": "TheBankster/rats-tacra",
       "baseRefName": "master",
-      "baseRefOid": "7b6461435423f29656514baea71d0365959df873",
+      "baseRefOid": "ed5eb9ac431983508c6b3cd9d4eaf19f306dc508",
       "headRepository": "nikolaichuk7/rats-tacra",
       "headRefName": "binding-to-evidence",
-      "headRefOid": "31daa0c50113a6911c9331899b6d458a7cd18d5d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "c387c6bce73fc129f5745fc30965f8494bec9de3",
+      "closedAt": "2026-09-30T16:59:56Z",
+      "mergedAt": "2026-09-30T16:59:56Z",
+      "mergedBy": "TheBankster",
+      "mergeCommit": {
+        "oid": "18770d222b883f3d3dc21b437f6a490eeb038fbc"
+      },
       "comments": [
         {
           "author": "nikolaichuk7",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "body": "Pushed 31daa0c to keep the binding text in step with the EST profile after Mark's review there (TheBankster/lamps-tacra-est#1):\n\n- The second value of the freshness input now names the RATS Relying Party that relies on the Evidence (the Credential Authority or the Secret Vault), not the credential-acquisition service. Evidence is produced for a Verifier or a Relying Party, never for the CAS. The CAI holds the identifier for the Target or, where a profile allows, takes it from the Initiate result; only a held one makes the Relying Party the intended one.\n- The first value is the freshness element of every kind: the Handle, the local epoch identifier, the Attester's timestamp, or nothing for absent-none. The recomputation uses it, and the substitution list notes that freshness that isn't single-use needs the Relying Party identifier to keep Evidence to one Relying Party.\n\nNo other change to this PR.\n",
           "createdAt": "2026-09-27T00:00:19Z",
           "updatedAt": "2026-09-27T00:00:19Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Mark, as planned, this PR is now the binding section alone; the channel-binding text will come back as its own PR.\n\nIt also answers open questions from your review of the EST profile: how Evidence is bound to the Target (item 3 of the list), how the Verifier attests to the binding and who checks it (the paragraph after the encoding: the Verifier reports the value, read from the Evidence or checked against it as Veraison does, and the Credential Authority or Secret Vault recomputes and compares), and whether Retrieval binds the same way (item 4: CEKpub takes the place of the CSR). On circular references: the encoding is now stated in TACRA, so TACRA no longer cites the EST profile.\n\nTwo sentences are new since the EST discussion, each in its own commit so either can be dropped: the Relying Party takes the Freshness Kind from its own policy, since the CAS returns it; and the Credential Type and Credential Hint are not bound, so the Relying Party's policy bounds what they can obtain.\n\nThe one point you may want to change is where the Attester gets the Relying Party identifier. I've written it as held by the Credential Acquisition Interface for each Target and mode. If the SIG prefers another source, only that sentence changes.\n",
+          "createdAt": "2026-09-30T12:35:39Z",
+          "updatedAt": "2026-09-30T12:35:39Z"
         }
       ],
       "reviews": [
@@ -396,7 +659,7 @@
             "abbreviatedOid": "3ac5145"
           },
           "author": "nikolaichuk7",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-09-22T16:27:50Z",
@@ -416,7 +679,7 @@
             "abbreviatedOid": "3ac5145"
           },
           "author": "nikolaichuk7",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-09-22T16:27:51Z",
@@ -436,7 +699,7 @@
             "abbreviatedOid": "3ac5145"
           },
           "author": "nikolaichuk7",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-09-22T16:27:53Z",
@@ -456,7 +719,7 @@
             "abbreviatedOid": "3ac5145"
           },
           "author": "nikolaichuk7",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-09-22T16:27:54Z",
@@ -469,8 +732,202 @@
               "updatedAt": "2026-09-22T16:27:55Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABPxovfQ",
+          "commit": {
+            "abbreviatedOid": "31daa0c"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-29T13:57:58Z",
+          "updatedAt": "2026-09-29T13:57:58Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Are circular references allowed?",
+              "createdAt": "2026-09-29T13:57:58Z",
+              "updatedAt": "2026-09-29T13:57:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABPxz3-w",
+          "commit": {
+            "abbreviatedOid": "ee4bcdc"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-29T14:12:30Z",
+          "updatedAt": "2026-09-29T14:12:30Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Yes. Here both citations are informative: TACRA cites the EST profile only as an example of a profile that fixes the encoding (Section 4.5), and the EST profile lists TACRA as informative too. An informative reference never holds a document back. If one side later becomes normative (the EST profile citing TACRA would be the natural one), the RFC Editor publishes the two together. If you would rather keep the architecture free of references to its profiles, I can drop the citation and say \"a protocol profile\" instead.\n\nI also merged master into the branch: one conflict, in the Enroll-Credential parameters, resolved by keeping both the line pointing to the binding section and your Credential Hint line. The PR is mergeable again.\n",
+              "createdAt": "2026-09-29T14:12:30Z",
+              "updatedAt": "2026-09-29T14:12:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQAmZHA",
+          "commit": {
+            "abbreviatedOid": "c387c6b"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T16:52:03Z",
+          "updatedAt": "2026-09-30T16:52:03Z",
+          "comments": [
+            {
+              "originalPosition": 60,
+              "body": "Doesn't freshness sometimes come from Verifier, not the RATS Relying Party?",
+              "createdAt": "2026-09-30T16:52:03Z",
+              "updatedAt": "2026-09-30T16:52:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQAmzVw",
+          "commit": {
+            "abbreviatedOid": "c387c6b"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T16:52:40Z",
+          "updatedAt": "2026-09-30T16:52:40Z",
+          "comments": [
+            {
+              "originalPosition": 40,
+              "body": "Don't necessarily change anything now: i can do this post-merge if necessary, but I feel it's best to revert 2 and 3 here (and in the binding_input computation below) because 2 refers to Target and 3 defines Taret.",
+              "createdAt": "2026-09-30T16:52:40Z",
+              "updatedAt": "2026-09-30T16:52:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQAnTZQ",
+          "commit": {
+            "abbreviatedOid": "c387c6b"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T16:53:30Z",
+          "updatedAt": "2026-09-30T16:53:30Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "Don't necessarily change anything now; I can do this post-merge, but I'd move the specifics of Credential Hit usage to the paragraph that follows that actually discusses Credential Hint.",
+              "createdAt": "2026-09-30T16:53:30Z",
+              "updatedAt": "2026-09-30T16:53:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQAzJOg",
+          "commit": {
+            "abbreviatedOid": "c387c6b"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T17:11:59Z",
+          "updatedAt": "2026-09-30T17:11:59Z",
+          "comments": [
+            {
+              "originalPosition": 60,
+              "body": "Thanks for merging. Yes, and the sentence is wrong for that case: a Relying Party cannot check a Handle it did not originate. The EST profile already has it right (\"The Freshness Handle originator MUST ensure `present-nonce` uniqueness and MUST correlate the second-leg request with the Handle\").\n\nWhat I would keep is the first half: the Freshness Kind required for a Target comes from the Relying Party's policy and not from the request, because the CAS returns it. A possible replacement for the sentence:\n\n> The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the Freshness Kind for a Target from its own policy, not from the request. The freshness element MUST be checked under that kind before a credential is issued or released. The Relying Party makes that check, except for a Freshness Handle that the Verifier originated: the Verifier checks that Handle, and the Relying Party relies on the Verifier's check, never on the request alone.\n\nOne consequence for profiles: the Evidence carries the digest, not the Handle, so a Verifier that originated the Handle can check it only by recomputing the digest from the four values; otherwise the Relying Party recomputes it and validates the Handle with the Verifier. The formal study models the second case: [`enrollment-verifier-handles-rrp-configured.pv`](https://github.com/nikolaichuk7/tacra-est/blob/dcca431/formal/enrollment-verifier-handles-rrp-configured.pv). I can send the rewording as a small PR, or you can take it as it is.\n",
+              "createdAt": "2026-09-30T17:11:59Z",
+              "updatedAt": "2026-09-30T17:11:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQAzKYA",
+          "commit": {
+            "abbreviatedOid": "c387c6b"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-30T17:12:00Z",
+          "updatedAt": "2026-09-30T17:12:00Z",
+          "comments": [
+            {
+              "originalPosition": 40,
+              "body": "Seen in 912bd50. The order is on the wire, so the digest changed: with the inputs of the EST profile's test vector it is now SHA-512 `36374188\u2026724a4404` instead of `cbff0ef7\u20268beb`. I will move the reference implementation and the EST profile PR to the new order, and regenerate the vector from a new hardware run, since the current one is the REPORT_DATA of a recorded run.\n",
+              "createdAt": "2026-09-30T17:12:00Z",
+              "updatedAt": "2026-09-30T17:12:01Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "number": 16,
+      "id": "PR_kwDOULZBls8AAAABF8exmA",
+      "title": "Credential scope",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/16",
+      "state": "MERGED",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #13.\n\nAdds Section 7.4 under Security Considerations, as suggested in #13. It separates the two things the issue asks about. The binding keeps Evidence produced for one Target from obtaining a credential for another. How widely the credential is honored afterwards is its scope, set by the policy of the Credential Authority or Secret Vault and by the relying parties that accept it. The section names the usual mechanisms, subject alternative names (RFC 5280, Section 4.2.1.6) and the JWT audience claim (RFC 7519, Section 4.1.3), and says that the Credential Type and the Credential Hint, which the binding does not cover, cannot widen that scope.\n\nThe first point is measured on AMD SEV-SNP hardware: a conduit that initiates for another Target is refused with `binding-mismatch` (drill D9), while the earlier binding of the EST profile -00, a digest of the Handle and the CSR alone, let the certificate be issued for the other Target (D10). Run 20260930T172002Z: [drills.json](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/evidence/20260930T171748Z-gcp-sev-snp/drills.json), [docs/RESULTS.md](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/docs/RESULTS.md).\n\nRenders with kramdown-rfc and xml2rfc without warnings.\n",
+      "createdAt": "2026-09-30T17:38:36Z",
+      "updatedAt": "2026-09-30T17:42:59Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "912bd503a120b3975090168000e42606c4a780d4",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "credential-scope",
+      "headRefOid": "5ab6ad989692c4376f86e892e77b5ad71a3de7c0",
+      "closedAt": "2026-09-30T17:42:59Z",
+      "mergedAt": "2026-09-30T17:42:58Z",
+      "mergedBy": "TheBankster",
+      "mergeCommit": {
+        "oid": "fb3d3b2d84ec913047102abc069ec9eb9f81fc79"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 18,
+      "id": "PR_kwDOULZBls8AAAABF--Jlw",
+      "title": "Freshness Handle checked by its originator; Attestation Results in the credential",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/18",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #4.\n\nTwo small changes, one commit each, as offered in the review of #1 and in #4.\n\n**Who checks the freshness element.** The sentence on the Freshness Kind had the Relying Party check the freshness element in every case, which it cannot do on its own for a Freshness Handle that the Verifier originated. It now keeps the first half, that the Relying Party takes the Freshness Kind for a Target from its own policy because the kind reaches the Attester through the CAS, and says who checks the freshness element: the Relying Party, or the Verifier for a Handle the Verifier originated, with the Relying Party relying on the Verifier's check and never on the request alone. A fourth sentence says how the Verifier can check such a Handle, since the Evidence carries only the digest: by recomputing the digest, or, at the Relying Party's request, for the same Handle the Relying Party used. Without that, a CAS could have a fresh Handle checked while the digest carries an old one.\n\nThis is how the related documents divide the work. In RFC 9334 the appraising entity that sends a nonce checks it (Section 10.2), and when the Verifier generates a nonce that the Relying Party relays, the Verifier checks the Evidence (Appendix A.5). In draft-ietf-lamps-attestation-freshness-08 (Section 8), the RA/CA ensures that a nonce it generates is not reused and, for a nonce obtained from the Verifier, that the Verifier applies the same policy. The EST profile: \"The originator MUST reject `present-nonce` reuse and a stale `present-epoch`.\" A CAS that only relays a Handle does not check it.\n\nThe formal study has the case of a Verifier-originated Handle that the Relying Party validates with the Verifier, for the same Handle it hashed. With the Relying Party identifier taken from the Attester's own configuration, as the binding requires, ProVerif 2.05 proves that a certificate issued on such a Handle was intended by the Attester for that Credential Authority, and that no two Credential Authorities issue for the same CSR and Target. The committed model binds the identity before the Target; the results are for the same models rewritten to the order of master, with the same outcomes ([model](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/enrollment-verifier-handles-rrp-configured.pv), [order](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/README.md#the-order-of-the-bound-values-30-september-2026), [results](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260930T171849Z-target-first.txt#L5270-L5425)). The model covers the binding, not single use: its Handles are never consumed.\n\n**Attestation Results in the credential (#4).** In Section 4.4, after the Credential Hint paragraph: a Credential Authority MAY include information from the Attestation Results in the credential. It is responsible for not breaking RATS-unaware Relying Parties with what it adds, for example by keeping it small and, in a certificate, by using a non-critical extension, which a certificate-using system that does not recognize it may ignore (RFC 5280, Section 4.2), and it limits what it adds to what the parties that see the credential need (RFC 9334, Section 11). The same commit takes Carl Wallace's wording from his review (item 2, which Michael posted as #4) in the Introduction: clients and servers \"need not notice anything different\".\n\nOne related point this PR does not change: the table of RATS roles says \"No changes in RATS Verifier role or implementation\", but Section 4.5 asks the Verifier to report the value in the freshness input, and a Verifier that originates Handles now checks one that the Evidence carries only inside the digest. If you agree, I can adjust that row.\n\nRenders with kramdown-rfc and xml2rfc; the one kramdown-rfc note, RFC 9334 cited both inline and in the YAML header, is also on master.\n",
+      "createdAt": "2026-09-30T22:06:12Z",
+      "updatedAt": "2026-09-30T22:06:12Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "2366c3882858a9bdb5472c5d4fc9ca0c11e4891e",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "freshness-originator",
+      "headRefOid": "8803603bcd99d5c89b461ed811eee66b3634ea13",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
