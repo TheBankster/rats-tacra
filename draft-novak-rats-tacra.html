@@ -1053,11 +1053,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">TACRA</td>
-<td class="right">September 2026</td>
+<td class="right">October 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Novak, et al.</td>
-<td class="center">Expires 3 April 2027</td>
+<td class="center">Expires 5 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg {
 <dd class="internet-draft">draft-novak-rats-tacra-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-30" class="published">30 September 2026</time>
+<time datetime="2026-10-02" class="published">2 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-03">3 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-05">5 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ Likewise, the choice between RATS Passport and Background Check models is made o
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 5 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1670,6 +1670,9 @@ In both cases, the associated secrets remain opaque to the CAS at all times (Goa
 During Enrollment, a Credential Authority <span class="bcp14">MAY</span> use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
 During Retrieval, a Secret Vault <span class="bcp14">MAY</span> use the Credential Hint to locate the credential to return.
 The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it will not honor the hint.<a href="#section-4.4-8" class="pilcrow">¶</a></p>
+<p id="section-4.4-9">A Credential Authority <span class="bcp14">MAY</span> include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
+In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties, for example by keeping it small and, in a certificate, by placing it in a non-critical extension, which a certificate-using system that does not recognize the extension may ignore (Section 4.2 of <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>).
+Attestation Results can reveal much about the Attester's platform (Section 11 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>), and every party the credential is presented to can read what it carries, so the Credential Authority <span class="bcp14">SHOULD</span> limit what it adds to what those parties need.<a href="#section-4.4-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="binding">
@@ -1706,27 +1709,39 @@ The length prefixes make the encoding unambiguous: no two different sequences of
 The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, a protocol profile fixes a hash whose output is the size of the field.<a href="#section-4.5-5" class="pilcrow">¶</a></p>
 <p id="section-4.5-6">The Verifier <span class="bcp14">MUST</span> report in the Attestation Results the value in the freshness input of the Evidence it appraised: the value it read from the Evidence, or, where the value to expect is submitted with the Evidence as in challenge-response appraisal, that value after checking that the Evidence carries it.
 The Credential Authority (Enrollment) or Secret Vault (Retrieval) <span class="bcp14">MUST</span> recompute the digest from its own identifier, the freshness element and the Target of the request, and the CSR or CEKpub it received, and <span class="bcp14">MUST</span> reject the request unless the result equals the value reported in the Attestation Results.
-This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.
-The Freshness Kind reaches the Attester through the CAS, so the Relying Party <span class="bcp14">MUST</span> take the Freshness Kind for a Target from its own policy, not from the request, and <span class="bcp14">MUST</span> check the freshness element under that kind.<a href="#section-4.5-6" class="pilcrow">¶</a></p>
-<p id="section-4.5-7">Because the CAS is untrusted (<a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>), each value closes a substitution: without the Relying Party identifier, the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and, with a freshness element that is not single-use (an epoch, a timestamp), have it accepted by two; without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
-Because the Credential Acquisition Interface holds the Relying Party identifier rather than receiving it from the CAS, the Evidence is accepted only by the Relying Party the deployment intended.<a href="#section-4.5-7" class="pilcrow">¶</a></p>
-<p id="section-4.5-8">Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
-It takes one of three forms:<a href="#section-4.5-8" class="pilcrow">¶</a></p>
+This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.<a href="#section-4.5-6" class="pilcrow">¶</a></p>
+<p id="section-4.5-7">The Freshness Kind reaches the Attester through the CAS, so the Relying Party <span class="bcp14">MUST</span> take the Freshness Kind for a Target from its own policy, not from the request.
+The freshness element <span class="bcp14">MUST</span> be checked under that kind before a credential is issued or released.
+For the <code>absent-*</code> kinds, which return no Freshness Handle, the Relying Party makes that check.
+For the <code>present-*</code> kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated.
+The party that issues a Freshness Handle checks it; a party, the Verifier included, <span class="bcp14">MUST NOT</span> issue a Freshness Handle that it cannot check:<a href="#section-4.5-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.5-9.1">
-            <p id="section-4.5-9.1.1">Direct: the Attesting Environment writes the digest into a guest-chosen field of the hardware Evidence, such as REPORT_DATA of an AMD SEV-SNP attestation report, REPORTDATA of an Intel TDX quote, or the user data of an AWS Nitro attestation document.<a href="#section-4.5-9.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-4.5-8.1">
+            <p id="section-4.5-8.1.1">Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle, so the Verifier either recomputes the digest from the four values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.<a href="#section-4.5-8.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-4.5-9.2">
-            <p id="section-4.5-9.2.1">Nested: a lower layer owns that field (for example, a paravisor that fixes it at boot), and the digest travels in a nested attestation whose report data the guest controls, such as a vTPM quote.<a href="#section-4.5-9.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-4.5-9.3">
-            <p id="section-4.5-9.3.1">Provider-scoped: the Evidence is signed by a key shared across a provider's fleet and identifies the provider's key domain rather than a machine. The binding holds, but a Relying Party whose policy requires a per-machine identity rejects such Evidence.<a href="#section-4.5-9.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-4.5-8.2">
+            <p id="section-4.5-8.2.1">RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself: a <code>present-nonce</code> Handle is one it issued and has not been used before, and a <code>present-epoch</code> Handle is the current epoch marker.<a href="#section-4.5-8.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-4.5-10">A Relying Party <span class="bcp14">MUST NOT</span> assume the Direct form; it learns the form from the Attestation Results or from its appraisal policy.<a href="#section-4.5-10" class="pilcrow">¶</a></p>
-<p id="section-4.5-11">This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness.
+<p id="section-4.5-9">Because the CAS is untrusted (<a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>), each value closes a substitution: without the Relying Party identifier, the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and, with a freshness element that is not single-use (an epoch, a timestamp), have it accepted by two; without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
+Because the Credential Acquisition Interface holds the Relying Party identifier rather than receiving it from the CAS, the Evidence is accepted only by the Relying Party the deployment intended.<a href="#section-4.5-9" class="pilcrow">¶</a></p>
+<p id="section-4.5-10">Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
+It takes one of three forms:<a href="#section-4.5-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.5-11.1">
+            <p id="section-4.5-11.1.1">Direct: the Attesting Environment writes the digest into a guest-chosen field of the hardware Evidence, such as REPORT_DATA of an AMD SEV-SNP attestation report, REPORTDATA of an Intel TDX quote, or the user data of an AWS Nitro attestation document.<a href="#section-4.5-11.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.5-11.2">
+            <p id="section-4.5-11.2.1">Nested: a lower layer owns that field (for example, a paravisor that fixes it at boot), and the digest travels in a nested attestation whose report data the guest controls, such as a vTPM quote.<a href="#section-4.5-11.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.5-11.3">
+            <p id="section-4.5-11.3.1">Provider-scoped: the Evidence is signed by a key shared across a provider's fleet and identifies the provider's key domain rather than a machine. The binding holds, but a Relying Party whose policy requires a per-machine identity rejects such Evidence.<a href="#section-4.5-11.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.5-12">A Relying Party <span class="bcp14">MUST NOT</span> assume the Direct form; it learns the form from the Attestation Results or from its appraisal policy.<a href="#section-4.5-12" class="pilcrow">¶</a></p>
+<p id="section-4.5-13">This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness.
 It does not by itself tie the exchange to the channel over which the credential is acquired.
-Nor does it cover the Credential Type or the Credential Hint, which the CAS can change; a Relying Party <span class="bcp14">MUST NOT</span> issue or release a credential beyond what its policy allows for the attested context.<a href="#section-4.5-11" class="pilcrow">¶</a></p>
+Nor does it cover the Credential Type or the Credential Hint, which the CAS can change; a Relying Party <span class="bcp14">MUST NOT</span> issue or release a credential beyond what its policy allows for the attested context.<a href="#section-4.5-13" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="summary-of-rats-roles">

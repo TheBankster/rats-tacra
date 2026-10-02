@@ -5,10 +5,10 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 3 April 2027                           Sandelman Software Works
+Expires: 5 April 2027                           Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
-                                                       30 September 2026
+                                                          2 October 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 April 2027.
+   This Internet-Draft will expire on 5 April 2027.
 
 Copyright Notice
 
@@ -575,6 +575,19 @@ Table of Contents
    use the Credential Hint to locate the credential to return.  The RATS
    Relying Party MAY reject the request if it will not honor the hint.
 
+   A Credential Authority MAY include information from the Attestation
+   Results in the credential, for parties that accept the credential and
+   can act on that information.  In that case, the Credential Authority
+   is responsible for ensuring that what it adds does not break RATS-
+   unaware Relying Parties, for example by keeping it small and, in a
+   certificate, by placing it in a non-critical extension, which a
+   certificate-using system that does not recognize the extension may
+   ignore (Section 4.2 of [RFC5280]).  Attestation Results can reveal
+   much about the Attester's platform (Section 11 of [RFC9334]), and
+   every party the credential is presented to can read what it carries,
+   so the Credential Authority SHOULD limit what it adds to what those
+   parties need.
+
 4.5.  Binding Credential Keys to Evidence
 
    The Evidence of a credential-acquisition exchange MUST carry a digest
@@ -632,11 +645,31 @@ Table of Contents
    Attestation Results.  This is the same in the Passport and the
    Background Check model: either way, the Relying Party compares
    against a value the Verifier took from, or checked against, the
-   appraised Evidence, never one it has from the CAS alone.  The
-   Freshness Kind reaches the Attester through the CAS, so the Relying
-   Party MUST take the Freshness Kind for a Target from its own policy,
-   not from the request, and MUST check the freshness element under that
-   kind.
+   appraised Evidence, never one it has from the CAS alone.
+
+   The Freshness Kind reaches the Attester through the CAS, so the
+   Relying Party MUST take the Freshness Kind for a Target from its own
+   policy, not from the request.  The freshness element MUST be checked
+   under that kind before a credential is issued or released.  For the
+   absent-* kinds, which return no Freshness Handle, the Relying Party
+   makes that check.  For the present-* kinds, the Freshness Handle is
+   either Verifier-originated or RATS Relying Party-originated.  The
+   party that issues a Freshness Handle checks it; a party, the Verifier
+   included, MUST NOT issue a Freshness Handle that it cannot check:
+
+   *  Verifier-originated: the Verifier issues the Handle and checks it,
+      and the Relying Party relies on the Verifier's check, never on the
+      request alone.  The Evidence carries the digest, not the Handle,
+      so the Verifier either recomputes the digest from the four values
+      or, in the Background Check model, checks at the Relying Party's
+      request the same Handle the Relying Party used to recompute the
+      digest.
+
+   *  RATS Relying Party-originated: the Credential Authority
+      (Enrollment) or Secret Vault (Retrieval) issues the Handle and
+      checks it itself: a present-nonce Handle is one it issued and has
+      not been used before, and a present-epoch Handle is the current
+      epoch marker.
 
    Because the CAS is untrusted (Section 7.2), each value closes a
    substitution: without the Relying Party identifier, the CAS could
