@@ -288,6 +288,10 @@ During Enrollment, a Credential Authority MAY use the Credential Hint when assig
 During Retrieval, a Secret Vault MAY use the Credential Hint to locate the credential to return.
 The RATS Relying Party MAY reject the request if it will not honor the hint.
 
+A Credential Authority MAY include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
+In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties, for example by keeping it small and, in a certificate, by placing it in a non-critical extension, which a certificate-using system that does not recognize the extension may ignore (Section 4.2 of {{RFC5280}}).
+Attestation Results can reveal much about the Attester's platform (Section 11 of {{RFC9334}}), and every party the credential is presented to can read what it carries, so the Credential Authority SHOULD limit what it adds to what those parties need.
+
 ## Binding Credential Keys to Evidence {#binding}
 
 The Evidence of a credential-acquisition exchange MUST carry a digest of four values in its freshness input, the field of the Evidence whose content the Attester chooses:
@@ -313,7 +317,15 @@ The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of 
 The Verifier MUST report in the Attestation Results the value in the freshness input of the Evidence it appraised: the value it read from the Evidence, or, where the value to expect is submitted with the Evidence as in challenge-response appraisal, that value after checking that the Evidence carries it.
 The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from its own identifier, the freshness element and the Target of the request, and the CSR or CEKpub it received, and MUST reject the request unless the result equals the value reported in the Attestation Results.
 This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.
-The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the Freshness Kind for a Target from its own policy, not from the request, and MUST check the freshness element under that kind.
+
+The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the Freshness Kind for a Target from its own policy, not from the request.
+The freshness element MUST be checked under that kind before a credential is issued or released.
+For the `absent-*` kinds, which return no Freshness Handle, the Relying Party makes that check.
+For the `present-*` kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated.
+The party that issues a Freshness Handle checks it; a party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check:
+
+* Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle, so the Verifier either recomputes the digest from the four values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.
+* RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself: a `present-nonce` Handle is one it issued and has not been used before, and a `present-epoch` Handle is the current epoch marker.
 
 Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substitution: without the Relying Party identifier, the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and, with a freshness element that is not single-use (an epoch, a timestamp), have it accepted by two; without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
 Because the Credential Acquisition Interface holds the Relying Party identifier rather than receiving it from the CAS, the Evidence is accepted only by the Relying Party the deployment intended.
