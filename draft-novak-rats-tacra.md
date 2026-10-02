@@ -321,7 +321,8 @@ This is the same in the Passport and the Background Check model: either way, the
 The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the Freshness Kind for a Target from its own policy, not from the request.
 The freshness element MUST be checked under that kind before a credential is issued or released.
 For the `absent-*` kinds, which return no Freshness Handle, the Relying Party makes that check.
-For the `present-*` kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated, and the two are handled differently:
+For the `present-*` kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated.
+The party that issues a Freshness Handle checks it; a party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check:
 
 * Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle, so the Verifier either recomputes the digest from the four values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.
 * RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself: a `present-nonce` Handle is one it issued and has not been used before, and a `present-epoch` Handle is the current epoch marker.
