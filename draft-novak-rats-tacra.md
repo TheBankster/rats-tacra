@@ -289,8 +289,8 @@ During Retrieval, a Secret Vault MAY use the Credential Hint to locate the crede
 The RATS Relying Party MAY reject the request if it will not honor the hint.
 
 A Credential Authority MAY include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
-It is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties, for example by keeping it small and, in a certificate, by placing it in a non-critical extension, which a certificate-using system that does not recognize the extension may ignore (Section 4.2 of {{RFC5280}}).
-Attestation Results can reveal much about the Attester's platform (Section 11 of {{RFC9334}}), and every party the credential is presented to can read what it carries, so the Credential Authority limits what it adds to what those parties need.
+In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties, for example by keeping it small and, in a certificate, by placing it in a non-critical extension, which a certificate-using system that does not recognize the extension may ignore (Section 4.2 of {{RFC5280}}).
+Attestation Results can reveal much about the Attester's platform (Section 11 of {{RFC9334}}), and every party the credential is presented to can read what it carries, so the Credential Authority SHOULD limit what it adds to what those parties need.
 
 ## Binding Credential Keys to Evidence {#binding}
 
