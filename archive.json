@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-01T03:31:02.013189+00:00",
+  "timestamp": "2026-10-04T03:43:45.483734+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -60,47 +60,63 @@
       "id": "I_kwDOULZBls8AAAABTuzUwA",
       "title": "review comments from Carl W",
       "url": "https://github.com/TheBankster/rats-tacra/issues/2",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcr",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "```\nFrom: Carl Wallace Subject: [Rats] Review of draft-novak-rats-tacra-01\nArchived-At: \n <https://mailarchive.ietf.org/arch/msg/rats/D7Z6QKWcz86n0STfF9AacUCKVMA>\n\nI have reviewed both draft-novak-rats-tacra-01 and (briefly) draft-novak-lamps-tacra-est. I think TACRA seems like a good avenue to explore but the current draft buries the lede. Some comments on draft-novak-rats-tacra-01 are below.\n\n```\n",
       "createdAt": "2026-09-28T18:08:55Z",
-      "updatedAt": "2026-09-28T18:58:52Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2026-10-03T17:21:07Z",
+      "closedAt": "2026-10-03T17:21:07Z",
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Issues filed for all of Carl's comments so this is no longer needed.",
+          "createdAt": "2026-10-03T17:21:07Z",
+          "updatedAt": "2026-10-03T17:21:07Z"
+        }
+      ]
     },
     {
       "number": 3,
       "id": "I_kwDOULZBls8AAAABTvT-Zg",
       "title": "rework introduction, motivation",
       "url": "https://github.com/TheBankster/rats-tacra/issues/3",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcr",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "```\n1) Most of the abstract and the introduction seem off topic. The entire \"RUP\" concept could be dropped from this draft. The third paragraph in the abstract is the closest to describing the work of the draft (plus the architecture theme in the second paragraph). Sharpening the focus on the API exercised by the attester would greatly improve the draft. As described here, today a \"RUP\" is an entity that an attester authenticates to using some credential. This draft defines a means for the attester to obtain credentials whose issuance process has been bolstered by remote attestation. That the RP is unaware of the details of the attestation-related information that is exchanged between the attester and the credential issuer is no more relevant than an RP that is unaware what certificate management protocol is used today. One would never refer to an EST-unaware Relying Party. \n\t\n```\n",
       "createdAt": "2026-09-28T18:54:46Z",
-      "updatedAt": "2026-09-28T18:54:46Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2026-10-03T17:20:32Z",
+      "closedAt": "2026-10-03T17:20:32Z",
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "I think the concept of RUP is essential to this draft, actually. One key reason for why CC is hard to deploy is that it needs to work with existing, RATS-unaware relying parties, where credential acquisition mechanisms do not support Remote Attestation. This draft addresses both of these limitations. Yes, it is API focused and is a lot for one draft. That can be split later, but not yet.\nWe'll keep this issue in our minds as things progress.",
+          "createdAt": "2026-10-03T17:20:32Z",
+          "updatedAt": "2026-10-03T17:20:32Z"
+        }
+      ]
     },
     {
       "number": 4,
       "id": "I_kwDOULZBls8AAAABTvUkgA",
       "title": "would issued credential include information that is actionable?",
       "url": "https://github.com/TheBankster/rats-tacra/issues/4",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcr",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "```\n2) Is there any consideration of whether the issued credential may include information that a RATS-aware Relying Party could act on (without disturbing the RATS-unaware RPs)? For example, in work that I do, the certificate policy OID included in an issued certificate varies based on presentation of attestation evidence. The sentence \"while its clients and servers do not notice anything different\" would be better as \"while its clients and servers need not notice anything different\".\n```\n",
       "createdAt": "2026-09-28T18:55:36Z",
-      "updatedAt": "2026-09-30T17:23:14Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-02T20:42:50Z",
+      "closedAt": "2026-10-02T20:42:50Z",
       "comments": [
         {
           "author": "nikolaichuk7",
@@ -178,15 +194,15 @@
       "id": "I_kwDOULZBls8AAAABTvVYxA",
       "title": "design goal 1: proof",
       "url": "https://github.com/TheBankster/rats-tacra/issues/7",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcr",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "```\n5) Re: design goal 1, how does an attester prove that it should be able to retrieve a given set of credentials or cause issuance of new credentials for a given name?\n```\n",
       "createdAt": "2026-09-28T18:56:43Z",
-      "updatedAt": "2026-09-30T17:38:38Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-03T17:16:41Z",
+      "closedAt": "2026-10-03T17:16:40Z",
       "comments": [
         {
           "author": "nikolaichuk7",
@@ -326,15 +342,15 @@
       "id": "I_kwDOULZBls8AAAABT6yCSw",
       "title": "Should design goal 5 account for using different mechanisms based on whether or not the target is RATS aware (or is RATS awareness being abstracted away by credential type details)?",
       "url": "https://github.com/TheBankster/rats-tacra/issues/12",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "TheBankster",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Should design goal 5 account for using different mechanisms based on whether or not the target is RATS aware (or is RATS awareness being abstracted away by credential type details)?",
       "createdAt": "2026-09-29T13:52:42Z",
-      "updatedAt": "2026-09-29T18:35:11Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-03T17:15:19Z",
+      "closedAt": "2026-10-03T17:15:19Z",
       "comments": [
         {
           "author": "nikolaichuk7",
@@ -466,6 +482,37 @@
           "body": "The formal study compares three sources ([formal/README.md, \"Where the bound identity comes from\"](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/README.md#where-the-bound-identity-comes-from-six-more-models); ProVerif output in [rrp-source](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260926T232411Z-rrp-source.txt) and [freshness-sources](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260926T233733Z-freshness-sources.txt)):\n\n1. **Held by the Credential Acquisition Interface for each Target and mode** (the current text, Section 4.5, item 3). Only the Relying Party the deployment intended can issue, with a fresh Handle and with a shared epoch alike. It is also the only source when Initiate-Credential-Acquisition is completed locally, as the EST profile allows, since there is no response to take it from. The cost is configuration in the Attester.\n2. **Taken from the Initiate-Credential-Acquisition response.** The Evidence is still accepted by only one Relying Party, but the CAS chooses which: it can initiate at another Credential Authority, hand that response to the Attester, and that Credential Authority issues.\n3. **Not bound.** A Handle minted per Relying Party session keeps the Evidence to one Relying Party by itself; freshness that is not single-use, such as an epoch, a timestamp or a Verifier Handle that several Relying Parties accept, lets two Relying Parties accept the same Evidence.\n\nThe EST profile pull request currently binds the held identifier when there is one and the response's otherwise, with a TODO pending this decision. A middle path the models do not cover yet is for the Credential Acquisition Interface to hold a set of acceptable identifiers per Target and take the response's value only when it is in that set. I can model that option, or any other the SIG wants to weigh, the same way, and where it applies also run it on SEV-SNP hardware with the reference implementation, as drills D3 and D3b already do for the first two sources ([drills.json](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/evidence/20260930T171748Z-gcp-sev-snp/drills.json)). I would post the results here.\n",
           "createdAt": "2026-09-30T17:47:47Z",
           "updatedAt": "2026-09-30T17:47:47Z"
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "id": "I_kwDOULZBls8AAAABUpO1rA",
+      "title": "Add a discussion regarding which CAAPI attest-initiate parameters \"hit the wire\" in CAS",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/19",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "\"attest-initiate\" may get short-circuited by the CAS client and not actually result in a call to a CAS server. Even if the CAAPI call ends up carried by CAS client to CAS server, not all of the attest-initiate parameters need to be carried to the CAS server, as some may get handled locally by the CAS client.\n\nAdd the discussion of each parameter and its relationship to the CAS client/server interaction.",
+      "createdAt": "2026-10-02T16:34:51Z",
+      "updatedAt": "2026-10-03T14:56:26Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Two constraints worth keeping in that discussion:\n\n1. Only the absent-* kinds can be short-circuited, as your EST draft already says (5.1). A present-* Handle has to come from a trusted role, the Verifier or the RP (interaction models, 7.1). 4.4 says the CAS Server MUST NOT generate one; the CAS Client needs the same rule, since 7.2 treats the whole CAS as a conduit. The Attester can't tell a made-up Handle from a real one, so it's the RP's check (4.5) that catches it. The reference implementation's RP refuses both a made-up Handle and a local absent-* kind at a present-nonce Target ([est_server.py](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/impl/est_server.py#L324-L346)).\n2. The second leg carries the Target, the Credential Type and the hint anyway (5.2, 5.3), and the RP takes the Freshness Kind from its own policy whatever the CAS client did (4.5). So the first leg needs only what the issuer of the Handle needs, e.g. the Target if kinds differ per Target. With 4.5 as it is, the RP identifier never needs the wire: the CAI holds it.\n\nHappy to draft the section.",
+          "createdAt": "2026-10-02T16:54:55Z",
+          "updatedAt": "2026-10-02T16:54:55Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "> Two constraints worth keeping in that discussion:\n> \n> 1. Only the absent-* kinds can be short-circuited, as your EST draft already says (5.1). A present-* Handle has to come from a trusted role, the Verifier or the RP (interaction models, 7.1). 4.4 says the CAS Server MUST NOT generate one; the CAS Client needs the same rule, since 7.2 treats the whole CAS as a conduit. The Attester can't tell a made-up Handle from a real one, so it's the RP's check (4.5) that catches it. The reference implementation's RP refuses both a made-up Handle and a local absent-* kind at a present-nonce Target ([est_server.py](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/impl/est_server.py#L324-L346)).\n> 2. The second leg carries the Target, the Credential Type and the hint anyway (5.2, 5.3), and the RP takes the Freshness Kind from its own policy whatever the CAS client did (4.5). So the first leg needs only what the issuer of the Handle needs, e.g. the Target if kinds differ per Target. With 4.5 as it is, the RP identifier never needs the wire: the CAI holds it.\n> \n> Happy to draft the section.\n\nLet's discuss in Tuesday's TWI-SIG meeting. I envision a situation where the response to attest-initiate might differ per-target (enroll for some, retrieve for others), in which case, if freshness comes from RRP, then attest-initiate needs to hit the wire since CAS client can't know what the RRP might return.",
+          "createdAt": "2026-10-03T14:56:26Z",
+          "updatedAt": "2026-10-03T14:56:26Z"
         }
       ]
     }
@@ -908,26 +955,269 @@
       "id": "PR_kwDOULZBls8AAAABF--Jlw",
       "title": "Freshness Handle checked by its originator; Attestation Results in the credential",
       "url": "https://github.com/TheBankster/rats-tacra/pull/18",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nikolaichuk7",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #4.\n\nTwo small changes, one commit each, as offered in the review of #1 and in #4.\n\n**Who checks the freshness element.** The sentence on the Freshness Kind had the Relying Party check the freshness element in every case, which it cannot do on its own for a Freshness Handle that the Verifier originated. It now keeps the first half, that the Relying Party takes the Freshness Kind for a Target from its own policy because the kind reaches the Attester through the CAS, and says who checks the freshness element: the Relying Party, or the Verifier for a Handle the Verifier originated, with the Relying Party relying on the Verifier's check and never on the request alone. A fourth sentence says how the Verifier can check such a Handle, since the Evidence carries only the digest: by recomputing the digest, or, at the Relying Party's request, for the same Handle the Relying Party used. Without that, a CAS could have a fresh Handle checked while the digest carries an old one.\n\nThis is how the related documents divide the work. In RFC 9334 the appraising entity that sends a nonce checks it (Section 10.2), and when the Verifier generates a nonce that the Relying Party relays, the Verifier checks the Evidence (Appendix A.5). In draft-ietf-lamps-attestation-freshness-08 (Section 8), the RA/CA ensures that a nonce it generates is not reused and, for a nonce obtained from the Verifier, that the Verifier applies the same policy. The EST profile: \"The originator MUST reject `present-nonce` reuse and a stale `present-epoch`.\" A CAS that only relays a Handle does not check it.\n\nThe formal study has the case of a Verifier-originated Handle that the Relying Party validates with the Verifier, for the same Handle it hashed. With the Relying Party identifier taken from the Attester's own configuration, as the binding requires, ProVerif 2.05 proves that a certificate issued on such a Handle was intended by the Attester for that Credential Authority, and that no two Credential Authorities issue for the same CSR and Target. The committed model binds the identity before the Target; the results are for the same models rewritten to the order of master, with the same outcomes ([model](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/enrollment-verifier-handles-rrp-configured.pv), [order](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/README.md#the-order-of-the-bound-values-30-september-2026), [results](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260930T171849Z-target-first.txt#L5270-L5425)). The model covers the binding, not single use: its Handles are never consumed.\n\n**Attestation Results in the credential (#4).** In Section 4.4, after the Credential Hint paragraph: a Credential Authority MAY include information from the Attestation Results in the credential. It is responsible for not breaking RATS-unaware Relying Parties with what it adds, for example by keeping it small and, in a certificate, by using a non-critical extension, which a certificate-using system that does not recognize it may ignore (RFC 5280, Section 4.2), and it limits what it adds to what the parties that see the credential need (RFC 9334, Section 11). The same commit takes Carl Wallace's wording from his review (item 2, which Michael posted as #4) in the Introduction: clients and servers \"need not notice anything different\".\n\nOne related point this PR does not change: the table of RATS roles says \"No changes in RATS Verifier role or implementation\", but Section 4.5 asks the Verifier to report the value in the freshness input, and a Verifier that originates Handles now checks one that the Evidence carries only inside the digest. If you agree, I can adjust that row.\n\nRenders with kramdown-rfc and xml2rfc; the one kramdown-rfc note, RFC 9334 cited both inline and in the YAML header, is also on master.\n",
       "createdAt": "2026-09-30T22:06:12Z",
-      "updatedAt": "2026-09-30T22:06:12Z",
+      "updatedAt": "2026-10-02T20:42:49Z",
       "baseRepository": "TheBankster/rats-tacra",
       "baseRefName": "master",
       "baseRefOid": "2366c3882858a9bdb5472c5d4fc9ca0c11e4891e",
       "headRepository": "nikolaichuk7/rats-tacra",
       "headRefName": "freshness-originator",
-      "headRefOid": "8803603bcd99d5c89b461ed811eee66b3634ea13",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "002b4db47b1c4f496dc1a74ff85442bd3f4608ae",
+      "closedAt": "2026-10-02T20:42:49Z",
+      "mergedAt": "2026-10-02T20:42:49Z",
+      "mergedBy": "TheBankster",
+      "mergeCommit": {
+        "oid": "21a180befe938ff7c4a21a6aabf5387d585c8127"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWLChA",
+          "commit": {
+            "abbreviatedOid": "8803603"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T12:48:33Z",
+          "updatedAt": "2026-10-02T12:48:33Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I'd keep the old wording. It's stronger. I'd go for MUST NOT even. The entire point of TACRA is *zero* blast radius from moving a workload from regular to confidential computing.",
+              "createdAt": "2026-10-02T12:48:33Z",
+              "updatedAt": "2026-10-02T12:48:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWLjTw",
+          "commit": {
+            "abbreviatedOid": "8803603"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T12:49:24Z",
+          "updatedAt": "2026-10-02T12:49:24Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "Instead of \"It is responsible\", i'd be more specific: \"In that case, the Credential Authority is responsible...\"",
+              "createdAt": "2026-10-02T12:49:24Z",
+              "updatedAt": "2026-10-02T12:49:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWMJkA",
+          "commit": {
+            "abbreviatedOid": "8803603"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T12:50:26Z",
+          "updatedAt": "2026-10-02T12:50:26Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "SHOULD limit",
+              "createdAt": "2026-10-02T12:50:26Z",
+              "updatedAt": "2026-10-02T12:50:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWNYag",
+          "commit": {
+            "abbreviatedOid": "8803603"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "Needs work, comments in the review.",
+          "createdAt": "2026-10-02T12:52:38Z",
+          "updatedAt": "2026-10-02T12:52:58Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "I would change these paragraphs some. I suggest cleanly splitting the two cases: Verifier-originated freshness vs. RP-originated freshness, and how each of those two variants is handled. Right now it's not clear that you have two options to choose from, so the wording becomes confusing.",
+              "createdAt": "2026-10-02T12:52:38Z",
+              "updatedAt": "2026-10-02T12:52:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWy-EQ",
+          "commit": {
+            "abbreviatedOid": "425fc30"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T13:53:06Z",
+          "updatedAt": "2026-10-02T13:53:06Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Agreed on zero blast radius, reverted. One catch: the new 4.4 paragraph lets the CA add attestation info for RPs that act on it (Carl's policy-OID case, #4), and those RPs do notice. How about \"its RATS-unaware clients and servers do not notice anything different\"? And for the MUST NOT, a design goal \"MUST NOT require changes to RATS-unaware Relying Parties\" would fit better than the Introduction.",
+              "createdAt": "2026-10-02T13:53:06Z",
+              "updatedAt": "2026-10-02T13:53:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWzAUw",
+          "commit": {
+            "abbreviatedOid": "425fc30"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T13:53:10Z",
+          "updatedAt": "2026-10-02T13:53:10Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "Done.",
+              "createdAt": "2026-10-02T13:53:10Z",
+              "updatedAt": "2026-10-02T13:53:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWzCsQ",
+          "commit": {
+            "abbreviatedOid": "425fc30"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T13:53:14Z",
+          "updatedAt": "2026-10-02T13:53:14Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "Done. One more for this paragraph: what the CA copies in is only as fresh as the appraisal at issuance (RFC 9334, Section 10), so after a TCB recall a long-lived cert still carries it. Worth a sentence, or a SHOULD to keep such credentials short-lived?",
+              "createdAt": "2026-10-02T13:53:14Z",
+              "updatedAt": "2026-10-02T13:53:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQWzFYA",
+          "commit": {
+            "abbreviatedOid": "425fc30"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T13:53:17Z",
+          "updatedAt": "2026-10-02T13:53:17Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "Split into the two cases. Doing that showed a gap: a Verifier-originated Handle sits inside the digest, so a stock Verifier can't check it. Veraison's SEV-SNP scheme compares REPORT_DATA to its session nonce byte for byte, and Intel Trust Authority expects `SHA-512(val || iat || user data)`, its own format. So today only RP-originated works without Verifier changes, and it's what both implementations do. Options: (1) say Verifier-originated needs a binding-aware Verifier and fix the \"No changes in RATS Verifier\" row; (2) let the RP check a Verifier Handle itself when it's signed with an issue time, as ITA's are; (3) RP-originated only for now. I'd lean to (2): it also works in Passport, where the RP can't ask the Verifier. Thoughts?",
+              "createdAt": "2026-10-02T13:53:17Z",
+              "updatedAt": "2026-10-02T13:53:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQaLDhw",
+          "commit": {
+            "abbreviatedOid": "425fc30"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T19:51:51Z",
+          "updatedAt": "2026-10-02T19:51:51Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "This statement I think is still confusing: if the Relying Party did not originate the Freshness, but the Verifier did, then there is no Relying Party policy around Freshness Kind. Whichever party generates Freshness is the party that checks it.",
+              "createdAt": "2026-10-02T19:51:51Z",
+              "updatedAt": "2026-10-02T19:51:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQaNn4w",
+          "commit": {
+            "abbreviatedOid": "425fc30"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2026-10-02T19:56:20Z",
+          "updatedAt": "2026-10-02T19:57:08Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "No changes to RATS Verifier is a firm requirement, but we have plenty of runway to identify and file bugs to make sure they do it correctly, and update various other RATS documents with errata as appropriate. So I am leaning towards option (1). No party, Verifier included, should issue freshness it cannot itself check.",
+              "createdAt": "2026-10-02T19:56:20Z",
+              "updatedAt": "2026-10-02T19:57:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQaiNWQ",
+          "commit": {
+            "abbreviatedOid": "002b4db"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T20:31:34Z",
+          "updatedAt": "2026-10-02T20:31:34Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "Makes sense. Pushed your rule as a sentence before the two cases: \"The party that issues a Freshness Handle checks it; a party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check.\" With it, \"no changes\" holds. I checked both sides on a GCP SEV-SNP guest today against our Veraison deployment: with the session nonce set to the binding digest (RP-originated), the report was affirming; with a nonce Veraison minted itself and the digest over it in REPORT_DATA, it was contraindicated (\"nonce in the evidence doesn't match the session nonce\"). I can file that as a Veraison issue, with the reproduction, if that helps.",
+              "createdAt": "2026-10-02T20:31:34Z",
+              "updatedAt": "2026-10-02T20:31:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABQaiPOA",
+          "commit": {
+            "abbreviatedOid": "002b4db"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-02T20:31:37Z",
+          "updatedAt": "2026-10-02T20:31:38Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "Agree that whoever generates the Handle checks it; the new sentence says that for every party. The kind is a different question, though: it reaches the RP through the CAS, so if the RP has no policy for it, the CAS can say absent-none (or hand over the public epoch marker), and then there's no Handle for anyone to check, whoever would have issued it. I ran that on SEV-SNP today: an RP made to take the kind from the request issued a second certificate for the same Evidence, with absent-none and with the public epoch marker; the RP that pins the kind refused the absent-none one. So I'd keep master's rule from #1, that the RP takes the kind from its own policy, for both cases, and add whether the Handle is Verifier-originated: \"The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the kind for a Target, and whether its Handle is Verifier-originated, from its own policy, not from the request.\" OK if I push that?",
+              "createdAt": "2026-10-02T20:31:37Z",
+              "updatedAt": "2026-10-02T20:31:38Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
