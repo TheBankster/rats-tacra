@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Trustworthy Acquisition of Credentials via Remote Attestation</title>
+<meta content="Mark Novak" name="author">
+<meta content="Michael Richardson" name="author">
+<meta content="Henk Birkholz" name="author">
+<meta content='
+       There is a large class of "RATS-Unaware" Relying Parties (RUPs) that Attesters nevertheless need to interoperate with.
+Existing deployed services, which precede the introduction of Remote Attestation, are often difficult to change/update in significant ways due to, among other reasons, organizational friction, technological inertia, and regulatory policies.
+There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers. 
+       This document describes an architecture by which Remote Attestation is utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs.
+This architecture is intended to work with common credential acquisition protocols and mechanisms such as EST, SPIFFE/SPIRE, ACMEv2, and many others. 
+       Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how Envoy does it.
+This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the Credential Acquisition Mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
+Likewise, the choice between RATS Passport and Background Check models is made opaque to the Attester, further simplifying its development. 
+    ' name="description">
+<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="trustworthy workload identity" name="keyword">
+<meta content="remote attestation" name="keyword">
+<meta content="credential enrollment" name="keyword">
+<meta content="credential retrieval" name="keyword">
+<meta content="draft-novak-rats-tacra-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.12.2
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.9.1
+-->
+<link href="draft-novak-rats-tacra.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">TACRA</td>
+<td class="right">October 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Novak, et al.</td>
+<td class="center">Expires 9 April 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Remote ATtestation ProcedureS</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-novak-rats-tacra-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-10-06" class="published">6 October 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-04-09">9 April 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">M. Novak</div>
+<div class="org">J.P. Morgan Chase &amp; Co.</div>
+</div>
+<div class="author">
+      <div class="author-name">M. Richardson</div>
+<div class="org">Sandelman Software Works</div>
+</div>
+<div class="author">
+      <div class="author-name">H. Birkholz</div>
+<div class="org">Fraunhofer SIT</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Trustworthy Acquisition of Credentials via Remote Attestation</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">There is a large class of "RATS-Unaware" Relying Parties (RUPs) that Attesters nevertheless need to interoperate with.
+Existing deployed services, which precede the introduction of Remote Attestation, are often difficult to change/update in significant ways due to, among other reasons, organizational friction, technological inertia, and regulatory policies.
+There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document describes an architecture by which Remote Attestation is utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs.
+This architecture is intended to work with common credential acquisition protocols and mechanisms such as EST, SPIFFE/SPIRE, ACMEv2, and many others.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how Envoy does it.
+This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the Credential Acquisition Mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
+Likewise, the choice between RATS Passport and Background Check models is made opaque to the Attester, further simplifying its development.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://TheBankster.github.io/rats-tacra/draft-novak-rats-tacra.html">https://TheBankster.github.io/rats-tacra/draft-novak-rats-tacra.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-novak-rats-tacra/">https://datatracker.ietf.org/doc/draft-novak-rats-tacra/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Remote ATtestation ProcedureS Working Group mailing list (<span><a href="mailto:rats@ietf.org">mailto:rats@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/rats/">https://mailarchive.ietf.org/arch/browse/rats/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/rats/">https://www.ietf.org/mailman/listinfo/rats/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/TheBankster/rats-tacra">https://github.com/TheBankster/rats-tacra</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 9 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-reasons-for-rats-unaware-re" class="internal xref">Reasons for RATS-Unaware Relying Party Immutability</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-freshness-kind" class="internal xref">Freshness Kind</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-design-goals" class="internal xref">Design Goals</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-architecture" class="internal xref">Architecture</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-attesters-role" class="internal xref">Attester's Role</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-required-modifications-to-e" class="internal xref">Required Modifications to Existing Credential Acquisition Mechanisms</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-architecture-overview" class="internal xref">Architecture Overview</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-architecture-meeting-design" class="internal xref">Architecture Meeting Design Goals</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.5">
+                <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-binding-credential-keys-to-" class="internal xref">Binding Credential Keys to Evidence</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.6">
+                <p id="section-toc.1-1.4.2.6.1"><a href="#section-4.6" class="auto internal xref">4.6</a>.  <a href="#name-summary-of-rats-roles" class="internal xref">Summary of RATS Roles</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-credential-acquisition-api-" class="internal xref">Credential Acquisition API (CAAPI)</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-initiate-credential-acquisi" class="internal xref">Initiate-Credential-Acquisition</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-enroll-credential" class="internal xref">Enroll-Credential</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-retrieve-credential" class="internal xref">Retrieve-Credential</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-caapi-invocation-sequence" class="internal xref">CAAPI Invocation Sequence</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-credential-acquisition-inte" class="internal xref">Credential Acquisition Interface (CAI)</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-acquire-credential" class="internal xref">Acquire-Credential</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-undesirability-and-inevitab" class="internal xref">Undesirability and Inevitability of Bearer Tokens</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-credential-acquisition-syst" class="internal xref">Credential Acquisition System Considered Untrustworthy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-credential-hint" class="internal xref">Credential Hint</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-credential-scope" class="internal xref">Credential Scope</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.5">
+                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-cas-client-authentication-t" class="internal xref">CAS Client Authentication to CAS Server</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.6">
+                <p id="section-toc.1-1.7.2.6.1"><a href="#section-7.6" class="auto internal xref">7.6</a>.  <a href="#name-misdirection-of-attestation" class="internal xref">Misdirection of Attestation Result</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="intro">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Success of a technology is ultimately measured by its adoption.
+The Remote ATestation procedureS (RATS) Architecture <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> requires that RATS Relying Parties understand Attestation Results, execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
+A change in Evidence may lead to a change in either the Attestation Results or Appraisal Policy for Attestation Results.
+However, it is common for authentication and authorization policies on Relying Parties to remain static for long periods of time.
+This is achieved by limiting which entities get to receive the credentials used for authentication and authorization, rather than have the Relying Party make complex decisions based on the credential's changing content.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">One key requirement for successful deployment of Remote Attestation-capable workloads is minimal blast radius.
+When a workload is moved from a legacy to a remotely attestable Trusted Execution Environment, that workload can use Remote Attestation to obtain a stable and trustworthy Identity Document, while its clients and servers do not notice anything different.
+For that, a mechanism is required by means of which a Secret Vault or a Credential Authority takes on the role of RATS Relying Party.
+This provides an intermediation between Attestation Results and the RATS-Unaware Relying Parties whose authentication and authorization policies may precede the introduction of Remotely Attestable Workloads and remain static for long periods of time.
+For the RATS-Unaware Relying Parties, these adoption barriers are eliminated, as these RUPs are capable of authenticating their clients utilizing Identity Document types they are already familiar with.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">In summary, rather than using Remote Attestation directly against the RUP, the Attester uses it to obtain from the RATS Relying Party a key, bearer token or proof-of-possession credential that is compatible with the RUP.
+This document details an Architecture by which legacy Identity Document issuance mechanisms are replaced or modified such that functionally identical Identity Documents are issued, but with the additional prerequisite of successful Remote Attestation of the workloads in question.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<div id="reasons-for-rats-unaware-relying-party-immutability">
+<section id="section-1.1">
+        <h3 id="name-reasons-for-rats-unaware-re">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-reasons-for-rats-unaware-re" class="section-name selfRef">Reasons for RATS-Unaware Relying Party Immutability</a>
+        </h3>
+<p id="section-1.1-1">The most important and most common scenario addressed here is that of a workload that employs Remote Attestation but whose Relying Party has no capacity to process Attestation Results or execute Appraisal Policy for Attestation Results.
+This RATS-Unaware Relying Party is typically unable to make the corresponding changes for a number of reasons:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-2.1">
+            <p id="section-1.1-2.1.1">It may be a compiled object or container provided by a third party<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.2">
+            <p id="section-1.1-2.2.1">Or it may be implemented in a language not easily changed or upgraded with new capabilities<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.3">
+            <p id="section-1.1-2.3.1">Further, such a system may require extensive and significant review by an authority before changes to the core algorithm can be made<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.4">
+            <p id="section-1.1-2.4.1">Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-3">In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the pre-shared key, bearer token, or proof-of-possession credential obtained by the workload following Remote Attestation matches that expected by the RUP.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.1">
+          <p id="section-2-2.1.1">Proof-of-Possession Credential: a credential that requires a private asymmetric signing key to sign statements using this credential<a href="#section-2-2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.1.2.1">
+              <p id="section-2-2.1.2.1.1">PKIX certificate <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span><a href="#section-2-2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.1.2.2">
+              <p id="section-2-2.1.2.2.1">WIMSE Workload Identity Certificate (WIC) and Workload Identity Token (WIT) <span>[<a href="#WIMSE" class="cite xref">WIMSE</a>]</span><a href="#section-2-2.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.1.2.3">
+              <p id="section-2-2.1.2.3.1">etc.<a href="#section-2-2.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li class="normal" id="section-2-2.2">
+          <p id="section-2-2.2.1">Bearer Token Credential: a credential that does not require proof of possession of a secret to use:<a href="#section-2-2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.2.2.1">
+              <p id="section-2-2.2.2.1.1">Pre-shared symmetric key<a href="#section-2-2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.2">
+              <p id="section-2-2.2.2.2.1">API key<a href="#section-2-2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.3">
+              <p id="section-2-2.2.2.3.1">JSON Web Token JWT <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span><a href="#section-2-2.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.2.2.4">
+              <p id="section-2-2.2.2.4.1">etc.<a href="#section-2-2.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li class="normal" id="section-2-2.3">
+          <p id="section-2-2.3.1">Credential Type: a catch-all term for any concrete credential type from the two lists above<a href="#section-2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.4">
+          <p id="section-2-2.4.1">Credential, a.k.a. Identity Document: an instance of a Credential Type<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.5">
+          <p id="section-2-2.5.1">Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, <span>[<a href="#SPIFFE" class="cite xref">SPIFFE</a>]</span>/<span>[<a href="#SPIRE" class="cite xref">SPIRE</a>]</span>, <span>[<a href="#RFC8555" class="cite xref">RFC8555</a>]</span>, <span>[<a href="#DAA" class="cite xref">DAA</a>]</span>, etc.<a href="#section-2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.6">
+          <p id="section-2-2.6.1">Credential Acquisition System (CAS): a client-server architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.7">
+          <p id="section-2-2.7.1">Credential Acquisition Mode: one of<a href="#section-2-2.7.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-2-2.7.2">
+<li id="section-2-2.7.2.1">
+              <p id="section-2-2.7.2.1.1">Credential Enrollment (minting new proof-of-possession credential), or<a href="#section-2-2.7.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-2-2.7.2.2">
+              <p id="section-2-2.7.2.2.1">Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)<a href="#section-2-2.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+</li>
+        <li class="normal" id="section-2-2.8">
+          <p id="section-2-2.8.1">Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.9">
+          <p id="section-2-2.9.1">Target: the RATS-unaware Relying Party for which the Attester seeks credentials<a href="#section-2-2.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.10">
+          <p id="section-2-2.10.1">Credential Hint: optional, implementation-defined information supplied by the Attester about the credential it expects. The Attester <span class="bcp14">MAY</span> obtain the hint from runtime configuration. A RATS Relying Party <span class="bcp14">MAY</span> use the hint, ignore it, or reject the request. This document does not specify the hint's syntax or meaning.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.11">
+          <p id="section-2-2.11.1">CSK: Credential Signing Key for proof-of-possession credentials; CSKpri and CSKpub refer to the private and public portions, respectively<a href="#section-2-2.11.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.12">
+          <p id="section-2-2.12.1">CEK: Credential Encryption Key for retrieved secrets; CEKpri and CEKpub refer to the private and public portions, respectively<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.13">
+          <p id="section-2-2.13.1">Freshness Handle: a Handle as defined in <span>[<a href="#INTERACTION-MODELS" class="cite xref">INTERACTION-MODELS</a>]</span> (for example an attestation nonce or an Epoch Marker), bound into Evidence to demonstrate freshness<a href="#section-2-2.13.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.14">
+          <p id="section-2-2.14.1">Freshness Kind: how freshness is established for one credential-acquisition exchange; see <a href="#freshness-kind" class="auto internal xref">Section 2.1</a><a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-2-3">Note: WITs are JWTs that require key confirmation.
+That makes them proof-of-possession credentials, whereas JWTs are used without key confirmation and are thus considered bearer tokens.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<div id="freshness-kind">
+<section id="section-2.1">
+        <h3 id="name-freshness-kind">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-freshness-kind" class="section-name selfRef">Freshness Kind</a>
+        </h3>
+<p id="section-2.1-1">This document classifies Evidence freshness for a credential-acquisition exchange by combining the methods in Section 10 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> with whether Initiate-Credential-Acquisition (<a href="#Initiate-Credential-Acquisition" class="auto internal xref">Section 5.1</a>) returns a Freshness Handle.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2"><code>present-*</code> kinds return a Freshness Handle; the Attester binds that Handle into Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).
+<code>absent-*</code> kinds return no Handle; the Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">The Freshness Kind is one of:<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1-4.1">
+            <p id="section-2.1-4.1.1"><code>absent-timestamp</code>: no Freshness Handle is returned; the Attester binds a timestamp from a trusted clock into Evidence (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.1)<a href="#section-2.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.1-4.2">
+            <p id="section-2.1-4.2.1"><code>absent-none</code>: no Freshness Handle is returned; Evidence carries no freshness claim<a href="#section-2.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.1-4.3">
+            <p id="section-2.1-4.3.1"><code>absent-epoch</code>: no Freshness Handle is returned; the Attester binds an epoch marker already held locally into Evidence (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.3)<a href="#section-2.1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.1-4.4">
+            <p id="section-2.1-4.4.1"><code>present-nonce</code>: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester binds that Handle into Evidence (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.2)<a href="#section-2.1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.1-4.5">
+            <p id="section-2.1-4.5.1"><code>present-epoch</code>: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester binds that Handle into Evidence and retries Initiate-Credential-Acquisition if the epoch has moved (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.3)<a href="#section-2.1-4.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="design-goals">
+<section id="section-3">
+      <h2 id="name-design-goals">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-design-goals" class="section-name selfRef">Design Goals</a>
+      </h2>
+<p id="section-3-1">This architecture is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG <span>[<a href="#TWISIGCharter" class="cite xref">TWISIGCharter</a>]</span> which has published a set of Definitions <span>[<a href="#TWISIGDef" class="cite xref">TWISIGDef</a>]</span> and Requirements <span>[<a href="#TWISIGReq" class="cite xref">TWISIGReq</a>]</span>.
+The requirements published by the TWI SIG are deliberately high-level.
+The design goals specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3-2">
+<li id="section-3-2.1">
+          <p id="section-3-2.1.1"><span class="bcp14">MUST</span> support mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.<a href="#section-3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.2">
+          <p id="section-3-2.2.1"><span class="bcp14">MUST</span> support current and future credential formats:<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-2.2.2.1">
+              <p id="section-3-2.2.2.1.1">X.509 Certificates<a href="#section-3-2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.2">
+              <p id="section-3-2.2.2.2.1">WIMSE Workload Identity Certificates (WICs)<a href="#section-3-2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.3">
+              <p id="section-3-2.2.2.3.1">WIMSE Workload Identity Tokens (WITs)<a href="#section-3-2.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.4">
+              <p id="section-3-2.2.2.4.1">Bearer tokens (JWTs, API Keys)<a href="#section-3-2.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.5">
+              <p id="section-3-2.2.2.5.1">TPM 2.0 DAA Group Certificates (for Replica workloads)<a href="#section-3-2.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.6">
+              <p id="section-3-2.2.2.6.1">Pre-shared keys<a href="#section-3-2.2.2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.2.2.7">
+              <p id="section-3-2.2.2.7.1">Future formats through architectural extensibility<a href="#section-3-2.2.2.7.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li id="section-3-2.3">
+          <p id="section-3-2.3.1"><span class="bcp14">SHOULD</span> limit the trust boundary expansion of the Attesting Environment to the minimum<a href="#section-3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.4">
+          <p id="section-3-2.4.1"><span class="bcp14">MUST</span> support, transparently to the Attester, most current and future Credential Acquisition Mechanisms:<a href="#section-3-2.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-2.4.2.1">
+              <p id="section-3-2.4.2.1.1">EST (RFC 7030)<a href="#section-3-2.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.2">
+              <p id="section-3-2.4.2.2.1">SPIFFE/SPIRE<a href="#section-3-2.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.3">
+              <p id="section-3-2.4.2.3.1">ACMEv2 (RFC 8555)<a href="#section-3-2.4.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.4">
+              <p id="section-3-2.4.2.4.1">TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)<a href="#section-3-2.4.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3-2.4.2.5">
+              <p id="section-3-2.4.2.5.1">Future mechanisms through architectural extensibility<a href="#section-3-2.4.2.5.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</li>
+        <li id="section-3-2.5">
+          <p id="section-3-2.5.1"><span class="bcp14">MUST</span> support Workloads utilizing different Credential Acquisition Mechanisms per-target<a href="#section-3-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.6">
+          <p id="section-3-2.6.1"><span class="bcp14">MUST</span> support both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester<a href="#section-3-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.7">
+          <p id="section-3-2.7.1"><span class="bcp14">MUST</span> support most current and future RATS Verifiers, Credential Authorities, and Secret Vaults, transparently to the Attester<a href="#section-3-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.8">
+          <p id="section-3-2.8.1"><span class="bcp14">MUST NOT</span> assume that the Attester has network access<a href="#section-3-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.9">
+          <p id="section-3-2.9.1"><span class="bcp14">MUST</span> be compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation<a href="#section-3-2.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-2.10">
+          <p id="section-3-2.10.1"><span class="bcp14">SHOULD</span> restrict visibility of fetched secrets to the Attester, specifically excluding visibility by the CAS Client and CAS Server<a href="#section-3-2.10.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+</section>
+</div>
+<div id="architecture">
+<section id="section-4">
+      <h2 id="name-architecture">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-architecture" class="section-name selfRef">Architecture</a>
+      </h2>
+<div id="attesters-role">
+<section id="section-4.1">
+        <h3 id="name-attesters-role">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-attesters-role" class="section-name selfRef">Attester's Role</a>
+        </h3>
+<ol start="1" type="1" class="normal type-1" id="section-4.1-1">
+<li id="section-4.1-1.1">
+            <p id="section-4.1-1.1.1">At the Attester level, all work is performed by a new Acquire-Credential call through a dedicated ENVOY-like <span>[<a href="#ENVOY" class="cite xref">ENVOY</a>]</span> Credential Acquisition Interface (CAI) which handles all the underlying complexity; this maximally simplifies Attester development.<a href="#section-4.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-1.2">
+            <p id="section-4.1-1.2.1">To acquire credentials, CAI always uses a two-phase sequence:<a href="#section-4.1-1.2.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.1-1.2.2">
+<li id="section-4.1-1.2.2.1">
+                <p id="section-4.1-1.2.2.1.1">It requests and obtains a Freshness Kind (<a href="#freshness-kind" class="auto internal xref">Section 2.1</a>); freshness <span class="bcp14">MAY</span> come from the Verifier, or the Relying Party, or <span class="bcp14">MAY</span> even be empty <span>[<a href="#INTERACTION-MODELS" class="cite xref">INTERACTION-MODELS</a>]</span> <span>[<a href="#ATTESTATION-FRESHNESS" class="cite xref">ATTESTATION-FRESHNESS</a>]</span><a href="#section-4.1-1.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-4.1-1.2.2.2">
+                <p id="section-4.1-1.2.2.2.1">It then generates and sends out Evidence, which is how the Attester demonstrates its security, possession of cryptographic key material, and capabilities<a href="#section-4.1-1.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
+</li>
+          <li id="section-4.1-1.3">
+            <p id="section-4.1-1.3.1">The Attester receives either an error or a newly acquired credential<a href="#section-4.1-1.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="required-modifications-to-existing-credential-acquisition-mechanisms">
+<section id="section-4.2">
+        <h3 id="name-required-modifications-to-e">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-required-modifications-to-e" class="section-name selfRef">Required Modifications to Existing Credential Acquisition Mechanisms</a>
+        </h3>
+<p id="section-4.2-1">It is not a goal, and, at any rate, it is not possible, to leave credential acquisition protocols and mechanisms (EST, SPIFFE/SPIRE, etc.) unmodified.
+These mechanisms currently do not support Remote Attestation, for the following reasons:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2-2">
+<li id="section-4.2-2.1">
+            <p id="section-4.2-2.1.1">None of the existing broadly deployed Credential Acquisition Mechanisms support this two-phase sequence, but all appear extensible to accommodate such changes without a lot of additional effort, and without risking backwards compatibility. CAS protocols <span class="bcp14">MUST</span> be able to carry Initiate-Credential-Acquisition; they need not be nonce-based.<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-2.2">
+            <p id="section-4.2-2.2.1">The credentials that these existing mechanisms return are typically visible in plaintext to the control plane (the CAS Client and the CAS Server), whereas it is a common requirement to keep the knowledge of authentication secrets to the Attesters and a small number of trusted services, such as Secret Vaults and HSMs.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="architecture-overview">
+<section id="section-4.3">
+        <h3 id="name-architecture-overview">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-architecture-overview" class="section-name selfRef">Architecture Overview</a>
+        </h3>
+<span id="name-tacra-architecture"></span><div id="fig-tacra">
+<figure id="figure-1">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-4.3-1.1">
+<pre>
+  Attesting
+  Environment      ┌─────── Credential Acquisition System ─────────┐
+┌─[Attester]───┐   │ SPIRE Agent,                   SPIRE Server,  │
+│   Workload   │   │ EST Client,...                 EST Server,... │
+│┌───&lt;CAI&gt;────┐│   │┌──────────────┐  Credential   ┌──────────────┐│
+││    CAI     ││   ││  CAS Client  │  Acquisition  │  CAS Server  ││
+││ Library or ││   ││┌────────────┐│   Protocol    │┌────────────┐││
+││ Container  ││   │││   TACRA    ││ (EST, SPIRE,  ││   TACRA    │││
+││┌─&lt;CAAPI&gt;──┐││   │││ CAS Client ││     etc.)     ││ CAS Server │││
+│││  CAAPI   ├┼┼───┼┼►  Plug-in   │├───────────────┼►  Plug-in   │││
+│││  Client  │││   ││└────────────┘│               │└──────────┬─┘││
+││└──────────┘││   │└──────────────┘               └───────────┼──┘│
+││┌──────────┐││   └───────────────────────────────────────────┼───┘
+│││ Platform │││                    ┌─Retrieve Key/Credential──┴──┐
+│││ Plug-in  │││                    │        ┌─Remote Attestation─┤
+││└─────┬────┘││                    │        │         ┌─Mint New─┘
+│└──────┼─────┘├───┐                │        │         │ Credential
+└───────┼──────┘   │   ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
+┌───────▼──────┐   │   │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
+├&lt;Platform ABI&gt;┤   │   └──────────────┘ │ Verifier │ │ Authority   │
+│ (Quote, RNG, │   │                    └──────────┘ └─────────────┘
+│     etc.)    │ ┌─▼─[RATS-Unaware RP]───────────────┐
+└──────────────┘ │ Existing Unmodified Relying Party │
+                 └───────────────────────────────────┘
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-tacra-architecture" class="selfRef">TACRA architecture</a>
+          </figcaption></figure>
+</div>
+<p id="section-4.3-2">This Architecture assumes the existence of a Credential Acquisition System (CAS), such as Enrollment over Secure Transport (EST), Secure Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated Certificate Management Environment (ACMEv2), etc., that comprises a client and a server.
+The CAS Client is presumed to be running on the Attester's system, but outside the Attesting Environment.
+The CAS Server is a remote service invoked by the CAS Client over the CAS protocol.
+Which CAS protocol is used <span class="bcp14">MUST</span> remain opaque to the Attester.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.3-3">The Attester (the workload) runs inside an Attesting Environment, such as a Confidential Computing Trusted Execution Environment or TEE.
+It obtains credentials by invoking the Credential Acquisition Interface (CAI), defined in this document.
+CAI insulates the Attester from all the details of platform-specific and protocol-specific aspects and services involved in Remote Attestation and credential enrollment/retrieval.
+The CAI <span class="bcp14">MAY</span> be a statically or dynamically linked library, an Envoy-style sidecar, or any other mechanism, but it <span class="bcp14">MUST</span> be part of the Attesting Environment.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4">CAI interacts with the outside world on behalf of the Attester via two channels:<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.3-5">
+<li id="section-4.3-5.1">
+            <p id="section-4.3-5.1.1">With the underlying hardware platform to utilize its platform-specific functions, such as generating keys and obtaining evidence, via the platform-type-specific plugin, and<a href="#section-4.3-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.3-5.2">
+            <p id="section-4.3-5.2.1">With the Credential Acquisition System Client, via the well-defined Credential Acquisition API (CAAPI), also outlined later in this document.<a href="#section-4.3-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="architecture-meeting-design-goals">
+<section id="section-4.4">
+        <h3 id="name-architecture-meeting-design">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-architecture-meeting-design" class="section-name selfRef">Architecture Meeting Design Goals</a>
+        </h3>
+<p id="section-4.4-1">In the text that follows, numbers in the format "(Goal #)" refer to the corresponding numbered items in the list of Design Goals in the opening section of this document.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-2">CAAPI and the Platform Plug-in being the only two communication mechanisms needed to interact with the outside world, no network or storage stack are needed by the Attester (Goal 8).
+The server side of CAAPI is part of the CAS Client.
+There can be as many Credential Acquisition Client implementations as there are Credential Acquisition Mechanisms (Goal 4): EST Client, SPIRE Agent, etc.
+There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets (Goal 5).
+Existing CAS Clients are extended to support Remote Attestation via dedicated CAS Client Plug-ins.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.4-3">The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement (Goal 1).
+If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result.
+It is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type it requires.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.4-4">The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester's behalf (Goal 7).
+The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support (Goal 2).
+Existing Credential Acquisition Servers are extended to support Remote Attestation via dedicated CAS Server Plug-ins.
+The CAS Server's interactions with the Verifier are those of a conduit, not of a Relying Party.
+When Initiate-Credential-Acquisition returns a Verifier-originated or RATS Relying Party-originated Freshness Handle, the CAS Server obtains that Handle and forwards it; it <span class="bcp14">MUST NOT</span> generate <code>present-nonce</code> or <code>present-epoch</code> values.
+In the Passport model, the CAS Server forwards Evidence to the Verifier and forwards the resulting Attestation Results to the Credential Authority or Secret Vault, which remain the Relying Parties that execute Appraisal Policy for Attestation Results.
+In the Background Check model, the Relying Party typically obtains Attestation Results from the Verifier directly; the CAS Server need not be on that path.
+The CAS Server <span class="bcp14">MUST NOT</span> appraise, modify, or replace Attestation Results.
+These Verifier exchanges are opaque to the Attester.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
+<p id="section-4.4-5">This arrangement shields the Attester developers from having to know the details of the platform on which the Attester runs (Goal 9).
+It restricts the unavoidable expansion of the Attesting Environment to the smallest possible amount (Goal 3).
+There is no difference, from the standpoint of the Attester, whether the RATS Passport or Background Check model is being used (Goal 6).<a href="#section-4.4-5" class="pilcrow">¶</a></p>
+<p id="section-4.4-6">Under the covers and opaquely to the Attester, the Credential Acquisition Interface discovers and utilizes one of two Credential Acquisition Modes: Enrollment and Retrieval.
+Enrollment corresponds to minting new proof-of-possession credentials, and Retrieval is used to fetch preshared keys, bearer tokens and shared proof-of-possession credentials (e.g., for Replica workloads).
+In both cases, the associated secrets remain opaque to the CAS at all times (Goal 10) even if the credential, such as an X.509 certificate, is public and can be returned in plaintext.<a href="#section-4.4-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4-7.1">
+            <p id="section-4.4-7.1.1">Enrollment: the Credential Acquisition Interface generates a CSK and a CSR. The CSR carries CSKpub and, being self-signed, proves possession of CSKpri. The CSR <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>, so that the Credential Authority can be sure the CSR was produced on the Attester's platform that the Evidence describes. Carrying Evidence inside the CSR (<span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>) does not replace this binding.<a href="#section-4.4-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-7.2">
+            <p id="section-4.4-7.2.1">Retrieval: the Credential Acquisition Interface generates an asymmetric encryption key CEK. CEKpub <span class="bcp14">MUST</span> be bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>. The resulting secrets are encrypted to CEKpub, ensuring that only the Attester in possession of CEKpri can decrypt them.<a href="#section-4.4-7.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.4-8">During both Enrollment and Retrieval, the Attester <span class="bcp14">MAY</span> supply a Credential Hint.
+During Enrollment, a Credential Authority <span class="bcp14">MAY</span> use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
+During Retrieval, a Secret Vault <span class="bcp14">MAY</span> use the Credential Hint to locate the credential to return.
+The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it will not honor the hint.<a href="#section-4.4-8" class="pilcrow">¶</a></p>
+<p id="section-4.4-9">A Credential Authority <span class="bcp14">MAY</span> include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
+In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties, for example by keeping it small and, in a certificate, by placing it in a non-critical extension, which a certificate-using system that does not recognize the extension may ignore (Section 4.2 of <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>).
+Attestation Results can reveal much about the Attester's platform (Section 11 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>), and every party the credential is presented to can read what it carries, so the Credential Authority <span class="bcp14">SHOULD</span> limit what it adds to what those parties need.<a href="#section-4.4-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="binding">
+<section id="section-4.5">
+        <h3 id="name-binding-credential-keys-to-">
+<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-binding-credential-keys-to-" class="section-name selfRef">Binding Credential Keys to Evidence</a>
+        </h3>
+<p id="section-4.5-1">The Evidence of a credential-acquisition exchange <span class="bcp14">MUST</span> carry a digest of four values in its freshness input, the field of the Evidence whose content the Attester chooses:<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.5-2">
+<li id="section-4.5-2.1">
+            <p id="section-4.5-2.1.1">the freshness element of the Freshness Kind (<a href="#freshness-kind" class="auto internal xref">Section 2.1</a>): the Freshness Handle for the <code>present-*</code> kinds, the locally held epoch marker for <code>absent-epoch</code>, the Attester's timestamp for <code>absent-timestamp</code>, and the empty string for <code>absent-none</code>;<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.5-2.2">
+            <p id="section-4.5-2.2.1">the Target of the corresponding Initiate-Credential-Acquisition call;<a href="#section-4.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.5-2.3">
+            <p id="section-4.5-2.3.1">the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;<a href="#section-4.5-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.5-2.4">
+            <p id="section-4.5-2.4.1">the subject: for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.<a href="#section-4.5-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.5-3">The digest is computed over the octet string<a href="#section-4.5-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.5-4">
+<pre>
+binding_input = len32(freshness) || freshness
+             || len32(target)    || target
+             || len32(rp_id)     || rp_id
+             || len32(subject)   || subject
+</pre><a href="#section-4.5-4" class="pilcrow">¶</a>
+</div>
+<p id="section-4.5-5">where <code>len32(x)</code> is the length of <code>x</code> in octets as a 32-bit big-endian unsigned integer; <code>freshness</code> is the freshness element, a timestamp being an 8-octet big-endian unsigned count of seconds since 1970-01-01T00:00:00Z; <code>rp_id</code> and <code>target</code> are the UTF-8 encodings of the Relying Party identifier and of the Target, each used as an exact octet string; and <code>subject</code> is the DER encoding of the CSR (Enrollment) or the DER-encoded SubjectPublicKeyInfo of CEKpub (Retrieval).
+The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
+The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, a protocol profile fixes a hash whose output is the size of the field.<a href="#section-4.5-5" class="pilcrow">¶</a></p>
+<p id="section-4.5-6">The Verifier <span class="bcp14">MUST</span> report in the Attestation Results the value in the freshness input of the Evidence it appraised: the value it read from the Evidence, or, where the value to expect is submitted with the Evidence as in challenge-response appraisal, that value after checking that the Evidence carries it.
+The Credential Authority (Enrollment) or Secret Vault (Retrieval) <span class="bcp14">MUST</span> recompute the digest from its own identifier, the freshness element and the Target of the request, and the CSR or CEKpub it received, and <span class="bcp14">MUST</span> reject the request unless the result equals the value reported in the Attestation Results.
+This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.<a href="#section-4.5-6" class="pilcrow">¶</a></p>
+<p id="section-4.5-7">The Freshness Kind reaches the Attester through the CAS, so the Relying Party <span class="bcp14">MUST</span> take the Freshness Kind for a Target from its own policy, not from the request.
+The freshness element <span class="bcp14">MUST</span> be checked under that kind before a credential is issued or released.
+For the <code>absent-*</code> kinds, which return no Freshness Handle, the Relying Party makes that check.
+For the <code>present-*</code> kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated.
+The party that issues a Freshness Handle checks it; a party, the Verifier included, <span class="bcp14">MUST NOT</span> issue a Freshness Handle that it cannot check:<a href="#section-4.5-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.5-8.1">
+            <p id="section-4.5-8.1.1">Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle, so the Verifier either recomputes the digest from the four values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.<a href="#section-4.5-8.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.5-8.2">
+            <p id="section-4.5-8.2.1">RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself: a <code>present-nonce</code> Handle is one it issued and has not been used before, and a <code>present-epoch</code> Handle is the current epoch marker.<a href="#section-4.5-8.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.5-9">Because the CAS is untrusted (<a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>), each value closes a substitution: without the Relying Party identifier, the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and, with a freshness element that is not single-use (an epoch, a timestamp), have it accepted by two; without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
+Because the Credential Acquisition Interface holds the Relying Party identifier rather than receiving it from the CAS, the Evidence is accepted only by the Relying Party the deployment intended.<a href="#section-4.5-9" class="pilcrow">¶</a></p>
+<p id="section-4.5-10">Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
+It takes one of three forms:<a href="#section-4.5-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.5-11.1">
+            <p id="section-4.5-11.1.1">Direct: the Attesting Environment writes the digest into a guest-chosen field of the hardware Evidence, such as REPORT_DATA of an AMD SEV-SNP attestation report, REPORTDATA of an Intel TDX quote, or the user data of an AWS Nitro attestation document.<a href="#section-4.5-11.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.5-11.2">
+            <p id="section-4.5-11.2.1">Nested: a lower layer owns that field (for example, a paravisor that fixes it at boot), and the digest travels in a nested attestation whose report data the guest controls, such as a vTPM quote.<a href="#section-4.5-11.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.5-11.3">
+            <p id="section-4.5-11.3.1">Provider-scoped: the Evidence is signed by a key shared across a provider's fleet and identifies the provider's key domain rather than a machine. The binding holds, but a Relying Party whose policy requires a per-machine identity rejects such Evidence.<a href="#section-4.5-11.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.5-12">A Relying Party <span class="bcp14">MUST NOT</span> assume the Direct form; it learns the form from the Attestation Results or from its appraisal policy.<a href="#section-4.5-12" class="pilcrow">¶</a></p>
+<p id="section-4.5-13">This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness.
+It does not by itself tie the exchange to the channel over which the credential is acquired.
+Nor does it cover the Credential Type or the Credential Hint, which the CAS can change; a Relying Party <span class="bcp14">MUST NOT</span> issue or release a credential beyond what its policy allows for the attested context.<a href="#section-4.5-13" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="summary-of-rats-roles">
+<section id="section-4.6">
+        <h3 id="name-summary-of-rats-roles">
+<a href="#section-4.6" class="section-number selfRef">4.6. </a><a href="#name-summary-of-rats-roles" class="section-name selfRef">Summary of RATS Roles</a>
+        </h3>
+<span id="name-rats-roles-in-tacra"></span><div id="tab-rats-roles">
+<table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-rats-roles-in-tacra" class="selfRef">RATS roles in TACRA</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">TACRA Component</th>
+              <th class="text-left" rowspan="1" colspan="1">RATS Role</th>
+              <th class="text-left" rowspan="1" colspan="1">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Attester</td>
+              <td class="text-left" rowspan="1" colspan="1">Attester</td>
+              <td class="text-left" rowspan="1" colspan="1">Attesting Environment extended and complemented by CAI, CAAPI, Platform Plug-in</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">CAI</td>
+              <td class="text-left" rowspan="1" colspan="1">Part of Attester</td>
+              <td class="text-left" rowspan="1" colspan="1">Library or Sidecar assisting Attester in obtaining credentials</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Platform Plug-in</td>
+              <td class="text-left" rowspan="1" colspan="1">Part of Attester</td>
+              <td class="text-left" rowspan="1" colspan="1">Invoked by CAI to perform platform-specific Remote Attestation and key generation operations</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">CAAPI Client</td>
+              <td class="text-left" rowspan="1" colspan="1">Part of Attester</td>
+              <td class="text-left" rowspan="1" colspan="1">Invoked by CAI to communicate with CAS Client</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">CAS Client</td>
+              <td class="text-left" rowspan="1" colspan="1">None: Conduit only</td>
+              <td class="text-left" rowspan="1" colspan="1">CAS Client extended by Remote Attestation Plug-in, <span class="bcp14">SHOULD</span> be outside the Attester's trust boundary</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">CAS Server</td>
+              <td class="text-left" rowspan="1" colspan="1">None: Conduit only</td>
+              <td class="text-left" rowspan="1" colspan="1">CAS Server extended by Remote Attestation Plug-in; forwards Freshness Handles, Evidence, and Attestation Results; does not appraise</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Secret Vault</td>
+              <td class="text-left" rowspan="1" colspan="1">RATS Relying Party</td>
+              <td class="text-left" rowspan="1" colspan="1">Invoked in the Retrieval variant of this architecture; <span class="bcp14">SHOULD</span> encrypt retrieved results to CEKpub in order to keep it from leaking to the CAS Server</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Credential Authority</td>
+              <td class="text-left" rowspan="1" colspan="1">RATS Relying Party</td>
+              <td class="text-left" rowspan="1" colspan="1">Invoked in the Enrollment variant of this architecture</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Verifier</td>
+              <td class="text-left" rowspan="1" colspan="1">Verifier</td>
+              <td class="text-left" rowspan="1" colspan="1">No changes in RATS Verifier role or implementation</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">RATS-Unaware Relying Party</td>
+              <td class="text-left" rowspan="1" colspan="1">None</td>
+              <td class="text-left" rowspan="1" colspan="1">No changes in RUP role or implementation</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="credential-acquisition-api-caapi">
+<section id="section-5">
+      <h2 id="name-credential-acquisition-api-">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-credential-acquisition-api-" class="section-name selfRef">Credential Acquisition API (CAAPI)</a>
+      </h2>
+<p id="section-5-1">The Credential Acquisition API allows the Attester to communicate with the Credential Acquisition System.
+These APIs are invoked by the Credential Acquisition Interface, covered in the next section.
+CAAPI can be implemented using any mechanism suitable for interprocess communication, including but not limited to Protobuf/gRPC.
+Here only the high-level description is provided.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="Initiate-Credential-Acquisition">
+<section id="section-5.1">
+        <h3 id="name-initiate-credential-acquisi">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-initiate-credential-acquisi" class="section-name selfRef">Initiate-Credential-Acquisition</a>
+        </h3>
+<p id="section-5.1-1">Initiates the credential acquisition process by obtaining Freshness and validating that the indicated Target name, Credential Type, and Credential Hint, if any, are supported by the CAS.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Parameters:<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-3.1">
+            <p id="section-5.1-3.1.1">Target name, e.g., the server URI to which the Attester wishes to authenticate<a href="#section-5.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-3.2">
+            <p id="section-5.1-3.2.1">Credential Type the Attester plans to use with this Target<a href="#section-5.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-3.3">
+            <p id="section-5.1-3.3.1">Credential Hint (optional) the Attester wishes to communicate when obtaining the credential<a href="#section-5.1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-4">Returns:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-5.1">
+            <p id="section-5.1-5.1.1">On success:<a href="#section-5.1-5.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-5.1.2.1">
+                <p id="section-5.1-5.1.2.1.1">Credential acquisition mechanism: "enroll" or "retrieve"<a href="#section-5.1-5.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.1.2.2">
+                <p id="section-5.1-5.1.2.2.1">Freshness Kind (<a href="#freshness-kind" class="auto internal xref">Section 2.1</a>): one of <code>absent-timestamp</code>, <code>absent-none</code>, <code>absent-epoch</code>, <code>present-nonce</code>, or <code>present-epoch</code><a href="#section-5.1-5.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.1.2.3">
+                <p id="section-5.1-5.1.2.3.1">Freshness Handle, when the Freshness Kind is <code>present-nonce</code> or <code>present-epoch</code><a href="#section-5.1-5.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.1.2.4">
+                <p id="section-5.1-5.1.2.4.1">Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)<a href="#section-5.1-5.1.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-5.1-5.2">
+            <p id="section-5.1-5.2.1">On failure: enumerated reason for failure, such as:<a href="#section-5.1-5.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-5.2.2.1">
+                <p id="section-5.1-5.2.2.1.1">Invalid Target<a href="#section-5.1-5.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.2.2.2">
+                <p id="section-5.1-5.2.2.2.1">Unsupported Target<a href="#section-5.1-5.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.2.2.3">
+                <p id="section-5.1-5.2.2.3.1">Unsupported Credential Type<a href="#section-5.1-5.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.2.2.4">
+                <p id="section-5.1-5.2.2.4.1">Invalid Credential Hint<a href="#section-5.1-5.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.2.2.5">
+                <p id="section-5.1-5.2.2.5.1">Server error: permission failure<a href="#section-5.1-5.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.2.2.6">
+                <p id="section-5.1-5.2.2.6.1">Server error: server too busy; try again later<a href="#section-5.1-5.2.2.6.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.2.2.7">
+                <p id="section-5.1-5.2.2.7.1">Server error: server unreachable<a href="#section-5.1-5.2.2.7.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.2.2.8">
+                <p id="section-5.1-5.2.2.8.1">etc. (TBD)<a href="#section-5.1-5.2.2.8.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+</div>
+<div id="enroll-credential">
+<section id="section-5.2">
+        <h3 id="name-enroll-credential">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-enroll-credential" class="section-name selfRef">Enroll-Credential</a>
+        </h3>
+<p id="section-5.2-1">Enrolls (mints) a new proof-of-possession credential.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">Parameters:<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.2-3.1">
+            <p id="section-5.2-3.1.1">Target name matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.2-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-3.2">
+            <p id="section-5.2-3.2.1">Credential Type matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.2-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-3.3">
+            <p id="section-5.2-3.3.1">Freshness element of <a href="#binding" class="auto internal xref">Section 4.5</a>: the Freshness Handle returned by the corresponding Initiate-Credential-Acquisition call, the locally held epoch marker, or the Attester's timestamp; absent for <code>absent-none</code><a href="#section-5.2-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-3.4">
+            <p id="section-5.2-3.4.1">Evidence carrying the binding of <a href="#binding" class="auto internal xref">Section 4.5</a><a href="#section-5.2-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-3.5">
+            <p id="section-5.2-3.5.1">CSR bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a>; the CSR carries CSKpub and proves possession of CSKpri<a href="#section-5.2-3.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-3.6">
+            <p id="section-5.2-3.6.1">Credential Hint (optional) matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.2-3.6.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.2-4">Returns:<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.2-5.1">
+            <p id="section-5.2-5.1.1">On success: plaintext newly enrolled (minted) credential of the requested type<a href="#section-5.2-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-5.2">
+            <p id="section-5.2-5.2.1">On failure: enumerated reason for failure, such as:<a href="#section-5.2-5.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.2-5.2.2.1">
+                <p id="section-5.2-5.2.2.1.1">Invalid Target<a href="#section-5.2-5.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.2">
+                <p id="section-5.2-5.2.2.2.1">Unsupported Target<a href="#section-5.2-5.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.3">
+                <p id="section-5.2-5.2.2.3.1">Unsupported Credential Type<a href="#section-5.2-5.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.4">
+                <p id="section-5.2-5.2.2.4.1">Invalid Credential Hint<a href="#section-5.2-5.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.5">
+                <p id="section-5.2-5.2.2.5.1">Rejected or unsupported Credential Hint<a href="#section-5.2-5.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.6">
+                <p id="section-5.2-5.2.2.6.1">Server error: Remote Attestation failure<a href="#section-5.2-5.2.2.6.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.7">
+                <p id="section-5.2-5.2.2.7.1">Server error: permission failure<a href="#section-5.2-5.2.2.7.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.8">
+                <p id="section-5.2-5.2.2.8.1">Server error: server too busy; try again later<a href="#section-5.2-5.2.2.8.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.9">
+                <p id="section-5.2-5.2.2.9.1">Server error: server unreachable<a href="#section-5.2-5.2.2.9.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.2-5.2.2.10">
+                <p id="section-5.2-5.2.2.10.1">etc. (TBD)<a href="#section-5.2-5.2.2.10.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+</div>
+<div id="retrieve-credential">
+<section id="section-5.3">
+        <h3 id="name-retrieve-credential">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-retrieve-credential" class="section-name selfRef">Retrieve-Credential</a>
+        </h3>
+<p id="section-5.3-1">Retrieves (fetches pre-existing) credential.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">Parameters:<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-3.1">
+            <p id="section-5.3-3.1.1">Target name matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-3.2">
+            <p id="section-5.3-3.2.1">Credential Type matching that of the corresponding Initiate-Credential-Acquisition call<a href="#section-5.3-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-3.3">
+            <p id="section-5.3-3.3.1">Freshness element of <a href="#binding" class="auto internal xref">Section 4.5</a>: the Freshness Handle returned by the corresponding Initiate-Credential-Acquisition call, the locally held epoch marker, or the Attester's timestamp; absent for <code>absent-none</code><a href="#section-5.3-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-3.4">
+            <p id="section-5.3-3.4.1">Evidence carrying the binding of <a href="#binding" class="auto internal xref">Section 4.5</a><a href="#section-5.3-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-3.5">
+            <p id="section-5.3-3.5.1">CEKpub bound to the Evidence as specified in <a href="#binding" class="auto internal xref">Section 4.5</a><a href="#section-5.3-3.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-3.6">
+            <p id="section-5.3-3.6.1">Credential Hint (optional)<a href="#section-5.3-3.6.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.3-4">Returns:<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-5.1">
+            <p id="section-5.3-5.1.1">On success: wrapped (encrypted to CEKpub) credential of the requested type<a href="#section-5.3-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-5.2">
+            <p id="section-5.3-5.2.1">On failure: enumerated reason for failure, such as:<a href="#section-5.3-5.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-5.2.2.1">
+                <p id="section-5.3-5.2.2.1.1">Invalid Target<a href="#section-5.3-5.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.2">
+                <p id="section-5.3-5.2.2.2.1">Unsupported Target<a href="#section-5.3-5.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.3">
+                <p id="section-5.3-5.2.2.3.1">Invalid Credential Type<a href="#section-5.3-5.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.4">
+                <p id="section-5.3-5.2.2.4.1">Rejected or unsupported Credential Hint<a href="#section-5.3-5.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.5">
+                <p id="section-5.3-5.2.2.5.1">Server error: failed remote attestation<a href="#section-5.3-5.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.6">
+                <p id="section-5.3-5.2.2.6.1">Server error: permission failure<a href="#section-5.3-5.2.2.6.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.7">
+                <p id="section-5.3-5.2.2.7.1">Server error: remote attestation failure<a href="#section-5.3-5.2.2.7.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.8">
+                <p id="section-5.3-5.2.2.8.1">Server error: server too busy; try again later<a href="#section-5.3-5.2.2.8.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.9">
+                <p id="section-5.3-5.2.2.9.1">Server error: server unreachable<a href="#section-5.3-5.2.2.9.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3-5.2.2.10">
+                <p id="section-5.3-5.2.2.10.1">etc. (TBD)<a href="#section-5.3-5.2.2.10.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+</div>
+<div id="caapi-invocation-sequence">
+<section id="section-5.4">
+        <h3 id="name-caapi-invocation-sequence">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-caapi-invocation-sequence" class="section-name selfRef">CAAPI Invocation Sequence</a>
+        </h3>
+<p id="section-5.4-1">The caller (normally the Credential Acquisition Interface) first decides which Target it wishes to authenticate to, using which Credential Type.
+CAAPI offers no facilities for discovering these; they are decided out of band, for example from Attester runtime configuration.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.4-2">The typical invocation flow is:<a href="#section-5.4-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.4-3">
+<li id="section-5.4-3.1">
+            <p id="section-5.4-3.1.1">CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)<a href="#section-5.4-3.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-3.1.2.1">
+                <p id="section-5.4-3.1.2.1.1">Returns Freshness kind and the Credential Acquisition Mode for this Target and Credential Type<a href="#section-5.4-3.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li id="section-5.4-3.2">
+            <p id="section-5.4-3.2.1">Platform Plug-in: Generate keys and Evidence for the Credential Acquisition Mode and Freshness kind returned in step 1, with the binding of <a href="#binding" class="auto internal xref">Section 4.5</a>, whose freshness element is:<a href="#section-5.4-3.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-3.2.2.1">
+                <p id="section-5.4-3.2.2.1.1">Freshness kind of <code>present-nonce</code> or <code>present-epoch</code>: the Freshness Handle<a href="#section-5.4-3.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.4-3.2.2.2">
+                <p id="section-5.4-3.2.2.2.1">Freshness kind of <code>absent-timestamp</code>: a timestamp from a trusted clock (<span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>, Section 10.1)<a href="#section-5.4-3.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.4-3.2.2.3">
+                <p id="section-5.4-3.2.2.3.1">Freshness kind of <code>absent-epoch</code>: the locally held epoch marker<a href="#section-5.4-3.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.4-3.2.2.4">
+                <p id="section-5.4-3.2.2.4.1">Freshness kind of <code>absent-none</code>: empty (no freshness claim)<a href="#section-5.4-3.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.4-3.2.2.5">
+                <p id="section-5.4-3.2.2.5.1">In all cases, the binding covers the CSR (enrollment) or CEKpub (retrieval)<a href="#section-5.4-3.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li id="section-5.4-3.3">
+            <p id="section-5.4-3.3.1">CAAPI: Depending on which Credential Acquisition Mode is returned, either<a href="#section-5.4-3.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-3.3.2.1">
+                <p id="section-5.4-3.3.2.1.1">Enroll-Credential(Target, Credential Type, Credential Hint, freshness element, CSR, Evidence)<a href="#section-5.4-3.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.4-3.3.2.2">
+                <p id="section-5.4-3.3.2.2.1">Retrieve-Credential(Target, Credential Type, Credential Hint, freshness element, CEKpub, Evidence)<a href="#section-5.4-3.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li id="section-5.4-3.4">
+            <p id="section-5.4-3.4.1">CAI examining Enroll-Credential or Retrieve-Credential results:<a href="#section-5.4-3.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-3.4.2.1">
+                <p id="section-5.4-3.4.2.1.1">If Enroll-Credential or Retrieve-Credential fails because a <code>present-epoch</code> marker has moved (or a <code>present-nonce</code> is no longer valid), it retries from Initiate-Credential-Acquisition.<a href="#section-5.4-3.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.4-3.4.2.2">
+                <p id="section-5.4-3.4.2.2.1">These retries are not visible to the Attester.<a href="#section-5.4-3.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+        </ol>
+</section>
+</div>
+</section>
+</div>
+<div id="credential-acquisition-interface-cai">
+<section id="section-6">
+      <h2 id="name-credential-acquisition-inte">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-credential-acquisition-inte" class="section-name selfRef">Credential Acquisition Interface (CAI)</a>
+      </h2>
+<p id="section-6-1">The Credential Acquisition Interface can be implemented using any mechanism suitable for local communication, including but not limited to statically linked calls and Protobuf/gRPC.
+Here only the high-level description is provided.
+The CAI consists of a single Acquire-Credential API, outlined below.
+The Acquire-Credential implementation follows the recommended CAAPI invocation sequence.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="acquire-credential">
+<section id="section-6.1">
+        <h3 id="name-acquire-credential">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-acquire-credential" class="section-name selfRef">Acquire-Credential</a>
+        </h3>
+<p id="section-6.1-1">Orchestrates an opaque-to-Attester process by which the Attester acquires a credential that it would need to authenticate to a given Target utilizing the given Credential Type.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">Parameters:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1-3.1">
+            <p id="section-6.1-3.1.1">Target name, e.g., the server URI to which the Attester wishes to authenticate<a href="#section-6.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-3.2">
+            <p id="section-6.1-3.2.1">Credential Type the Attester plans to use with this Target<a href="#section-6.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-3.3">
+            <p id="section-6.1-3.3.1">Credential Hint (optional)<a href="#section-6.1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.1-4">All of these parameters the Attester <span class="bcp14">MAY</span> learn from runtime configuration.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.1-5">Returns:<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1-6.1">
+            <p id="section-6.1-6.1.1">On success: newly acquired credential of the requested type<a href="#section-6.1-6.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-6.2">
+            <p id="section-6.1-6.2.1">On failure: enumerated reason for failure, such as:<a href="#section-6.1-6.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1-6.2.2.1">
+                <p id="section-6.1-6.2.2.1.1">Invalid Target<a href="#section-6.1-6.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.2">
+                <p id="section-6.1-6.2.2.2.1">Unsupported Target<a href="#section-6.1-6.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.3">
+                <p id="section-6.1-6.2.2.3.1">Unsupported Credential Type<a href="#section-6.1-6.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.4">
+                <p id="section-6.1-6.2.2.4.1">Rejected or unsupported Credential Hint<a href="#section-6.1-6.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.5">
+                <p id="section-6.1-6.2.2.5.1">Server error: Remote Attestation failure<a href="#section-6.1-6.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.6">
+                <p id="section-6.1-6.2.2.6.1">Server error: permission failure<a href="#section-6.1-6.2.2.6.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.7">
+                <p id="section-6.1-6.2.2.7.1">Server error: server too busy; try again later<a href="#section-6.1-6.2.2.7.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.8">
+                <p id="section-6.1-6.2.2.8.1">Server error: server unreachable<a href="#section-6.1-6.2.2.8.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1-6.2.2.9">
+                <p id="section-6.1-6.2.2.9.1">etc. (TBD)<a href="#section-6.1-6.2.2.9.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="security">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<div id="undesirability-and-inevitability-of-bearer-tokens">
+<section id="section-7.1">
+        <h3 id="name-undesirability-and-inevitab">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-undesirability-and-inevitab" class="section-name selfRef">Undesirability and Inevitability of Bearer Tokens</a>
+        </h3>
+<p id="section-7.1-1">This specification supports but discourages the use of bearer token credentials.
+They are supported in the interest of maximizing compatibility.
+While the specification takes care to deliver bearer token credentials to the Attester securely, subsequent usage, such as using them in authentication against the RUP, still risks leaking them.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="untrusted-cas">
+<section id="section-7.2">
+        <h3 id="name-credential-acquisition-syst">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-credential-acquisition-syst" class="section-name selfRef">Credential Acquisition System Considered Untrustworthy</a>
+        </h3>
+<p id="section-7.2-1">This architecture seeks to protect credentials acquired by the Attester from disclosure to the Credential Acquisition System.
+For that reason, it does not treat the Credential Acquisition System as anything other than a conduit between the Attester and the services needed for Remote Attestation and credential issuance.
+It leaves open the possibility that the CAS Server would retrieve credentials from Secret Vault in plaintext and itself encrypt them with CEKpub so that only the Attester can read them.
+Likewise, it leaves open the possibility that there is no trust boundary between the Attester and CAS Client, and the CAS Client is therefore capable of inspecting the secrets the Attester generates and the secrets the CAS Server returns.
+Both of these options are discouraged.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">The CAS is expected to remain benevolent and not tamper with or leak the traffic between the Attester, the Verifier, and the RATS Relying Parties. However, the CAS is still untrusted, and the burden on protection from such attacks rests with these trusted endpoints.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="credential-hint">
+<section id="section-7.3">
+        <h3 id="name-credential-hint">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-credential-hint" class="section-name selfRef">Credential Hint</a>
+        </h3>
+<p id="section-7.3-1">The Credential Hint is a request, not an authorization.
+A Credential Authority or Secret Vault <span class="bcp14">MAY</span> use it when selecting issued credential properties, or locating a stored credential, and <span class="bcp14">MAY</span> ignore or reject it.
+The hint <span class="bcp14">MUST NOT</span> cause issuance or release of a credential that Appraisal Policy for Attestation Results or local issuance policy would otherwise deny.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="credential-scope">
+<section id="section-7.4">
+        <h3 id="name-credential-scope">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-credential-scope" class="section-name selfRef">Credential Scope</a>
+        </h3>
+<p id="section-7.4-1">The binding (<a href="#binding" class="auto internal xref">Section 4.5</a>) ensures that Evidence produced for one Target does not obtain a credential for another.
+It does not limit where the credential is honored once issued or released: that is the credential's scope, set, as for any credential, by the policy of the Credential Authority or Secret Vault and by the RATS-unaware Relying Parties that accept the credential.
+A certificate, for example, is bound to the identities in its subject alternative names (Section 4.2.1.6 of <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>), and a JSON Web Token can name its intended recipients in its audience claim, which a recipient not named there rejects (Section 4.1.3 of <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>).
+The scope comes from that policy and not from the request: the Credential Type and the Credential Hint, which the binding does not cover, cannot widen it (<a href="#binding" class="auto internal xref">Section 4.5</a>, <a href="#credential-hint" class="auto internal xref">Section 7.3</a>).
+A deployment that needs a credential usable only at the requested Target issues or releases it with that scope.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="cas-client-authentication-to-cas-server">
+<section id="section-7.5">
+        <h3 id="name-cas-client-authentication-t">
+<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-cas-client-authentication-t" class="section-name selfRef">CAS Client Authentication to CAS Server</a>
+        </h3>
+<p id="section-7.5-1">In this architecture, Remote Attestation is used to authenticate the Attester to the services (Secret Vault or Credential Authority) involved in Credential Issuance.
+In any given implementation, the CAS Client <span class="bcp14">MAY</span> still authenticate to the CAS Server.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
+<p id="section-7.5-2">Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.
+TODO: Define what that binding looks like.<a href="#section-7.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="misdirection-of-attestation-result">
+<section id="section-7.6">
+        <h3 id="name-misdirection-of-attestation">
+<a href="#section-7.6" class="section-number selfRef">7.6. </a><a href="#name-misdirection-of-attestation" class="section-name selfRef">Misdirection of Attestation Result</a>
+        </h3>
+<p id="section-7.6-1">A concern was raised that Attestation Results created for one Relying Party (RP) could be redirected to another Relying Party.
+Attestation Results are signed by the Verifier, so there is never a concern about integrity of the Attestation Result.<a href="#section-7.6-1" class="pilcrow">¶</a></p>
+<p id="section-7.6-2">A question was raised about whether the Attestation Results needed to be strongly bound to the intended Relying Party: such as by having the Verifier encrypt the result to the intended Relying Party, or by including the identity of the Relying Party in the results.<a href="#section-7.6-2" class="pilcrow">¶</a></p>
+<p id="section-7.6-3">For the background check model, the Relying Party picks the Verifier, and if the Evidence needs to be encrypted (such as to protect PII from the Relying Party),
+then the RP needs to communicate the identity of the Verifier to the Attester before the Evidence is transmitted.<a href="#section-7.6-3" class="pilcrow">¶</a></p>
+<p id="section-7.6-4">If the Attestation Results should be encrypted such that only a specific Relying Party can see the results, then in the background check model, then this needs to be done in the protocol between the RP and the Verifier.
+This would be beyond any transport security that was present between RP and Verifier.
+It could important if the Verifier will not be able to produce Attestation Results in a synchronous fashion, requiring the RP to return at a later time to get the result.<a href="#section-7.6-4" class="pilcrow">¶</a></p>
+<p id="section-7.6-5">In the Passport model, the Attester communicates with the Verifier directly,
+so protection of the Evidence is a problem that does not involve the Relying Party.
+If there is a need to make the Attestation Results available to a specific RP,
+then the Attester will need to obtain an encryption capable asymmetric credential for the Relying Party.
+(This would be beyond a TLS certificate, which is often capable of signatures only, used to sign the TLS messages)
+As the Attestation Results are forwarded by the Attester to the RP, it seems unreasonable that the Attester would then mis-direct the results.
+If the RP can not be trusted by the Attester to keep the Attestation Results confidential, then encrypting to the RP will not help, as the RP could just disclose it after decrypting it.<a href="#section-7.6-5" class="pilcrow">¶</a></p>
+<p id="section-7.6-6">It therefore does not seem like there are any reasonable threats to mitigate here.<a href="#section-7.6-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="iana">
+<section id="section-8">
+      <h2 id="name-iana-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-8-1">This document has no IANA actions.<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-9">
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9334">[RFC9334]</dt>
+      <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Thaler, D.</span>, <span class="refAuthor">Richardson, M.</span>, <span class="refAuthor">Smith, N.</span>, and <span class="refAuthor">W. Pan</span>, <span class="refTitle">"Remote ATtestation procedureS (RATS) Architecture"</span>, <span class="seriesInfo">RFC 9334</span>, <span class="seriesInfo">DOI 10.17487/RFC9334</span>, <time datetime="2023-01" class="refDate">January 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9334">https://www.rfc-editor.org/rfc/rfc9334</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="ATTESTATION-FRESHNESS">[ATTESTATION-FRESHNESS]</dt>
+        <dd>
+<span class="refAuthor">Tschofenig, H.</span>, <span class="refAuthor">Brockhaus, H.</span>, <span class="refAuthor">Mandel, J.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"Requesting a Freshness Nonce for Attestation Evidence in Certificate Signing Requests"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-attestation-freshness-08</span>, <time datetime="2026-07-04" class="refDate">4 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-attestation-freshness-08">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-attestation-freshness-08</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="CSR-ATTEST">[CSR-ATTEST]</dt>
+        <dd>
+<span class="refAuthor">Ounsworth, M.</span>, <span class="refAuthor">Tschofenig, H.</span>, <span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Wiseman, M.</span>, and <span class="refAuthor">N. Smith</span>, <span class="refTitle">"Use of Remote Attestation with Certification Signing Requests"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-csr-attestation-29</span>, <time datetime="2026-09-02" class="refDate">2 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-csr-attestation-29">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-csr-attestation-29</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="DAA">[DAA]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Newton, C.</span>, <span class="refAuthor">Chen, L.</span>, <span class="refAuthor">Giannetsos, T.</span>, and <span class="refAuthor">D. Thaler</span>, <span class="refTitle">"Direct Anonymous Attestation for the Remote Attestation Procedures Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-daa-09</span>, <time datetime="2026-03-02" class="refDate">2 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-rats-daa-09">https://datatracker.ietf.org/doc/html/draft-ietf-rats-daa-09</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ENVOY">[ENVOY]</dt>
+        <dd>
+<span class="refAuthor">Envoy</span>, <span class="refTitle">"The Envoy Proxy"</span>, <span>n.d.</span>, <span>&lt;<a href="https://envoyproxy.io">https://envoyproxy.io</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="INTERACTION-MODELS">[INTERACTION-MODELS]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Eckel, M.</span>, <span class="refAuthor">Pan, W.</span>, and <span class="refAuthor">E. Voit</span>, <span class="refTitle">"Reference Interaction Models for Remote Attestation Procedures"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-reference-interaction-models-18</span>, <time datetime="2026-09-17" class="refDate">17 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-rats-reference-interaction-models-18">https://datatracker.ietf.org/doc/html/draft-ietf-rats-reference-interaction-models-18</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5280">[RFC5280]</dt>
+        <dd>
+<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7030">[RFC7030]</dt>
+        <dd>
+<span class="refAuthor">Pritikin, M., Ed.</span>, <span class="refAuthor">Yee, P., Ed.</span>, and <span class="refAuthor">D. Harkins, Ed.</span>, <span class="refTitle">"Enrollment over Secure Transport"</span>, <span class="seriesInfo">RFC 7030</span>, <span class="seriesInfo">DOI 10.17487/RFC7030</span>, <time datetime="2013-10" class="refDate">October 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7030">https://www.rfc-editor.org/rfc/rfc7030</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7519">[RFC7519]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>, <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI 10.17487/RFC7519</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7519">https://www.rfc-editor.org/rfc/rfc7519</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8555">[RFC8555]</dt>
+        <dd>
+<span class="refAuthor">Barnes, R.</span>, <span class="refAuthor">Hoffman-Andrews, J.</span>, <span class="refAuthor">McCarney, D.</span>, and <span class="refAuthor">J. Kasten</span>, <span class="refTitle">"Automatic Certificate Management Environment (ACME)"</span>, <span class="seriesInfo">RFC 8555</span>, <span class="seriesInfo">DOI 10.17487/RFC8555</span>, <time datetime="2019-03" class="refDate">March 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8555">https://www.rfc-editor.org/rfc/rfc8555</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SPIFFE">[SPIFFE]</dt>
+        <dd>
+<span class="refAuthor">spiffe.io</span>, <span class="refTitle">"Secure Production Identity Framework for Everyone"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/spiffe/">https://github.com/spiffe/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SPIRE">[SPIRE]</dt>
+        <dd>
+<span class="refAuthor">spiffe.io</span>, <span class="refTitle">"SPIRE Concepts"</span>, <span>n.d.</span>, <span>&lt;<a href="https://spiffe.io/docs/latest/spire-about/spire-concepts/">https://spiffe.io/docs/latest/spire-about/spire-concepts/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="TWISIGCharter">[TWISIGCharter]</dt>
+        <dd>
+<span class="refAuthor">Confidential Computing Consortium Trustworthy Workload Identity SIG</span>, <span class="refTitle">"Trustworthy Workload Identity (TWI) Special Interest Group - Charter"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md">https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="TWISIGDef">[TWISIGDef]</dt>
+        <dd>
+<span class="refAuthor">Confidential Computing Consortium Trustworthy Workload Identity SIG</span>, <span class="refTitle">"Trustworthy Workload Identity (TWI) Special Interest Group - Definitions"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/confidential-computing/twi/blob/main/TWI_Definitions.md">https://github.com/confidential-computing/twi/blob/main/TWI_Definitions.md</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="TWISIGReq">[TWISIGReq]</dt>
+        <dd>
+<span class="refAuthor">Confidential Computing Consortium Trustworthy Workload Identity SIG</span>, <span class="refTitle">"Trustworthy Workload Identity (TWI) Special Interest Group - Requirements"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/confidential-computing/twi/blob/main/TWI_Requirements.md">https://github.com/confidential-computing/twi/blob/main/TWI_Requirements.md</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIMSE">[WIMSE]</dt>
+      <dd>
+<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Salowey, J. A.</span>, <span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Sheffer, Y.</span>, and <span class="refAuthor">Y. Rosomakho</span>, <span class="refTitle">"WIMSE Workload Credentials"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-workload-creds-02</span>, <time datetime="2026-07-02" class="refDate">2 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">The authors thank the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) Special Interest Group <span>[<a href="#TWISIGCharter" class="cite xref">TWISIGCharter</a>]</span> for the definitions <span>[<a href="#TWISIGDef" class="cite xref">TWISIGDef</a>]</span> and requirements <span>[<a href="#TWISIGReq" class="cite xref">TWISIGReq</a>]</span> that motivated this work.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Mark Novak</span></div>
+<div dir="auto" class="left"><span class="org">J.P. Morgan Chase &amp; Co.</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:mark.f.novak@jpmchase.com" class="email">mark.f.novak@jpmchase.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Michael Richardson</span></div>
+<div dir="auto" class="left"><span class="org">Sandelman Software Works</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:mcr+ietf@sandelman.ca" class="email">mcr+ietf@sandelman.ca</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Henk Birkholz</span></div>
+<div dir="auto" class="left"><span class="org">Fraunhofer SIT</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:Henk.Birkholz@ietf.contact" class="email">Henk.Birkholz@ietf.contact</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
