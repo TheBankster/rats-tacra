@@ -5,10 +5,10 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 9 April 2027                           Sandelman Software Works
+Expires: 10 April 2027                          Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
-                                                          6 October 2026
+                                                          7 October 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 April 2027.
+   This Internet-Draft will expire on 10 April 2027.
 
 Copyright Notice
 
@@ -1095,7 +1095,7 @@ Table of Contents
 
 7.6.  Misdirection of Attestation Result
 
-   A concern was raised that Attestation Results created for one Relying
+   There is a concern that Attestation Results created for one Relying
    Party (RP) could be redirected to another Relying Party.  Attestation
    Results are signed by the Verifier, so there is never a concern about
    integrity of the Attestation Result.
