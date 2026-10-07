@@ -548,7 +548,7 @@ TODO: Define what that binding looks like.
 
 ## Misdirection of Attestation Result
 
-A concern was raised that Attestation Results created for one Relying Party (RP) could be redirected to another Relying Party.
+There is a concern that Attestation Results created for one Relying Party (RP) could be redirected to another Relying Party.
 Attestation Results are signed by the Verifier, so there is never a concern about integrity of the Attestation Result.
 
 A question was raised about whether the Attestation Results needed to be strongly bound to the intended Relying Party: such as by having the Verifier encrypt the result to the intended Relying Party, or by including the identity of the Relying Party in the results.
