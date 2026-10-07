@@ -1115,8 +1115,8 @@ Table of Contents
    specific Relying Party can see the results, then in the background
    check model, then this needs to be done in the protocol between the
    RP and the Verifier.  This would be beyond any transport security
-   that was present between RP and Verifier.  It could important if the
-   Verifier will not be able to produce Attestation Results in a
+   that was present between RP and Verifier.  It could be important if
+   the Verifier will not be able to produce Attestation Results in a
    synchronous fashion, requiring the RP to return at a later time to
    get the result.
 
