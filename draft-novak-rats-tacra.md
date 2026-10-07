@@ -558,7 +558,7 @@ then the RP needs to communicate the identity of the Verifier to the Attester be
 
 If the Attestation Results should be encrypted such that only a specific Relying Party can see the results, then in the background check model, then this needs to be done in the protocol between the RP and the Verifier.
 This would be beyond any transport security that was present between RP and Verifier.
-It could important if the Verifier will not be able to produce Attestation Results in a synchronous fashion, requiring the RP to return at a later time to get the result.
+It could be important if the Verifier will not be able to produce Attestation Results in a synchronous fashion, requiring the RP to return at a later time to get the result.
 
 In the Passport model, the Attester communicates with the Verifier directly,
 so protection of the Evidence is a problem that does not involve the Relying Party.
