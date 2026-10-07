@@ -546,6 +546,29 @@ In any given implementation, the CAS Client MAY still authenticate to the CAS Se
 Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.
 TODO: Define what that binding looks like.
 
+## Misdirection of Attestation Result
+
+There is a concern that Attestation Results created for one Relying Party (RP) could be redirected to another Relying Party.
+Attestation Results are signed by the Verifier, so there is never a concern about integrity of the Attestation Result.
+
+A question was raised about whether the Attestation Results needed to be strongly bound to the intended Relying Party: such as by having the Verifier encrypt the result to the intended Relying Party, or by including the identity of the Relying Party in the results.
+
+For the background check model, the Relying Party picks the Verifier, and if the Evidence needs to be encrypted (such as to protect PII from the Relying Party),
+then the RP needs to communicate the identity of the Verifier to the Attester before the Evidence is transmitted.
+
+If the Attestation Results should be encrypted such that only a specific Relying Party can see the results, then in the background check model, then this needs to be done in the protocol between the RP and the Verifier.
+This would be beyond any transport security that was present between RP and Verifier.
+It could be important if the Verifier will not be able to produce Attestation Results in a synchronous fashion, requiring the RP to return at a later time to get the result.
+
+In the Passport model, the Attester communicates with the Verifier directly,
+so protection of the Evidence is a problem that does not involve the Relying Party.
+If there is a need to make the Attestation Results available to a specific RP,
+then the Attester will need to obtain an encryption capable asymmetric credential for the Relying Party.
+(This would be beyond a TLS certificate, which is often capable of signatures only, used to sign the TLS messages)
+As the Attestation Results are forwarded by the Attester to the RP, it seems unreasonable that the Attester would then mis-direct the results.
+If the RP can not be trusted by the Attester to keep the Attestation Results confidential, then encrypting to the RP will not help, as the RP could just disclose it after decrypting it.
+
+It therefore does not seem like there are any reasonable threats to mitigate here.
 
 # IANA Considerations {#iana}
 
