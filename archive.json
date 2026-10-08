@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-06T04:14:54.403459+00:00",
+  "timestamp": "2026-10-08T03:55:43.646379+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -280,15 +280,15 @@
       "id": "I_kwDOULZBls8AAAABTvWdWA",
       "title": "goal 9 SHOULD/ is supporting many credeentials wrong?",
       "url": "https://github.com/TheBankster/rats-tacra/issues/10",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcr",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "```\n9) Re: design goal 9, this should be a SHOULD. Also design goal 2's requirement to support \"most\" credential formats is inconsistent with this one.\n\n```\n",
       "createdAt": "2026-09-28T18:58:11Z",
-      "updatedAt": "2026-09-30T18:23:50Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-06T14:01:06Z",
+      "closedAt": "2026-10-06T14:01:06Z",
       "comments": [
         {
           "author": "TheBankster",
@@ -303,6 +303,13 @@
           "body": "On the explicit list Mark proposed, here is what \"minimum requirements around secure cryptography and evidence generation\" comes to on the platforms in use today: (1) Evidence signed by a key that chains to the platform vendor; (2) a value the workload chooses, carried in that Evidence and at least as large as the binding digest (64 octets of REPORT_DATA or REPORTDATA on SEV-SNP and TDX; on Azure the paravisor holds that field, so the value travels through the vTPM quote); (3) a way for the workload to request Evidence at run time; (4) key generation inside the workload's trust boundary. The platform shapes are measured across Google Cloud, AWS and Azure in [geoar-verifier](https://github.com/nikolaichuk7/geoar-verifier) and described in PR #1.",
           "createdAt": "2026-09-29T18:35:07Z",
           "updatedAt": "2026-09-29T18:35:07Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "The decision is to allow retrieval of one credential at a time.",
+          "createdAt": "2026-10-06T14:01:06Z",
+          "updatedAt": "2026-10-06T14:01:06Z"
         }
       ]
     },
@@ -397,15 +404,17 @@
       "id": "I_kwDOULZBls8AAAABT6yx1g",
       "title": "Is there any concern about requesting new credentials per target when reuse is possible?",
       "url": "https://github.com/TheBankster/rats-tacra/issues/14",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "TheBankster",
       "authorAssociation": "OWNER",
-      "assignees": [],
+      "assignees": [
+        "TheBankster"
+      ],
       "labels": [],
       "body": "Is there any concern about requesting new credentials per target when reuse is possible?",
       "createdAt": "2026-09-29T13:53:36Z",
-      "updatedAt": "2026-09-30T17:21:16Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-07T00:55:06Z",
+      "closedAt": "2026-10-07T00:55:06Z",
       "comments": [
         {
           "author": "nikolaichuk7",
@@ -420,6 +429,13 @@
           "body": "The decision of whether to issue new (enroll) or reuse existing (retrieve) is not made by Attester, but by the system administrator, reflected in what the system is configured to do when attest-initiate is called.\nI suspect in most real-world scenarios involving cloud, the preferred mode will be retrieve as cloud is based on large numbers of replica workloads. For longer-lived credentials that don't go to replica workloads (e.g., IoT sensors, managed endpoints) the predominant mode would be enroll, but the frequency of enrollment will be much less than that of retrieval.",
           "createdAt": "2026-09-30T17:21:16Z",
           "updatedAt": "2026-09-30T17:21:16Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "If this question comes up again, we'll update the text of the draft to make this more explicit. I think the text of the draft already makes it clear that the enroll/retrieve decision lies with the CAS.",
+          "createdAt": "2026-10-07T00:55:06Z",
+          "updatedAt": "2026-10-07T00:55:06Z"
         }
       ]
     },
@@ -431,11 +447,13 @@
       "state": "OPEN",
       "author": "TheBankster",
       "authorAssociation": "OWNER",
-      "assignees": [],
+      "assignees": [
+        "henkbirkholz"
+      ],
       "labels": [],
       "body": "Should this draft address key lifetime concepts, like rotation, deletion, revocation, etc.?",
       "createdAt": "2026-09-29T13:53:52Z",
-      "updatedAt": "2026-09-30T22:06:39Z",
+      "updatedAt": "2026-10-06T13:52:08Z",
       "closedAt": null,
       "comments": [
         {
@@ -497,7 +515,7 @@
       "labels": [],
       "body": "\"attest-initiate\" may get short-circuited by the CAS client and not actually result in a call to a CAS server. Even if the CAAPI call ends up carried by CAS client to CAS server, not all of the attest-initiate parameters need to be carried to the CAS server, as some may get handled locally by the CAS client.\n\nAdd the discussion of each parameter and its relationship to the CAS client/server interaction.",
       "createdAt": "2026-10-02T16:34:51Z",
-      "updatedAt": "2026-10-03T14:56:26Z",
+      "updatedAt": "2026-10-07T22:35:22Z",
       "closedAt": null,
       "comments": [
         {
@@ -513,8 +531,71 @@
           "body": "> Two constraints worth keeping in that discussion:\n> \n> 1. Only the absent-* kinds can be short-circuited, as your EST draft already says (5.1). A present-* Handle has to come from a trusted role, the Verifier or the RP (interaction models, 7.1). 4.4 says the CAS Server MUST NOT generate one; the CAS Client needs the same rule, since 7.2 treats the whole CAS as a conduit. The Attester can't tell a made-up Handle from a real one, so it's the RP's check (4.5) that catches it. The reference implementation's RP refuses both a made-up Handle and a local absent-* kind at a present-nonce Target ([est_server.py](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/impl/est_server.py#L324-L346)).\n> 2. The second leg carries the Target, the Credential Type and the hint anyway (5.2, 5.3), and the RP takes the Freshness Kind from its own policy whatever the CAS client did (4.5). So the first leg needs only what the issuer of the Handle needs, e.g. the Target if kinds differ per Target. With 4.5 as it is, the RP identifier never needs the wire: the CAI holds it.\n> \n> Happy to draft the section.\n\nLet's discuss in Tuesday's TWI-SIG meeting. I envision a situation where the response to attest-initiate might differ per-target (enroll for some, retrieve for others), in which case, if freshness comes from RRP, then attest-initiate needs to hit the wire since CAS client can't know what the RRP might return.",
           "createdAt": "2026-10-03T14:56:26Z",
           "updatedAt": "2026-10-03T14:56:26Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Data for this, measured on real hardware (GCP SEV-SNP, GCP TDX, AWS SEV-SNP; Background Check and Passport, 7 October). We had the CAS change, one at a time, what it relays to the RRP on Evidence made for that RRP:\n\n| the CAS sends | the RRP |\n|---|---|\n| a made-up Handle (present-nonce) | refuses: it knows the Handles it minted |\n| the Freshness Kind absent-none for a Target of another kind | refuses: the kind is the Target's, by its policy |\n| a credential type the Target does not offer | refuses |\n| another workload's Credential Hint | refuses: the CA names the attested workload itself |\n| the other credential type the Target offers | issues, for every kind but present-nonce |\n\nSo the Handle, the Target and the RRP ID are covered by the binding, the kind and the hint by the RRP's own policy, and the credential type by nothing but a present-nonce Handle minted for one Target and type. If the type matters, it belongs in the binding or in the Target's policy.\n\nOn which fields must reach the RRP: in the same runs the RRP issued for present-epoch, absent-epoch, absent-timestamp and absent-none with no attest-initiate exchange for that request (the epoch taken as published); present-nonce needs the RRP's Handle. That fits your case, Mark: initiate has to hit the wire when the freshness value comes from the RRP, or when the CAS client cannot know a Target's kind and mode.\n\nOn what Initiate costs: of 60 acquisitions on the three platforms, it took a median 259 ms of 564 ms, all but 1.35 ms of it the round trip from the guest to the CAS server (here through an SSH tunnel to our test setup); a CAS client that completes it locally for the absent-* kinds saves that round trip, and nothing else.\n",
+          "createdAt": "2026-10-07T22:35:21Z",
+          "updatedAt": "2026-10-07T22:35:21Z"
         }
       ]
+    },
+    {
+      "number": 20,
+      "id": "I_kwDOULZBls8AAAABVX4Nvw",
+      "title": "Including Relying Party identifier in Evidence and Attestation Results -- pros and cons",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/20",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "mcr"
+      ],
+      "labels": [],
+      "body": "Discuss whether RRP ID should be included in Evidence, or Attestation Results after that, and document the result in the Security Considerations Section. If it is to be included, define the entire \"system\" around it -- where it originates, who handles it, etc.\nTODO: MCR to add his thoughts including the role of TLS in protecting the information in-transit.",
+      "createdAt": "2026-10-06T13:32:44Z",
+      "updatedAt": "2026-10-07T22:35:23Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Initial indication is to leave the RRP ID out.",
+          "createdAt": "2026-10-06T13:45:08Z",
+          "updatedAt": "2026-10-06T13:45:08Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "What the attack is, as promised on Tuesday, and the threat model Mark asks for in #21. The CAS relays everything, so it can offer Evidence made for one RRP to a second RRP that trusts the same Verifier and serves a Target of the same name. If the RRP identifier is not in the binding, whether the second RRP accepts depends on the freshness:\n\n| Freshness Kind | without the RRP ID | with it |\n|---|---|---|\n| present-nonce | refused (only the first RRP minted the Handle) | refused |\n| present-epoch, absent-epoch, absent-timestamp, absent-none | **issued** | refused |\n\nProVerif finds the same for nonce, epoch and timestamp ([models and results](https://github.com/nikolaichuk7/tacra-est/blob/ca4de514996c/formal/README.md), query U1), and so does real hardware: GCP SEV-SNP, GCP TDX and AWS SEV-SNP, 7 October, in Background Check. In Passport the CAS carries the Attestation Result instead; we can measure that too.\n\nOn Mark's question whether other systems put the RP in the evidence: WebAuthn puts the RP ID's hash in the authenticator data the attestation signs, and the RP must check it (WebAuthn Level 2, \u00a76.1, \u00a78.2 and \u00a77.1 step 13); JWT has `aud`, which a recipient not named in it must reject (RFC 7519 \u00a74.1.3), and EAT may carry it (RFC 9711, Appendix D); EAR has no RP field and relies on the nonce (draft-ietf-rats-ear-04, \u00a73).\n\nSo the RRP ID can stay out if the draft says when that is not enough. A line for #21: \"An RRP whose credentials must not be obtainable at another RRP that trusts the same Verifier MUST require present-nonce.\"\n",
+          "createdAt": "2026-10-07T18:41:00Z",
+          "updatedAt": "2026-10-07T18:41:00Z"
+        },
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Measured in Passport too, as offered above: the CAS takes the Attestation Results the Verifier issued for one RRP and offers them to a second. Same table on GCP SEV-SNP, GCP TDX and AWS SEV-SNP: with the RRP ID in the binding the second RRP refuses every kind (\"eat_nonce is not the binding value\"); without it, it issues for every kind but present-nonce. So in Passport it is the CAS, not the Attester, that can misdirect the results.\n",
+          "createdAt": "2026-10-07T22:35:22Z",
+          "updatedAt": "2026-10-07T22:35:22Z"
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOULZBls8AAAABVuZF2A",
+      "title": "absent-timestamp is as fresh as the Attester's clock: measured",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/22",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Measured on real hardware (GCP SEV-SNP, GCP TDX, AWS SEV-SNP; 7 October), with the guest's wall clock set 300 s ahead, as a host that serves the guest its time could do: absent-timestamp Evidence was refused at once, then accepted from 295 s to 420 s after it was made, that is from \u0394 \u2212 clock_skew to \u0394 + max_age (max_age 120 s, clock_skew 5 s), the same Evidence each time it was offered. With the clock set behind, it was only refused. Evidence of the other kinds made with the clock ahead (present-nonce, present-epoch, absent-epoch, absent-none) was taken at once: they do not rest on the Attester's clock.\n\nOn SEV-SNP and TDX the guest's date comes from outside the TEE: Secure TSC and TDX keep the host from rescaling the guest's counter, not from setting its date ([the Linux Secure TSC series](https://patchwork.kernel.org/project/kvm/cover/20250106124633.1418972-1-nikunj@amd.com/)), and both clouds serve time by plain NTP ([Google Cloud](https://cloud.google.com/compute/docs/instances/configure-ntp), [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html)). A sentence for Security Considerations:\n\n\"absent-timestamp bounds the age of Evidence by the Attester's clock, which whoever serves it the time can set: Evidence made with the clock \u0394 ahead is accepted from \u0394 \u2212 clock_skew to \u0394 + max_age after it was made. An RRP that needs a bound on the Evidence's real age needs a Freshness Kind it supplies, or the Attester's time attested.\"\n",
+      "createdAt": "2026-10-07T22:39:06Z",
+      "updatedAt": "2026-10-07T22:39:06Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -1214,6 +1295,373 @@
               "body": "Agree that whoever generates the Handle checks it; the new sentence says that for every party. The kind is a different question, though: it reaches the RP through the CAS, so if the RP has no policy for it, the CAS can say absent-none (or hand over the public epoch marker), and then there's no Handle for anyone to check, whoever would have issued it. I ran that on SEV-SNP today: an RP made to take the kind from the request issued a second certificate for the same Evidence, with absent-none and with the public epoch marker; the RP that pins the kind refused the absent-none one. So I'd keep master's rule from #1, that the RP takes the kind from its own policy, for both cases, and add whether the Handle is Verifier-originated: \"The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the kind for a Target, and whether its Handle is Verifier-originated, from its own policy, not from the request.\" OK if I push that?",
               "createdAt": "2026-10-02T20:31:37Z",
               "updatedAt": "2026-10-02T20:31:38Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "id": "PR_kwDOULZBls8AAAABG7WOzw",
+      "title": "feat: trial text to deal with mis-direction of results",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/21",
+      "state": "OPEN",
+      "author": "mcr",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "close #20 ",
+      "createdAt": "2026-10-06T14:02:45Z",
+      "updatedAt": "2026-10-07T18:42:03Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "21a180befe938ff7c4a21a6aabf5387d585c8127",
+      "headRepository": "TheBankster/rats-tacra",
+      "headRefName": "misdirection-of-attestation-result",
+      "headRefOid": "fa23d334b3fa9ca4f496d6c47362f60e1158584e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOULZBls8AAAABRAf5vA",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T00:57:33Z",
+          "updatedAt": "2026-10-07T00:57:34Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "If the Relying Party is not trusted with PII in the Evidence, why would the Attester trust the Relying Party with the identity of the Verifier?",
+              "createdAt": "2026-10-07T00:57:33Z",
+              "updatedAt": "2026-10-07T00:57:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRAgHbA",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T00:57:57Z",
+          "updatedAt": "2026-10-07T00:57:57Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Is \" a concern was raised\" a common wording to use in I-Ds?",
+              "createdAt": "2026-10-07T00:57:57Z",
+              "updatedAt": "2026-10-07T00:57:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRAgbvw",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T00:58:32Z",
+          "updatedAt": "2026-10-07T00:58:32Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "Grammar: \"then in the b/c model, then this...\"",
+              "createdAt": "2026-10-07T00:58:32Z",
+              "updatedAt": "2026-10-07T00:58:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRAgvgQ",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T00:59:05Z",
+          "updatedAt": "2026-10-07T00:59:05Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "Grammar: \"it could important\"",
+              "createdAt": "2026-10-07T00:59:05Z",
+              "updatedAt": "2026-10-07T00:59:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRAhLvQ",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T00:59:53Z",
+          "updatedAt": "2026-10-07T00:59:53Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "All this to me is stuff that should be in the RATS security considerations, not in TACRA. Thoughts?\nPerhaps the reason it belongs to TACRA is that here the Attester never communicates directly with the RP or the Verifier, only through CAS, so has no idea who these entities are. Maybe we should state that here: this section exists because...\nThen we can dispense with \"a concern was raised...\" below.",
+              "createdAt": "2026-10-07T00:59:53Z",
+              "updatedAt": "2026-10-07T01:11:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRAm-PQ",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T01:12:11Z",
+          "updatedAt": "2026-10-07T01:12:11Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Not strictly true because it does go through CAS... CAS is, in a very real sense, less trusted than the RATS Relying Party. The RRP is at least trusted with credential issuance. The CAS is only trusted with shuttling messages back and forth.",
+              "createdAt": "2026-10-07T01:12:11Z",
+              "updatedAt": "2026-10-07T01:12:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRAohrg",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T01:16:45Z",
+          "updatedAt": "2026-10-07T01:16:45Z",
+          "comments": [
+            {
+              "originalPosition": 24,
+              "body": "I think this statement can be safely removed. Attestation Results are targeted explicitly at the RP, so there are no circumstances where they must also be kept secret from the RP.",
+              "createdAt": "2026-10-07T01:16:45Z",
+              "updatedAt": "2026-10-07T01:16:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRE_vHA",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "mcr",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T10:36:25Z",
+          "updatedAt": "2026-10-07T10:36:25Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "The high-level answer is that trust is not binary :-)    The next level is that if the RP can see the Evidence, then it might log the Evidence (which includes PII it didn't know was there).    The identity of the Verifier that the RP provides might need corroboration. \r\nBut, ultimately, you've hit the nail on why I don't love background check for inter-organizational things.",
+              "createdAt": "2026-10-07T10:36:25Z",
+              "updatedAt": "2026-10-07T10:36:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRE__pw",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "mcr",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T10:36:52Z",
+          "updatedAt": "2026-10-07T10:36:52Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "> Is \" a concern was raised\" a common wording to use in I-Ds?\r\n\r\nMaybe not.  ",
+              "createdAt": "2026-10-07T10:36:52Z",
+              "updatedAt": "2026-10-07T10:36:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRFAZHw",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "mcr",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T10:37:32Z",
+          "updatedAt": "2026-10-07T10:37:32Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "```suggestion\nThere is a concern that Attestation Results created for one Relying Party (RP) could be redirected to another Relying Party.\n```",
+              "createdAt": "2026-10-07T10:37:32Z",
+              "updatedAt": "2026-10-07T10:37:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRFBDiw",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "mcr",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T10:38:41Z",
+          "updatedAt": "2026-10-07T10:38:41Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "```suggestion\nIf the Attestation Results should be encrypted such that only a specific Relying Party can see the results, then in the background check model, this needs to be done in the protocol between the RP and the Verifier.\n```\nYou can just suggest the fix..",
+              "createdAt": "2026-10-07T10:38:41Z",
+              "updatedAt": "2026-10-07T10:38:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRFBNLA",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "mcr",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T10:38:57Z",
+          "updatedAt": "2026-10-07T10:38:57Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "```suggestion\nIt could be important if the Verifier will not be able to produce Attestation Results in a synchronous fashion, requiring the RP to return at a later time to get the result.\n```",
+              "createdAt": "2026-10-07T10:38:57Z",
+              "updatedAt": "2026-10-07T10:38:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRFB3dw",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "mcr",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T10:40:03Z",
+          "updatedAt": "2026-10-07T10:40:04Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Attester --Evidence--> Verifier\nVerifier --Attestation Results -> Attester\nAttester --> AR --> RP (CA)\n\nRight?",
+              "createdAt": "2026-10-07T10:40:04Z",
+              "updatedAt": "2026-10-07T10:40:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRFCQpA",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "mcr",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T10:40:39Z",
+          "updatedAt": "2026-10-07T10:40:39Z",
+          "comments": [
+            {
+              "originalPosition": 24,
+              "body": "okay.",
+              "createdAt": "2026-10-07T10:40:39Z",
+              "updatedAt": "2026-10-07T10:40:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRIuklA",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T16:03:03Z",
+          "updatedAt": "2026-10-07T16:03:03Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "Then I think the issue needs to be filed in RATS to note that background check is not good for inter-org attestation. TACRA is not the culprit here.",
+              "createdAt": "2026-10-07T16:03:03Z",
+              "updatedAt": "2026-10-07T16:03:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRIxSYw",
+          "commit": {
+            "abbreviatedOid": "f70bb10"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T16:06:45Z",
+          "updatedAt": "2026-10-07T16:06:45Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "> Attester --Evidence--> Verifier Verifier --Attestation Results -> Attester Attester --> AR --> RP (CA)\r\n> \r\n> Right?\r\n\r\nMy point is that unless we have point-to-point encryption that explicitly is put in to bypass the CAS, then CAS will be exposed to details of Evidence and Attestation Results, as well as capable of directing them to places other than the intended ones. I think I am okay with exposing Evidence and Attestation Results to CAS. We can note that in Security Considerations and move on. But misdirection should probably be threat modeled.",
+              "createdAt": "2026-10-07T16:06:45Z",
+              "updatedAt": "2026-10-07T16:06:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABRKcJKA",
+          "commit": {
+            "abbreviatedOid": "fa23d33"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-07T18:42:02Z",
+          "updatedAt": "2026-10-07T18:42:02Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Threat-modelled and measured in #20: https://github.com/TheBankster/rats-tacra/issues/20#issuecomment-6044448767. Without the RRP ID, a second RRP accepts misdirected Evidence for every Freshness Kind but present-nonce.",
+              "createdAt": "2026-10-07T18:42:02Z",
+              "updatedAt": "2026-10-07T18:42:02Z"
             }
           ]
         }
