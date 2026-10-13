@@ -351,7 +351,7 @@ Nor does it cover the Credential Type or the Credential Hint, which the CAS can 
 | CAI | Part of Attester | Library or Sidecar assisting Attester in obtaining credentials |
 | Platform Plug-in | Part of Attester | Invoked by CAI to perform platform-specific Remote Attestation and key generation operations |
 | CAAPI Client | Part of Attester | Invoked by CAI to communicate with CAS Client |
-| CAS Client | None: Conduit only | CAS Client extended by Remote Attestation Plug-in, SHOULD be outside the Attester's trust boundary |
+| CAS Client | None: Conduit only | CAS Client extended by Remote Attestation Plug-in, MUST be outside the Attester's trust boundary ({{untrusted-cas}}) |
 | CAS Server | None: Conduit only | CAS Server extended by Remote Attestation Plug-in; forwards Freshness Handles, Evidence, and Attestation Results; does not appraise |
 | Secret Vault | RATS Relying Party | Invoked in the Retrieval variant of this architecture; SHOULD encrypt retrieved results to CEKpub in order to keep it from leaking to the CAS Server |
 | Credential Authority | RATS Relying Party | Invoked in the Enrollment variant of this architecture |
@@ -514,15 +514,56 @@ This specification supports but discourages the use of bearer token credentials.
 They are supported in the interest of maximizing compatibility.
 While the specification takes care to deliver bearer token credentials to the Attester securely, subsequent usage, such as using them in authentication against the RUP, still risks leaking them.
 
-## Credential Acquisition System Considered Untrustworthy {#untrusted-cas}
+## Trust Model: the Credential Acquisition System as an Untrusted Conduit {#untrusted-cas}
 
+This section exists because, in this architecture, the Attester never communicates with the Verifier or the RATS Relying Party directly, only through the Credential Acquisition System, and does not know who those entities are.
+Transport security is therefore not end to end: there is a secure channel between the CAS Client and the CAS Server, and another between the CAS Server and the Verifier or the RATS Relying Party, while the CAAPI between the Attester and the CAS Client is local to the Attester's system.
 This architecture seeks to protect credentials acquired by the Attester from disclosure to the Credential Acquisition System.
-For that reason, it does not treat the Credential Acquisition System as anything other than a conduit between the Attester and the services needed for Remote Attestation and credential issuance.
-It leaves open the possibility that the CAS Server would retrieve credentials from Secret Vault in plaintext and itself encrypt them with CEKpub so that only the Attester can read them.
-Likewise, it leaves open the possibility that there is no trust boundary between the Attester and CAS Client, and the CAS Client is therefore capable of inspecting the secrets the Attester generates and the secrets the CAS Server returns.
-Both of these options are discouraged.
+For that reason, it does not treat the Credential Acquisition System as anything other than a conduit between the Attester and the services needed for Remote Attestation and credential issuance; the CAS Client and the CAS Server hold no RATS role and no credential, and they are not assumed to be benevolent.
+What a CAS that delays, replays, rewrites or redirects what it carries can obtain is bounded as follows.
 
-The CAS is expected to remain benevolent and not tamper with or leak the traffic between the Attester, the Verifier, and the RATS Relying Parties. However, the CAS is still untrusted, and the burden on protection from such attacks rests with these trusted endpoints.
+What each party holds, and what bounds it:
+
+* The Attester, with its Credential Acquisition Interface, holds CSKpri or CEKpri, the Attesting Environment, and its configuration for each Target.
+  It can produce Evidence over any value it chooses as the freshness input, and ask for any Target; the Verifier appraises its platform and its launch, and the Credential Authority or Secret Vault decides by its own policy, not by what the Attester asks.
+* The CAS Client and the CAS Server see every message in transit: the Freshness Handle, the Evidence, the CSR or CEKpub, the Credential Type and the Credential Hint, in the Passport model the Attestation Results, and the credential or the sealed container.
+  They can delay, replay and reorder messages, obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, change what the binding ({{binding}}) does not cover and, in the Passport model, choose the Verifier.
+  What bounds them is the binding, recomputed by the RATS Relying Party; the freshness element; the RATS Relying Party's policy; the Verifiers the RATS Relying Party trusts; and the container sealed to CEKpub.
+* The Verifier holds Reference Values, the hardware vendors' roots and, when it originates them, Freshness Handles.
+  It appraises Evidence and reports the freshness input it read; it decides nothing about issuance.
+* The Credential Authority and the Secret Vault hold the issuance policy, the signing key or the secrets, and the Verifiers they trust.
+  Each recomputes the binding from the request and its own knowledge ({{binding}}), checks the freshness element under the Freshness Kind of its policy, and the Secret Vault seals what it releases to CEKpub.
+
+What a CAS that is not benevolent can and cannot do:
+
+* Substitution. A request whose Target, CSR or CEKpub, or freshness element the CAS has changed is refused, because the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence ({{binding}}).
+  A machine of the CAS's own obtains nothing for the Attester's keys: not genuine, its Evidence does not chain to the vendor's root; genuine and running another launch, it fails the Target's Reference Values; genuine and running the same launch, it is an instance of the attested workload with keys of its own, and what it obtains is a credential for those keys.
+* Replay at the same RATS Relying Party. The RATS Relying Party keeps no record of a CSR or CEKpub it served; only the freshness element can refuse a second offer of the same request.
+  `present-nonce` makes one Evidence serve once, as the Handle is consumed on first use; under `present-epoch` and `absent-epoch` the same request is served again until the epoch moves, under `absent-timestamp` within the window the RATS Relying Party accepts, and under `absent-none` without limit.
+  What the CAS obtains is a second credential, or a second release, for the Attester's own key; a deployment that counts or audits credentials uses `present-nonce`.
+* Redirection to another RATS Relying Party. The CAS can offer Evidence made for one Credential Authority or Secret Vault to another that trusts the same Verifier and serves a Target of the same name.
+  Whatever that RATS Relying Party issues or releases is bound to the Attester's keys, so the CAS obtains nothing it can use; what is at stake is which RATS Relying Party serves the Attester, and who chooses it.
+  With the Relying Party identifier in the binding ({{binding}}), the second RATS Relying Party refuses every Freshness Kind, including a Freshness Handle it originated itself.
+  Without it, the choice is the CAS Server's, among the RATS Relying Parties that trust the same Verifier and serve the Target's name; `present-nonce` keeps one Evidence from serving a second RATS Relying Party, but not from serving the one the CAS Server started the exchange at.
+  A deployment that must pin the RATS Relying Party without the identifier gives each RATS Relying Party Target names of its own: the Target is bound, and a request for a Target a RATS Relying Party does not serve is refused.
+* The choice of Verifier in the Passport model. The CAS Server chooses the Verifier it sends Evidence to, and relays the Attestation Results.
+  A RATS Relying Party MUST accept Attestation Results only from a Verifier it trusts, and MUST check that the freshness input they report equals its own recomputation of the binding ({{binding}}); a Verifier of the CAS's own is then of no use to it.
+* What the binding does not cover. The Credential Type and the Credential Hint travel unbound; the RATS Relying Party's policy and the Attester's check of what it receives carry them ({{credential-hint}}, {{credential-scope}}).
+  The Freshness Kind is the RATS Relying Party's, from its policy for the Target, not the request's ({{binding}}).
+* Denial. The CAS can delay or drop any message, and obtain Freshness Handles it never uses; a RATS Relying Party bounds what it originates per client, which is where authentication of the CAS Client to the CAS Server, and of the CAS Server to the RATS Relying Party, matters ({{cas-client-auth}}).
+
+What the CAS reads. Evidence is signed, not encrypted, and the CAS Client and the CAS Server read it in transit, as the CAS Server reads the Attestation Results in the Passport model.
+Evidence identifies the platform, its firmware level and the launched software, and may identify the machine (Section 7.2 and Section 11 of {{RFC9334}}); the RATS architecture expects an entity that relays Evidence without being the Attester or the intended Verifier not to have access to it (Section 12.2 of {{RFC9334}}).
+This architecture accepts that the CAS reads Evidence and Attestation Results, and a deployment accepts it with the CAS it operates.
+A deployment that cannot accept it encrypts Evidence to the Verifier, which requires the Attester to hold the Verifier's key before it produces Evidence; this document does not specify that.
+What the CAS cannot read is CSKpri, CEKpri and the secret the Secret Vault seals to CEKpub.
+
+The CAS Client MUST be outside the Attester's trust boundary: it is not attested as part of the Attester, and a CAS Client inside that boundary could inspect the secrets the Attester generates and the secrets the CAS Server returns.
+This architecture leaves open the possibility that the CAS Server would retrieve credentials from the Secret Vault in plaintext and itself encrypt them with CEKpub so that only the Attester can read them; that option is discouraged, since it exposes the secret to the CAS Server.
+
+A compromised platform attestation key breaks every guarantee above; the Verifier's handles on it are the vendor's root and the TCB the Evidence reports.
+Under `absent-timestamp`, Evidence is as fresh as the Attester's clock.
+The credential's scope after issuance is the RATS Relying Party's policy ({{credential-scope}}), not the binding's.
 
 ## Credential Hint
 
@@ -538,7 +579,7 @@ A certificate, for example, is bound to the identities in its subject alternativ
 The scope comes from that policy and not from the request: the Credential Type and the Credential Hint, which the binding does not cover, cannot widen it ({{binding}}, {{credential-hint}}).
 A deployment that needs a credential usable only at the requested Target issues or releases it with that scope.
 
-## CAS Client Authentication to CAS Server
+## CAS Client Authentication to CAS Server {#cas-client-auth}
 
 In this architecture, Remote Attestation is used to authenticate the Attester to the services (Secret Vault or Credential Authority) involved in Credential Issuance.
 In any given implementation, the CAS Client MAY still authenticate to the CAS Server.
