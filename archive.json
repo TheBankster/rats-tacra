@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-11T03:19:22.356435+00:00",
+  "timestamp": "2026-10-15T02:41:58.462011+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -1680,6 +1680,58 @@
           ]
         }
       ]
+    },
+    {
+      "number": 23,
+      "id": "PR_kwDOULZBls8AAAABIL_nqg",
+      "title": "Trust Model: the Credential Acquisition System as an untrusted conduit, what each party holds, what a CAS can and cannot do",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/23",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "One commit on master (21a180b). It turns \"Credential Acquisition System Considered Untrustworthy\" into the Trust Model the draft has been asked for: Michael's #11 and Mark's answer there (\"Perhaps there is room for adding a 'Trust Model' section\"), the review of the EST profile of 28 September (\"most if not all of it belongs in the base TACRA draft\"), the thread of 8 October (\"to be completely sure, a full threat model is required\") and the review of the group's code on 11 October (\"once we have a comprehensive end to end understanding, then we put in only what's needed\"). It is the second pull request of the plan I sent on 27 September.\n\nWhat the section says, and where each statement comes from:\n\n| statement | source |\n|---|---|\n| why the section exists: the Attester reaches the Verifier and the RRP only through the CAS and does not know them; transport security is multi-hop | Mark on #21 (\"this section exists because\u2026\") and in the thread of 8 October; Architecture Overview, \"Which CAS protocol is used MUST remain opaque to the Attester\" |\n| the CAS Client and CAS Server are not assumed benevolent; what they hold, can do and are bounded by | the threat model sent on 8 October, Section 2; RFC 9334, Section 12.2 |\n| substitution of the Target, the CSR or CEKpub, or the freshness element is refused; a machine of the CAS's own obtains nothing for the Attester's keys | Section 4.5; measured: every substitution refused on GCP SEV-SNP, AWS SEV-SNP and GCP TDX, both RATS models, 6\u20138 October (40 committed runs re-appraised by the live verifiers, 2000 checks) and again on the group's master on 11 October (232, 232 and 142 checks) |\n| replay at the same RRP: only `present-nonce` makes one Evidence serve once | measured 8 October, 12 runs, the three platforms \u00d7 the Credential Authority and the Secret Vault \u00d7 both models, 10 of 10 outcomes each |\n| redirection to another RRP: what it yields is bound to the Attester's keys; with the identifier bound the second RRP refuses every kind, its own Handles included; without it the CAS Server chooses, and `present-nonce` does not stop the RRP it started at; Target names of its own pin the RRP | #20 (7\u20138 October, 27 runs in both regimes); ProVerif, query U1 |\n| the choice of Verifier in Passport is bounded by the Verifiers the RRP trusts and by the binding check: MUST | measured 8 October, Passport, 3 runs: Attestation Results re-signed by the CAS Server under a key of its own refused 5 of 5, the Verifier's own admitted 5 of 5; the thread of 9 October |\n| the Credential Type and the Credential Hint are unbound; the Freshness Kind is the RRP's | Section 4.5 and Section 7, Credential Hint and Credential Scope; measured 7 October, 6 runs |\n| denial: Handles minted and never used; what bounds it is authentication of the CAS, the open item of Section 7.5 | not measured; stated as the open item it is |\n| what the CAS reads, and that the architecture accepts it; encrypting Evidence to the Verifier needs the Verifier's key in the Attester's configuration and is not specified | Evidence of the 8 October runs parsed with the platforms' own libraries (CHIP_ID and the VCEK's hwID on GCP SEV-SNP; cspID on AWS; PPID, FMSPC and the launch measurements on TDX); RFC 9334, Sections 7.2, 11 and 12.2; Mark, 8 October: \"trust CAS client and CAS server with certain things like inspecting Evidence\" |\n| the CAS Client MUST be outside the Attester's trust boundary (here and in the roles table, where it was a SHOULD) | Mark, review of 28 September: \"CAS MUST be outside the Attester's trust boundary; it's not a SHOULD as CAS is not attested as part of Attester\" |\n| the CAS Server re-encrypting a plaintext secret stays \"discouraged\" | unchanged from the current text; the container is a separate pull request |\n| the assumptions: a compromised attestation key, the Attester's clock under `absent-timestamp`, the credential's scope | Section 7, Credential Scope; #22 |\n\nWhat this section does not decide, on purpose: whether the Relying Party identifier stays in the binding (#20; the section states what each choice gives, in two sentences, and follows whatever Section 4.5 ends up saying), whether Evidence is encrypted to the Verifier (left for after IETF 127, as Mark proposed), the container of the retrieved credential and the lifetime of Handles (each its own pull request). No measurement figures are in the draft text, as agreed on the EST profile; they are here and in the record with the implementation.\n\n#21 describes the same misdirection; this section covers it under \"Redirection to another RATS Relying Party\" and under the Passport Verifier choice, and it changes no line #21 touches, so the two can be merged in either order; whether #21's text stays as a subsection of its own is yours to say.\n\nThe draft builds; the one note it prints (RFC 9334 both inline and in the YAML header) pre-dates this change.\n",
+      "createdAt": "2026-10-13T14:02:11Z",
+      "updatedAt": "2026-10-13T14:02:11Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "21a180befe938ff7c4a21a6aabf5387d585c8127",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "trust-model",
+      "headRefOid": "7e84fb36cb4607549420442ac33dcd24006366e7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 24,
+      "id": "PR_kwDOULZBls8AAAABIMFuaA",
+      "title": "Freshness: the lifetime of a Handle and the maximum age of a timestamp; the subject of the binding for Retrieval",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/24",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "One commit on master (21a180b), independent of #23 (different lines; either order merges). It carries into the base draft what the EST profile had as `expires_in` and `max_age`, as asked in the review of the EST profile on 8 October (\"Expiration and age fields should probably also be reflected in the base TACRA draft\"), with the requirement and one line of why, the detail staying with the implementation (\"Does this level of detail belong in an IETF I-D?\", 26 September). It also corrects the subject of the binding for Retrieval.\n\n| statement | source |\n|---|---|\n| a Freshness Handle has a lifetime, set by its originator; Initiate-Credential-Acquisition MAY return it | the EST profile's `expires_in`; the group's mock sets 300 s (`internal/mockca/attest.go`, `nonceLifetime`) |\n| the lifetime MUST leave the Attester time to produce the Evidence, since a platform may rate-limit attestation requests | GHCB specification (AMD 56421 rev. 2.04), Section 4.1.7: firmware access is sequential, the hypervisor is recommended to rate-limit a guest, and the retry answer is defined; the Linux guest driver sleeps 2 s per retry and gives up after 60 s (`arch/x86/coco/sev/core.c`, `__handle_guest_request`; `arch/x86/include/asm/sev.h`, SNP_REQ_RETRY_DELAY, SNP_REQ_MAX_RETRY_DURATION, v7.0) |\n| SHOULD NOT be below 60 seconds | measured: on every Google Cloud SEV-SNP guest (n2d-standard-2, Milan; eight runs of 26 and 30 September and 5 October), every tenth report requested back to back waits 10.2 s, five sleeps of the driver, while a report alone takes 7.6\u20138.2 ms; the driver's own limit is about 62 s from the first attempt. AWS SEV-SNP (c6a.large): no stall in 200, 7 ms each; GCP TDX: 38.8 ms, no stall; Azure (paravisor): a per-request value reaches the hardware report about once per 2 s. The bench's Relying Parties refuse a configuration below 60 s |\n| under `absent-timestamp` the Relying Party accepts Evidence within the maximum age its policy sets and the skew it tolerates; Initiate MAY return the maximum age | the EST profile's `max_age`; the group's mock (`policyMaxAge`, \"evidence timestamp is stale\" / \"in the future\"); the bench's Relying Parties (`max_age`, `clock_skew`) |\n| the timestamp bounds the age of the Evidence by a clock that whoever serves the Attester its time can set; a Relying Party that needs a bound on the real age uses a `present-*` kind or an attested time | Section 10.1 of RFC 9334 (\"in many TEEs today, a clock is only available outside the TEE; thus, it cannot be trusted by the TEE\"); measured in #22 (7 October, the three platforms): with the guest's clock 300 s ahead, `absent-timestamp` Evidence refused at once, then accepted from 295 s to 420 s after it was made (max_age 120 s, clock_skew 5 s), the same Evidence each time; Secure TSC and TDX keep the host from rescaling the counter, not from setting the date; both clouds serve time by plain NTP |\n| the subject for Retrieval is CEKpub in the encoding the mechanism carries, which the profile fixes, not the DER-encoded SubjectPublicKeyInfo | both implementations bind the key's own octets: the group's mock a P-256 point (`ecdh.P256().NewPublicKey(cekPub)`, 65 octets), the deployed backend an MLKEM768-P256 key (1249 octets); the EST profile (#11) says \"the octets of `cek_pub`\" |\n\nNot in this change: how often the same Evidence may be served under the kinds that are not single-use (in #23, Replay), the container of the retrieved credential, and the Relying Party identifier (#20).\n\nThe draft builds; the one note it prints (RFC 9334 both inline and in the YAML header) pre-dates this change.\n",
+      "createdAt": "2026-10-13T14:09:53Z",
+      "updatedAt": "2026-10-13T14:09:53Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "21a180befe938ff7c4a21a6aabf5387d585c8127",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "freshness-lifetime",
+      "headRefOid": "c34b624632d85fbc3d25c9d3756ad8cb559a394c",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
