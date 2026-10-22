@@ -524,7 +524,7 @@ What a CAS that delays, replays, rewrites or redirects what it carries can obtai
 
 What each party holds, and what bounds it:
 
-* The Attester, with its Credential Acquisition Interface, holds CSKpri or CEKpri, the Attesting Environment, and its configuration for each Target.
+* The Attester, with its Credential Acquisition Interface, holds CSKpri or CEKpri and the Attesting Environment.
   It can produce Evidence over any value it chooses as the freshness input, and ask for any Target; the Verifier appraises its platform and its launch, and the Credential Authority or Secret Vault decides by its own policy, not by what the Attester asks.
 * The CAS Client and the CAS Server see every message in transit: the Freshness Handle, the Evidence, the CSR or CEKpub, the Credential Type and the Credential Hint, in the Passport model the Attestation Results, and the credential or the sealed container.
   They can delay, replay and reorder messages, obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, change what the binding ({{binding}}) does not cover and, in the Passport model, choose the Verifier.
