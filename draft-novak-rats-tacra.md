@@ -516,7 +516,7 @@ While the specification takes care to deliver bearer token credentials to the At
 
 ## Trust Model: the Credential Acquisition System as an Untrusted Conduit {#untrusted-cas}
 
-This section exists because in this architecture the Attester never communicates with the Verifier or the RATS Relying Party directly, only through the Credential Acquisition System, and does not know what those entities are.
+This section exists because in this architecture, the Attester never communicates with the Verifier or the RATS Relying Party directly. Instead, all messages between the Attester and these services flow through the Credential Acquisition System, and the Attester need not know what those entities are.
 Transport security is therefore not end to end: there is a secure channel between the CAS Client and the CAS Server, and another between the CAS Server and the Verifier or the RATS Relying Party, while the CAAPI between the Attester and the CAS Client is local to the Attester's system.
 This architecture seeks to protect credentials acquired by the Attester from disclosure to the Credential Acquisition System.
 For that reason, the Attester does not treat the Credential Acquisition System as anything other than a conduit between the Attester and the services needed for Remote Attestation and credential issuance; the CAS Client and the CAS Server hold no RATS role and no credential, and they are not assumed to be benevolent.
