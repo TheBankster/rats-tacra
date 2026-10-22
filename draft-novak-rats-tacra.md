@@ -178,12 +178,12 @@ The Freshness Kind is one of:
 * `present-epoch`: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester binds that Handle into Evidence and retries Initiate-Credential-Acquisition if the epoch has moved ({{RFC9334}}, Section 10.3)
 
 A Freshness Handle has a lifetime, set by its originator, after which the originator no longer accepts it; Initiate-Credential-Acquisition MAY return the lifetime with the Handle.
-The lifetime MUST leave the Attester time to produce the Evidence that carries the Handle: a platform may rate-limit attestation requests, so that an Attester waits several seconds for one report.
+The lifetime SHOULD leave the Attester time to produce the Evidence that carries the Handle: a platform may rate-limit attestation requests, so that an Attester waits several seconds for one report.
 A Freshness Handle originator SHOULD NOT set a lifetime below 60 seconds.
 
 Under `absent-timestamp`, the RATS Relying Party accepts Evidence whose timestamp is no older than the maximum age its policy sets, and no later than its own clock by more than the skew it tolerates; Initiate-Credential-Acquisition MAY return that maximum age, so that the Attester knows it.
 Section 10.1 of {{RFC9334}} notes that in many TEEs a clock is only available outside the TEE and cannot be trusted by it.
-On such a platform the timestamp bounds the age of the Evidence by a clock that whoever serves the Attester its time can set: Evidence made with that clock set ahead is accepted once the RATS Relying Party's clock reaches the timestamp, less the skew, and for the maximum age after that.
+On such a platform the timestamp bounds the age of the Evidence by a clock set by whoever serves the Attester the current time: Evidence made with that clock set ahead is accepted once the RATS Relying Party's clock reaches the timestamp, less the skew, and for the maximum age after that.
 A RATS Relying Party that needs a bound on the real age of Evidence uses a `present-*` Freshness Kind, or requires the Attester's time to be attested.
 
 
@@ -319,7 +319,13 @@ binding_input = len32(freshness) || freshness
              || len32(subject)   || subject
 ~~~
 
-where `len32(x)` is the length of `x` in octets as a 32-bit big-endian unsigned integer; `freshness` is the freshness element, a timestamp being an 8-octet big-endian unsigned count of seconds since 1970-01-01T00:00:00Z; `rp_id` and `target` are the UTF-8 encodings of the Relying Party identifier and of the Target, each used as an exact octet string; and `subject` is the DER encoding of the CSR (Enrollment) or CEKpub in the encoding the Credential Acquisition Mechanism carries it in (Retrieval), which a protocol profile fixes.
+where:
+
+* `len32(x)` is the length of `x` in octets, as a 32-bit big-endian unsigned integer;
+* `freshness` is the freshness element; a timestamp is an 8-octet big-endian unsigned count of seconds since 1970-01-01T00:00:00Z;
+* `rp_id` and `target` are the UTF-8 encodings of the Relying Party identifier and of the Target, each used as an exact octet string;
+* `subject` is, for Enrollment, the DER encoding of the CSR; for Retrieval, CEKpub in the encoding the Credential Acquisition Mechanism carries it in, which a protocol profile fixes.
+
 The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
 The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, a protocol profile fixes a hash whose output is the size of the field.
 
