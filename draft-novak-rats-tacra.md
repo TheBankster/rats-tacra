@@ -530,7 +530,7 @@ What each party holds, and what bounds it:
   They can delay, replay and reorder messages, obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, change what the binding ({{binding}}) does not cover and, in the Passport model, choose the Verifier.
   What bounds them is the binding, recomputed by the RATS Relying Party; the freshness element; the RATS Relying Party's policy; the Verifiers the RATS Relying Party trusts; and the container sealed to CEKpub.
 * The Verifier holds Reference Values, the hardware vendors' roots and, when it originates them, Freshness Handles.
-  It appraises Evidence and reports the freshness input it read; it decides nothing about issuance.
+  It appraises Evidence and reports the freshness input it read; it decides nothing about credential issuance or retrieval.
 * The Credential Authority and the Secret Vault hold the issuance policy, the signing key or the secrets, and the Verifiers they trust.
   Each recomputes the binding from the request and from what it holds ({{binding}}), checks the freshness element under the Freshness Kind of its policy, and the Secret Vault seals what it releases to CEKpub.
 
