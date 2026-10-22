@@ -536,16 +536,23 @@ What each party holds, and what bounds it:
 
 What a CAS that is not benevolent can and cannot do:
 
-* Substitution. A request whose Target, CSR or CEKpub, or freshness element the CAS has changed is refused, because the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence ({{binding}}).
-  A machine of the CAS's own obtains nothing for the Attester's keys: not genuine, its Evidence does not chain to the vendor's root; genuine and running another launch, it fails the Target's Reference Values; genuine and running the same launch, it is an instance of the attested workload with keys of its own, and what it obtains is a credential for those keys.
-* Replay at the same RATS Relying Party. The RATS Relying Party keeps no record of a CSR or CEKpub it served; only the freshness element can refuse a second offer of the same request.
-  `present-nonce` makes one Evidence serve once, as the Handle is consumed on first use; under `present-epoch` and `absent-epoch` the same request is served again until the epoch moves, under `absent-timestamp` within the window the RATS Relying Party accepts, and under `absent-none` without limit.
-  What the CAS obtains is a second credential, or a second release, for the Attester's own key; a deployment that counts or audits credentials uses `present-nonce`.
+* Substitution of a value. A request whose Target, CSR or CEKpub, or freshness element the CAS has changed is refused: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence ({{binding}}).
+* Substitution of the Attester. Evidence from a platform of the CAS's own, offered in place of the Attester's, obtains nothing for the Attester's keys:
+  * a platform that is not genuine: its Evidence does not chain to the vendor's root;
+  * a genuine platform running another launch: it fails the Target's Reference Values;
+  * a genuine platform running the same launch: it is another instance of the attested workload, with keys of its own, and what it obtains is a credential for those keys.
+* Replay at the same RATS Relying Party. The RATS Relying Party keeps no record of a CSR or CEKpub it served; only the freshness element can refuse a second offer of the same request:
+  * `present-nonce`: one Evidence serves once, as the Handle is consumed on first use;
+  * `present-epoch` and `absent-epoch`: the same request is served again until the epoch moves;
+  * `absent-timestamp`: the same request is served again within the window the RATS Relying Party accepts;
+  * `absent-none`: the same request is served again without limit.
+
+  What the CAS obtains is a second credential, or a second release, for the Attester's own key. A deployment that counts or audits credentials uses `present-nonce`.
 * Redirection to another RATS Relying Party. The CAS can offer Evidence made for one Credential Authority or Secret Vault to another that trusts the same Verifier and serves a Target of the same name.
-  Whatever that RATS Relying Party issues or releases is bound to the Attester's keys, so the CAS obtains nothing it can use; what is at stake is which RATS Relying Party serves the Attester, and who chooses it.
-  With the Relying Party identifier in the binding ({{binding}}), the second RATS Relying Party refuses every Freshness Kind, including a Freshness Handle it originated itself.
-  Without it, the choice is the CAS Server's, among the RATS Relying Parties that trust the same Verifier and serve the Target's name; `present-nonce` keeps one Evidence from serving a second RATS Relying Party, but not from serving the one the CAS Server started the exchange at.
-  A deployment that must pin the RATS Relying Party without the identifier gives each RATS Relying Party Target names of its own: the Target is bound, and a request for a Target a RATS Relying Party does not serve is refused.
+  Whatever that RATS Relying Party issues or releases is bound to the Attester's keys, so the CAS obtains nothing it can use. What is at stake is which RATS Relying Party serves the Attester, and who chooses it:
+  * with the Relying Party identifier in the binding ({{binding}}), the second RATS Relying Party refuses every Freshness Kind, including a Freshness Handle it originated itself;
+  * without it, the choice is the CAS Server's, among the RATS Relying Parties that trust the same Verifier and serve the Target's name; `present-nonce` keeps one Evidence from serving a second RATS Relying Party, but not from serving the one the CAS Server started the exchange at;
+  * a deployment that must pin the RATS Relying Party without the identifier gives each RATS Relying Party Target names of its own: the Target is bound, and a request for a Target a RATS Relying Party does not serve is refused.
 * The choice of Verifier in the Passport model. The CAS Server chooses the Verifier it sends Evidence to, and relays the Attestation Results.
   A RATS Relying Party MUST accept Attestation Results only from a Verifier it trusts, and MUST check that the freshness input they report equals its own recomputation of the binding ({{binding}}); a Verifier of the CAS's own is then of no use to it.
 * What the binding does not cover. The Credential Type and the Credential Hint travel unbound; the RATS Relying Party's policy and the Attester's check of what it receives carry them ({{credential-hint}}, {{credential-scope}}).
