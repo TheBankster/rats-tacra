@@ -303,19 +303,17 @@ Attestation Results can reveal much about the Attester's platform (Section 11 of
 
 ## Binding Credential Keys to Evidence {#binding}
 
-The Evidence of a credential-acquisition exchange MUST carry a digest of four values in its freshness input, the field of the Evidence whose content the Attester chooses:
+The Evidence of a credential-acquisition exchange MUST carry a digest of three values in its freshness input, the field of the Evidence whose content the Attester chooses:
 
 1. the freshness element of the Freshness Kind ({{freshness-kind}}): the Freshness Handle for the `present-*` kinds, the locally held epoch marker for `absent-epoch`, the Attester's timestamp for `absent-timestamp`, and the empty string for `absent-none`;
 2. the Target of the corresponding Initiate-Credential-Acquisition call;
-3. the identifier of the Relying Party that will rely on the Evidence: the Credential Authority for Enrollment, the Secret Vault for Retrieval. The Credential Acquisition Interface holds this identifier in its configuration for each Target and Credential Acquisition Mode; it does not take it from the CAS. Evidence is produced for a Verifier or a Relying Party, never for the CAS;
-4. the subject: for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.
+3. the subject: for Enrollment, the CSR, which carries CSKpub and proves possession of CSKpri; for Retrieval, CEKpub.
 
 The digest is computed over the octet string
 
 ~~~
 binding_input = len32(freshness) || freshness
              || len32(target)    || target
-             || len32(rp_id)     || rp_id
              || len32(subject)   || subject
 ~~~
 
@@ -323,14 +321,14 @@ where:
 
 * `len32(x)` is the length of `x` in octets, as a 32-bit big-endian unsigned integer;
 * `freshness` is the freshness element; a timestamp is an 8-octet big-endian unsigned count of seconds since 1970-01-01T00:00:00Z;
-* `rp_id` and `target` are the UTF-8 encodings of the Relying Party identifier and of the Target, each used as an exact octet string;
-* `subject` is, for Enrollment, the DER encoding of the CSR; for Retrieval, CEKpub in the encoding the Credential Acquisition Mechanism carries it in, which a protocol profile fixes.
+* `target` is the UTF-8 encoding of the Target, used as an exact octet string;
+* `subject` is, for Enrollment, the DER encoding of the CSR; for Retrieval, CEKpub in the encoding the Credential Acquisition Mechanism carries it in, which the protocol profile specifies.
 
 The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
-The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, a protocol profile fixes a hash whose output is the size of the field.
+The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, a protocol profile specifies a hash whose output is the size of the field.
 
 The Verifier MUST report in the Attestation Results the value in the freshness input of the Evidence it appraised: the value it read from the Evidence, or, where the value to expect is submitted with the Evidence as in challenge-response appraisal, that value after checking that the Evidence carries it.
-The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from its own identifier, the freshness element and the Target of the request, and the CSR or CEKpub it received, and MUST reject the request unless the result equals the value reported in the Attestation Results.
+The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from the freshness element and the Target of the request, and the CSR or CEKpub it received, and MUST reject the request unless the result equals the value reported in the Attestation Results.
 This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.
 
 The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the Freshness Kind for a Target from its own policy, not from the request.
@@ -339,11 +337,11 @@ For the `absent-*` kinds, which return no Freshness Handle, the Relying Party ma
 For the `present-*` kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated.
 The party that issues a Freshness Handle checks it; a party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check:
 
-* Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle, so the Verifier either recomputes the digest from the four values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.
+* Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle, so the Verifier either recomputes the digest from the three values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.
 * RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself: a `present-nonce` Handle is one it issued and has not been used before, and a `present-epoch` Handle is the current epoch marker.
 
-Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substitution: without the Relying Party identifier, the CAS could carry genuine Evidence to another Credential Authority or Secret Vault, and, with a freshness element that is not single-use (an epoch, a timestamp), have it accepted by two; without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
-Because the Credential Acquisition Interface holds the Relying Party identifier rather than receiving it from the CAS, the Evidence is accepted only by the Relying Party the deployment intended.
+Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substitution: without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
+The binding carries no Relying Party identifier. Which RATS Relying Party serves the Attester, and what a deployment does about it, is in {{untrusted-cas}}.
 
 Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
 It takes one of three forms:
@@ -572,9 +570,9 @@ What a CAS that is not benevolent can and cannot do:
   What the CAS obtains is a second credential, or a second release, for the Attester's key. A deployment that counts or audits credentials uses `present-nonce`.
 * Redirection to another RATS Relying Party. The CAS can offer Evidence made for one Credential Authority or Secret Vault to another that trusts the same Verifier and serves a Target of the same name.
   Whatever that RATS Relying Party issues or releases is bound to the Attester's keys, so the CAS obtains nothing it can use. What is at stake is which RATS Relying Party serves the Attester, and who chooses it:
-  * With the Relying Party identifier in the binding ({{binding}}), the second RATS Relying Party refuses every Freshness Kind, including a Freshness Handle it originated itself.
-  * Without it, the CAS Server chooses among the RATS Relying Parties that trust the same Verifier and serve that Target name. `present-nonce` keeps one Evidence from serving a second RATS Relying Party, but not the one the CAS Server started the exchange at.
-  * A deployment that wants one RATS Relying Party, and no other, to serve a given Attester can have that without the identifier. It gives each RATS Relying Party its own Target names. The Target is bound, and a RATS Relying Party refuses a request for a Target it does not serve.
+  * This document binds no Relying Party identifier ({{binding}}). Binding one would make the second RATS Relying Party refuse every Freshness Kind, including a Freshness Handle it originated itself.
+  * As it is, the CAS Server chooses among the RATS Relying Parties that trust the same Verifier and serve that Target name. `present-nonce` keeps one Evidence from serving a second RATS Relying Party, but not the one the CAS Server started the exchange at.
+  * A deployment that wants one RATS Relying Party, and no other, to serve a given Attester gives each RATS Relying Party its own Target names. The Target is bound, and a RATS Relying Party refuses a request for a Target it does not serve.
 * The choice of Verifier in the Passport model. The CAS Server chooses the Verifier it sends Evidence to, and relays the Attestation Results.
   A RATS Relying Party MUST accept Attestation Results only from a Verifier it trusts, and MUST check that the freshness input they report equals its own recomputation of the binding ({{binding}}). Any other Verifier chosen by the CAS is therefore of no use to it.
 * What the binding does not cover. The Credential Type and the Credential Hint travel unbound, and a CAS can change them. Two things bound that. The RATS Relying Party's policy issues or releases nothing beyond what it allows for the attested context, whatever the request says. The Attester sees whether the credential it receives is the one it asked for ({{binding}}, {{credential-hint}}, {{credential-scope}}).
