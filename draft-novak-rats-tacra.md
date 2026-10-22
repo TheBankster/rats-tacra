@@ -166,8 +166,8 @@ That makes them proof-of-possession credentials, whereas JWTs are used without k
 
 This document classifies Evidence freshness for a credential-acquisition exchange by combining the methods in Section 10 of {{RFC9334}} with whether Initiate-Credential-Acquisition ({{Initiate-Credential-Acquisition}}) returns a Freshness Handle.
 
-`present-*` kinds return a Freshness Handle; the Attester binds that Handle into Evidence ({{binding}}).
-`absent-*` kinds return no Handle; the Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.
+`present-*` kinds return a Freshness Handle. The Attester binds that Handle into Evidence ({{binding}}).
+`absent-*` kinds return no Handle. The Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.
 
 The Freshness Kind is one of:
 
@@ -177,11 +177,11 @@ The Freshness Kind is one of:
 * `present-nonce`: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester binds that Handle into Evidence ({{RFC9334}}, Section 10.2)
 * `present-epoch`: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester binds that Handle into Evidence and retries Initiate-Credential-Acquisition if the epoch has moved ({{RFC9334}}, Section 10.3)
 
-A Freshness Handle has a lifetime, set by its originator, after which the originator no longer accepts it; Initiate-Credential-Acquisition MAY return the lifetime with the Handle.
+A Freshness Handle has a lifetime, set by its originator, after which the originator no longer accepts it. Initiate-Credential-Acquisition MAY return the lifetime with the Handle.
 The lifetime SHOULD leave the Attester time to produce the Evidence that carries the Handle: a platform may rate-limit attestation requests, so that an Attester waits several seconds for one report.
 A Freshness Handle originator SHOULD NOT set a lifetime below 60 seconds.
 
-Under `absent-timestamp`, the RATS Relying Party accepts Evidence whose timestamp is no older than the maximum age its policy sets, and no later than its own clock by more than the skew it tolerates; Initiate-Credential-Acquisition MAY return that maximum age, so that the Attester knows it.
+Under `absent-timestamp`, the RATS Relying Party accepts Evidence whose timestamp is no older than the maximum age its policy sets, and no later than its own clock by more than the skew it tolerates. Initiate-Credential-Acquisition MAY return that maximum age, so that the Attester knows it.
 Section 10.1 of {{RFC9334}} notes that in many TEEs a clock is only available outside the TEE and cannot be trusted by it.
 On such a platform the timestamp bounds the age of the Evidence by a clock set by whoever serves the Attester the current time: Evidence made with that clock set ahead is accepted once the RATS Relying Party's clock reaches the timestamp, less the skew, and for the maximum age after that.
 A RATS Relying Party that needs a bound on the real age of Evidence uses a `present-*` Freshness Kind, or requires the Attester's time to be attested.
@@ -298,7 +298,7 @@ During Retrieval, a Secret Vault MAY use the Credential Hint to locate the crede
 The RATS Relying Party MAY reject the request if it will not honor the hint.
 
 A Credential Authority MAY include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
-In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties, for example by keeping it small and, in a certificate, by placing it in a non-critical extension, which a certificate-using system that does not recognize the extension may ignore (Section 4.2 of {{RFC5280}}).
+In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties. For example, it keeps the addition small and, in a certificate, places it in a non-critical extension, which a certificate-using system that does not recognize may ignore (Section 4.2 of {{RFC5280}}).
 Attestation Results can reveal much about the Attester's platform (Section 11 of {{RFC9334}}), and every party the credential is presented to can read what it carries, so the Credential Authority SHOULD limit what it adds to what those parties need.
 
 ## Binding Credential Keys to Evidence {#binding}
@@ -325,30 +325,35 @@ where:
 * `subject` is, for Enrollment, the DER encoding of the CSR; for Retrieval, CEKpub in the encoding the Credential Acquisition Mechanism carries it in, which the protocol profile specifies.
 
 The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
-The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are; for a field of another size, a protocol profile specifies a hash whose output is the size of the field.
+The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are. For a field of another size, a protocol profile specifies a hash whose output is the size of the field.
 
-The Verifier MUST report in the Attestation Results the value in the freshness input of the Evidence it appraised: the value it read from the Evidence, or, where the value to expect is submitted with the Evidence as in challenge-response appraisal, that value after checking that the Evidence carries it.
-The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from the freshness element and the Target of the request, and the CSR or CEKpub it received, and MUST reject the request unless the result equals the value reported in the Attestation Results.
+The Verifier MUST report in the Attestation Results the value in the freshness input of the Evidence it appraised. That is the value it read from the Evidence. Where the value to expect is submitted with the Evidence, as in challenge-response appraisal, it is that value, after the Verifier has checked that the Evidence carries it.
+The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from the freshness element and the Target of the request and the CSR or CEKpub it received. It MUST reject the request unless the result equals the value reported in the Attestation Results.
 This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.
 
 The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the Freshness Kind for a Target from its own policy, not from the request.
 The freshness element MUST be checked under that kind before a credential is issued or released.
 For the `absent-*` kinds, which return no Freshness Handle, the Relying Party makes that check.
 For the `present-*` kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated.
-The party that issues a Freshness Handle checks it; a party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check:
+The party that issues a Freshness Handle checks it. A party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check:
 
-* Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle, so the Verifier either recomputes the digest from the three values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.
-* RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself: a `present-nonce` Handle is one it issued and has not been used before, and a `present-epoch` Handle is the current epoch marker.
+* Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle. The Verifier therefore either recomputes the digest from the three values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.
+* RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself. A `present-nonce` Handle is one it issued and has not been used before. A `present-epoch` Handle is the current epoch marker.
 
-Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substitution: without the Target, it could initiate, at the intended Relying Party, for a Target the Attester did not ask for; without the freshness element, it could replay; without the CSR or CEKpub, it could substitute a key.
+Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substitution:
+
+* without the Target, the CAS could initiate, at the intended Relying Party, for a Target the Attester did not ask for;
+* without the freshness element, it could replay;
+* without the CSR or CEKpub, it could substitute a key.
+
 The binding carries no Relying Party identifier. Which RATS Relying Party serves the Attester, and what a deployment does about it, is in {{untrusted-cas}}.
 
 Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
 It takes one of three forms:
 
-* Direct: the Attesting Environment writes the digest into a guest-chosen field of the hardware Evidence, such as REPORT_DATA of an AMD SEV-SNP attestation report, REPORTDATA of an Intel TDX quote, or the user data of an AWS Nitro attestation document.
-* Nested: a lower layer owns that field (for example, a paravisor that fixes it at boot), and the digest travels in a nested attestation whose report data the guest controls, such as a vTPM quote.
-* Provider-scoped: the Evidence is signed by a key shared across a provider's fleet and identifies the provider's key domain rather than a machine. The binding holds, but a Relying Party whose policy requires a per-machine identity rejects such Evidence.
+* Direct: the Attesting Environment writes the digest into a guest-chosen field of the hardware Evidence. Examples are REPORT_DATA of an AMD SEV-SNP attestation report, REPORTDATA of an Intel TDX quote, and the user data of an AWS Nitro attestation document.
+* Nested: a lower layer owns that field (for example, a paravisor that sets it at boot), and the digest travels in a nested attestation whose report data the guest controls, such as a vTPM quote.
+* Provider-scoped: the Evidence is signed by a key shared across a provider's fleet and identifies the provider's key domain rather than a device. The binding holds, but a Relying Party whose policy requires a per-device identity rejects such Evidence.
 
 A Relying Party MUST NOT assume the Direct form; it learns the form from the Attestation Results or from its appraisal policy.
 
