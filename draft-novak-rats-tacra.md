@@ -351,7 +351,7 @@ Nor does it cover the Credential Type or the Credential Hint, which the CAS can 
 | CAI | Part of Attester | Library or Sidecar assisting Attester in obtaining credentials |
 | Platform Plug-in | Part of Attester | Invoked by CAI to perform platform-specific Remote Attestation and key generation operations |
 | CAAPI Client | Part of Attester | Invoked by CAI to communicate with CAS Client |
-| CAS Client | None: Conduit only | CAS Client extended by Remote Attestation Plug-in, MUST be outside the Attester's trust boundary ({{untrusted-cas}}) |
+| CAS Client | None: Conduit only | CAS Client extended by Remote Attestation Plug-in; SHOULD be outside the Attester's trust boundary and, wherever it runs, is trusted for nothing beyond carrying messages ({{untrusted-cas}}) |
 | CAS Server | None: Conduit only | CAS Server extended by Remote Attestation Plug-in; forwards Freshness Handles, Evidence, and Attestation Results; does not appraise |
 | Secret Vault | RATS Relying Party | Invoked in the Retrieval variant of this architecture; SHOULD encrypt retrieved results to CEKpub in order to keep it from leaking to the CAS Server |
 | Credential Authority | RATS Relying Party | Invoked in the Enrollment variant of this architecture |
@@ -516,10 +516,10 @@ While the specification takes care to deliver bearer token credentials to the At
 
 ## Trust Model: the Credential Acquisition System as an Untrusted Conduit {#untrusted-cas}
 
-This section exists because, in this architecture, the Attester never communicates with the Verifier or the RATS Relying Party directly, only through the Credential Acquisition System, and does not know who those entities are.
+This section exists because, in this architecture, the Attester never communicates with the Verifier or the RATS Relying Party directly, only through the Credential Acquisition System, and does not know what those entities are.
 Transport security is therefore not end to end: there is a secure channel between the CAS Client and the CAS Server, and another between the CAS Server and the Verifier or the RATS Relying Party, while the CAAPI between the Attester and the CAS Client is local to the Attester's system.
 This architecture seeks to protect credentials acquired by the Attester from disclosure to the Credential Acquisition System.
-For that reason, it does not treat the Credential Acquisition System as anything other than a conduit between the Attester and the services needed for Remote Attestation and credential issuance; the CAS Client and the CAS Server hold no RATS role and no credential, and they are not assumed to be benevolent.
+For that reason, the Attester does not treat the Credential Acquisition System as anything other than a conduit between the Attester and the services needed for Remote Attestation and credential issuance; the CAS Client and the CAS Server hold no RATS role and no credential, and they are not assumed to be benevolent.
 What a CAS that delays, replays, rewrites or redirects what it carries can obtain is bounded as follows.
 
 What each party holds, and what bounds it:
