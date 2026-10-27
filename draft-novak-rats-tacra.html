@@ -1583,9 +1583,41 @@ These mechanisms currently do not support Remote Attestation, for the following 
         <h3 id="name-architecture-overview">
 <a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-architecture-overview" class="section-name selfRef">Architecture Overview</a>
         </h3>
-<span id="name-tacra-architecture"></span><div id="fig-tacra">
+<p id="section-4.3-1">At the high level, the TACRA architecture allows an Attester to obtain credentials from either a Credential Authority or a Secret Vault, both RATS Relying Parties, by interacting with these Relying Parties and the Verifier through an untrusted Credential Acquisition System (CAS).
+The CAS can be any existing system, such as Enrollment over Secure Transport (EST), Secure Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated Certificate Management Environment (ACMEv2), etc., extended with additional commands related to Remote Attestation.
+The job of the Credential Acquisition System is to carry messages between the Attester and these back-end services using the Credential Acquisition System's own protocol.
+This is illustrated below.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<span id="name-high-level-tacra-architectu"></span><div id="fig-hla">
 <figure id="figure-1">
-          <div class="alignLeft art-ascii-art art-text artwork" id="section-4.3-1.1">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-4.3-2.1">
+<pre>
+                                      Enroll     ┌────────────┐
+                               ┌─────────────────► Credential │
+                               │  ┌──────────────┤ Authority  │
+                               │  │  Credential  └────┬──▲────┘
+             Initiate/         │  │                   │  │
+             Enroll/           │  │                   │  │
+┌──────────┐ Retrieve  ┌───────┴──▼────┐         ┌────▼──┴────┐
+│          ├───────────►  Credential   ├─────────►            │
+│ Attester │           │  Acquisition  │         |  Verifier  │
+│          ◄───────────┤    System     ◄─────────┤            │
+└──────────┘ Initiate- └───────┬──▲────┘         └────┬──▲────┘
+             Response/         │  │                   │  │
+             Credential        │  │                   │  │
+                               │  │  Credential  ┌────▼──┴────┐
+                               │  └──────────────┤   Secret   │
+                               └─────────────────►   Vault    │
+                                     Retrieve    └────────────┘
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-high-level-tacra-architectu" class="selfRef">High-Level TACRA Architecture</a>
+          </figcaption></figure>
+</div>
+<p id="section-4.3-3">A more detailed architecture is illustrated below.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<span id="name-detailed-tacra-architecture"></span><div id="fig-tacra">
+<figure id="figure-2">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-4.3-4.1">
 <pre>
   Attesting
   Environment      ┌─────── Credential Acquisition System ─────────┐
@@ -1613,25 +1645,25 @@ These mechanisms currently do not support Remote Attestation, for the following 
                  └───────────────────────────────────┘
 </pre>
 </div>
-<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
-<a href="#name-tacra-architecture" class="selfRef">TACRA architecture</a>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-detailed-tacra-architecture" class="selfRef">Detailed TACRA architecture</a>
           </figcaption></figure>
 </div>
-<p id="section-4.3-2">This Architecture assumes the existence of a Credential Acquisition System (CAS), such as Enrollment over Secure Transport (EST), Secure Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated Certificate Management Environment (ACMEv2), etc., that comprises a client and a server.
+<p id="section-4.3-5">The CAS comprises a client and a server.
 The CAS Client is presumed to be running on the Attester's system, but outside the Attesting Environment.
 The CAS Server is a remote service invoked by the CAS Client over the CAS protocol.
-Which CAS protocol is used <span class="bcp14">MUST</span> remain opaque to the Attester.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
-<p id="section-4.3-3">The Attester (the workload) runs inside an Attesting Environment, such as a Confidential Computing Trusted Execution Environment or TEE.
+Which CAS protocol is used <span class="bcp14">MUST</span> remain opaque to the Attester.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+<p id="section-4.3-6">The Attester (the workload) runs inside an Attesting Environment, such as a Confidential Computing Trusted Execution Environment or TEE.
 It obtains credentials by invoking the Credential Acquisition Interface (CAI), defined in this document.
 CAI insulates the Attester from all the details of platform-specific and protocol-specific aspects and services involved in Remote Attestation and credential enrollment/retrieval.
-The CAI <span class="bcp14">MAY</span> be a statically or dynamically linked library, an Envoy-style sidecar, or any other mechanism, but it <span class="bcp14">MUST</span> be part of the Attesting Environment.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
-<p id="section-4.3-4">CAI interacts with the outside world on behalf of the Attester via two channels:<a href="#section-4.3-4" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-4.3-5">
-<li id="section-4.3-5.1">
-            <p id="section-4.3-5.1.1">With the underlying hardware platform to utilize its platform-specific functions, such as generating keys and obtaining evidence, via the platform-type-specific plugin, and<a href="#section-4.3-5.1.1" class="pilcrow">¶</a></p>
+The CAI <span class="bcp14">MAY</span> be a statically or dynamically linked library, an Envoy-style sidecar, or any other mechanism, but it <span class="bcp14">MUST</span> be part of the Attesting Environment.<a href="#section-4.3-6" class="pilcrow">¶</a></p>
+<p id="section-4.3-7">CAI interacts with the outside world on behalf of the Attester via two channels:<a href="#section-4.3-7" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.3-8">
+<li id="section-4.3-8.1">
+            <p id="section-4.3-8.1.1">With the underlying hardware platform to utilize its platform-specific functions, such as generating keys and obtaining evidence, via the platform-type-specific plugin, and<a href="#section-4.3-8.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-4.3-5.2">
-            <p id="section-4.3-5.2.1">With the Credential Acquisition System Client, via the well-defined Credential Acquisition API (CAAPI), also outlined later in this document.<a href="#section-4.3-5.2.1" class="pilcrow">¶</a></p>
+          <li id="section-4.3-8.2">
+            <p id="section-4.3-8.2.1">With the Credential Acquisition System Client, via the well-defined Credential Acquisition API (CAAPI), also outlined later in this document.<a href="#section-4.3-8.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
