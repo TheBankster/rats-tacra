@@ -2271,7 +2271,7 @@ Each recomputes the binding from the request and from what it holds (<a href="#b
 <p id="section-7.2-4">The various attacks the CAS is capable of and their mitigations are listed below:<a href="#section-7.2-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2-5.1">
-            <p id="section-7.2-5.1.1">Substitution of a value. A request whose Target, CSR or CEKpub, or freshness element the CAS has changed is refused: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-7.2-5.1.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.1.1">Substitution of a value. If the CAS changes a request by modifying its Target, CSR, CEKpub, or freshness element, that request would be refused by the RATS Relying Party: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-7.2-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.2-5.2">
             <p id="section-7.2-5.2.1">Substitution of the Attester. The CAS can replace the Evidence the Attester supplied with Evidence from a platform of its choosing. It obtains nothing for the Attester's keys:<a href="#section-7.2-5.2.1" class="pilcrow">¶</a></p>

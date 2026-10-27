@@ -1139,9 +1139,10 @@ Table of Contents
    The various attacks the CAS is capable of and their mitigations are
    listed below:
 
-   *  Substitution of a value.  A request whose Target, CSR or CEKpub,
-      or freshness element the CAS has changed is refused: the digest
-      the RATS Relying Party recomputes no longer equals the one the
+   *  Substitution of a value.  If the CAS changes a request by
+      modifying its Target, CSR, CEKpub, or freshness element, that
+      request would be refused by the RATS Relying Party: the digest the
+      RATS Relying Party recomputes no longer equals the one the
       Verifier read from the Evidence (Section 4.5).
 
    *  Substitution of the Attester.  The CAS can replace the Evidence
