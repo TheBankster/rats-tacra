@@ -561,7 +561,7 @@ What each party holds, and what bounds it:
 
 The various attacks the CAS is capable of and their mitigations are listed below:
 
-* Substitution of a value. A request whose Target, CSR or CEKpub, or freshness element the CAS has changed is refused: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence ({{binding}}).
+* Substitution of a value. If the CAS changes a request by modifying its Target, CSR, CEKpub, or freshness element, that request would be refused by the RATS Relying Party: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence ({{binding}}).
 * Substitution of the Attester. The CAS can replace the Evidence the Attester supplied with Evidence from a platform of its choosing. It obtains nothing for the Attester's keys:
   * a platform that is not genuine: its Evidence does not chain to the vendor's root;
   * a genuine platform running another launch: it fails the Target's Reference Values;
