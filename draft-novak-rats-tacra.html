@@ -2268,7 +2268,7 @@ It appraises Evidence and reports the freshness input it read. It decides nothin
 Each recomputes the binding from the request and from what it holds (<a href="#binding" class="auto internal xref">Section 4.5</a>), and checks the freshness element under the Freshness Kind of its policy. The Secret Vault seals what it releases to CEKpub.<a href="#section-7.2-3.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-7.2-4">What a CAS that is not benevolent can and cannot do:<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2-4">The various attacks the CAS is capable of and their mitigations are listed below:<a href="#section-7.2-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2-5.1">
             <p id="section-7.2-5.1.1">Substitution of a value. A request whose Target, CSR or CEKpub, or freshness element the CAS has changed is refused: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-7.2-5.1.1" class="pilcrow">¶</a></p>

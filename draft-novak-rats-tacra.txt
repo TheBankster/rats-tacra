@@ -1136,7 +1136,8 @@ Table of Contents
       Freshness Kind of its policy.  The Secret Vault seals what it
       releases to CEKpub.
 
-   What a CAS that is not benevolent can and cannot do:
+   The various attacks the CAS is capable of and their mitigations are
+   listed below:
 
    *  Substitution of a value.  A request whose Target, CSR or CEKpub,
       or freshness element the CAS has changed is refused: the digest
