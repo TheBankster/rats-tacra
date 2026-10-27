@@ -228,12 +228,40 @@ These mechanisms currently do not support Remote Attestation, for the following 
 
 ## Architecture Overview
 
+At the high level, the TACRA architecture allows an Attester to obtain credentials from either a Credential Authority or a Secret Vault, both RATS Relying Parties, by interacting with these Relying Parties and the Verifier through an untrusted Credential Acquisition System (CAS).
+The CAS can be any existing system, such as Enrollment over Secure Transport (EST), Secure Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated Certificate Management Environment (ACMEv2), etc., extended with additional commands related to Remote Attestation.
+The job of the Credential Acquisition System is to carry messages between the Attester and these back-end services using the Credential Acquisition System's own protocol.
+This is illustrated below.
+
+~~~ aasvg
+                                      Enroll     .------------.
+                               .---------------->| Credential |
+                               |  .--------------+ Authority  |
+                               |  |  Credential  '----+-------'
+             Initiate/         |  |                   |  ^
+             Enroll/           |  v                   v  |
+.----------. Retrieve  .-------+-------.         .-------+----.
+|          +---------->|  Credential   +-------->|            |
+| Attester |           |  Acquisition  |         |  Verifier  |
+|          |<----------+    System     |<--------+            |
+'----------' Initiate- '-------+-------'         '----+-------'
+             Response/         |  ^                   |  ^
+             Credential        |  |                   v  |
+                               |  |  Credential  .-------+----.
+                               |  '--------------+   Secret   |
+                               '---------------->|   Vault    |
+                                     Retrieve    '------------'
+~~~
+{: #fig-hla title="High-Level TACRA Architecture"}
+
+A more detailed architecture is illustrated below.
+
 ~~~~ ascii-art
 {::include tacra_architecture.txt}
 ~~~~
-{: #fig-tacra title="TACRA architecture"}
+{: #fig-tacra title="Detailed TACRA architecture"}
 
-This Architecture assumes the existence of a Credential Acquisition System (CAS), such as Enrollment over Secure Transport (EST), Secure Production Identity Framework for Everyone (SPIFFE/SPIRE), Automated Certificate Management Environment (ACMEv2), etc., that comprises a client and a server.
+The CAS comprises a client and a server.
 The CAS Client is presumed to be running on the Attester's system, but outside the Attesting Environment.
 The CAS Server is a remote service invoked by the CAS Client over the CAS protocol.
 Which CAS protocol is used MUST remain opaque to the Attester.
