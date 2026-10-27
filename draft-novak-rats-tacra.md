@@ -242,25 +242,25 @@ The CAS can be any existing system, such as Enrollment over Secure Transport (ES
 The job of the Credential Acquisition System is to carry messages between the Attester and these back-end services using the Credential Acquisition System's own protocol.
 This is illustrated below.
 
-~~~ aasvg
-                                      Enroll     .------------.
-                               .---------------->| Credential |
-                               |  .--------------+ Authority  |
-                               |  |  Credential  '----+-------'
-             Initiate/         |  |                   |  ^
-             Enroll/           |  v                   v  |
-.----------. Retrieve  .-------+-------.         .-------+----.
-|          +---------->|  Credential   +-------->|            |
-| Attester |           |  Acquisition  |         |  Verifier  |
-|          |<----------+    System     |<--------+            |
-'----------' Initiate- '-------+-------'         '----+-------'
-             Response/         |  ^                   |  ^
-             Credential        |  |                   v  |
-                               |  |  Credential  .-------+----.
-                               |  '--------------+   Secret   |
-                               '---------------->|   Vault    |
-                                     Retrieve    '------------'
-~~~
+~~~~ ascii-art
+                                      Enroll     ┌────────────┐
+                               ┌─────────────────► Credential │
+                               │  ┌──────────────┤ Authority  │
+                               │  │  Credential  └────┬──▲────┘
+             Initiate/         │  │                   │  │
+             Enroll/           │  │                   │  │
+┌──────────┐ Retrieve  ┌───────┴──▼────┐         ┌────▼──┴────┐
+│          ├───────────►  Credential   ├─────────►            │
+│ Attester │           │  Acquisition  │         |  Verifier  │
+│          ◄───────────┤    System     ◄─────────┤            │
+└──────────┘ Initiate- └───────┬──▲────┘         └────┬──▲────┘
+             Response/         │  │                   │  │
+             Credential        │  │                   │  │
+                               │  │  Credential  ┌────▼──┴────┐
+                               │  └──────────────┤   Secret   │
+                               └─────────────────►   Vault    │
+                                     Retrieve    └────────────┘
+~~~~
 {: #fig-hla title="High-Level TACRA Architecture"}
 
 A more detailed architecture is illustrated below.
