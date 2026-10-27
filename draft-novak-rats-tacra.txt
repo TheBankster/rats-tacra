@@ -8,6 +8,8 @@ Intended status: Informational                             M. Richardson
 Expires: 30 April 2027                          Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
+                                                          S. Nikolaichuk
+                                                   The Capital Index LLC
                                                          27 October 2026
 
 
@@ -1469,3 +1471,8 @@ Authors' Addresses
    Henk Birkholz
    Fraunhofer SIT
    Email: Henk.Birkholz@ietf.contact
+
+
+   Serhii Nikolaichuk
+   The Capital Index LLC
+   Email: nikolaichuk.s.f@gmail.com
