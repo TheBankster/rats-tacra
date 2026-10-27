@@ -4,10 +4,10 @@
 
 This is the working area for the individual Internet-Draft, "Trustworthy Acquisition of Credentials via Remote Attestation".
 
-* [Editor's Copy](https://TheBankster.github.io/rats-twi-um/#go.draft-novak-rats-tacra.html)
+* [Editor's Copy](https://TheBankster.github.io/rats-tacra/#go.draft-novak-rats-tacra.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-novak-rats-tacra)
 * [Individual Draft](https://datatracker.ietf.org/doc/html/draft-novak-rats-tacra)
-* [Compare Editor's Copy to Individual Draft](https://TheBankster.github.io/rats-twi-um/#go.draft-novak-rats-tacra.diff)
+* [Compare Editor's Copy to Individual Draft](https://TheBankster.github.io/rats-tacra/#go.draft-novak-rats-tacra.diff)
 
 
 ## Contributing
