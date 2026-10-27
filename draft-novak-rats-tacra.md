@@ -547,7 +547,7 @@ What each party holds, and what bounds it:
 * The Attester, with its Credential Acquisition Interface, holds CSKpri or CEKpri inside the environment its Evidence attests.
   It can produce Evidence over any value it chooses as the freshness input, and ask for any Target. The Verifier appraises its platform and its launch, and the Credential Authority or Secret Vault decides by its policy, not by what the Attester asks.
 * The CAS Client and the CAS Server see every message in transit: the Freshness Handle, the Evidence, the CSR or CEKpub, the Credential Type and the Credential Hint, and the credential or the sealed container. In the Passport model, the CAS Server also sees the Attestation Results.
-  They CAS Client and CAS Server can delay, replay and reorder messages. They can obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, and change what the binding ({{binding}}) does not cover. In the Passport model, they can also choose the Verifier.
+  The CAS Client and CAS Server can delay, replay and reorder messages. They can obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, and change what the binding ({{binding}}) does not cover. In the Passport model, they can also choose the Verifier.
   What bounds them:
   * the binding, recomputed by the RATS Relying Party;
   * the freshness element;
