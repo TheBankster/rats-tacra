@@ -559,7 +559,7 @@ What each party holds, and what bounds it:
 * The Credential Authority and the Secret Vault hold the issuance policy, the signing key or the secrets, and the Verifiers they trust.
   Each recomputes the binding from the request and from what it holds ({{binding}}), and checks the freshness element under the Freshness Kind of its policy. The Secret Vault seals what it releases to CEKpub.
 
-What a CAS that is not benevolent can and cannot do:
+The various attacks the CAS is capable of and their mitigations are listed below:
 
 * Substitution of a value. A request whose Target, CSR or CEKpub, or freshness element the CAS has changed is refused: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence ({{binding}}).
 * Substitution of the Attester. The CAS can replace the Evidence the Attester supplied with Evidence from a platform of its choosing. It obtains nothing for the Attester's keys:
