@@ -248,23 +248,23 @@ The job of the Credential Acquisition System is to carry messages between the At
 This is illustrated below.
 
 ~~~~ ascii-art
-                                      Enroll     ┌────────────┐
-                               ┌─────────────────► Credential │
-                               │  ┌──────────────┤ Authority  │
-                               │  │  Credential  └────┬──▲────┘
-             Initiate/         │  │                   │  │
-             Enroll/           │  │                   │  │
-┌──────────┐ Retrieve  ┌───────┴──▼────┐         ┌────▼──┴────┐
-│          ├───────────►  Credential   ├─────────►            │
-│ Attester │           │  Acquisition  │         |  Verifier  │
-│          ◄───────────┤    System     ◄─────────┤            │
-└──────────┘ Initiate- └───────┬──▲────┘         └────┬──▲────┘
-             Response/         │  │                   │  │
-             Credential        │  │                   │  │
-                               │  │  Credential  ┌────▼──┴────┐
-                               │  └──────────────┤   Secret   │
-                               └─────────────────►   Vault    │
-                                     Retrieve    └────────────┘
+                                      Enroll     +------------+
+                               +-----------------> Credential |
+                               |  +--------------+ Authority  |
+                               |  |  Credential  +----+--^----+
+             Initiate/         |  |                   |  |
+             Enroll/           |  |                   |  |
++----------+ Retrieve  +-------+--v----+         +----v--+----+
+|          +----------->  Credential   +--------->            |
+| Attester |           |  Acquisition  |         |  Verifier  |
+|          <-----------+    System     <---------+            |
++----------+ Initiate- +-------+--^----+         +----+--^----+
+             Response/         |  |                   |  |
+             Credential        |  |                   |  |
+                               |  |  Credential  +----v--+----+
+                               |  +--------------+   Secret   |
+                               +----------------->   Vault    |
+                                     Retrieve    +------------+
 ~~~~
 {: #fig-hla title="High-Level TACRA Architecture"}
 
