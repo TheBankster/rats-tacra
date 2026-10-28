@@ -5,12 +5,12 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 30 April 2027                          Sandelman Software Works
+Expires: 1 May 2027                             Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
                                                           S. Nikolaichuk
                                                    The Capital Index LLC
-                                                         27 October 2026
+                                                         28 October 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -75,7 +75,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 April 2027.
+   This Internet-Draft will expire on 1 May 2027.
 
 Copyright Notice
 
@@ -466,52 +466,52 @@ Table of Contents
    the Credential Acquisition System's own protocol.  This is
    illustrated below.
 
-                                         Enroll     ┌────────────┐
-                                  ┌─────────────────► Credential │
-                                  │  ┌──────────────┤ Authority  │
-                                  │  │  Credential  └────┬──▲────┘
-                Initiate/         │  │                   │  │
-                Enroll/           │  │                   │  │
-   ┌──────────┐ Retrieve  ┌───────┴──▼────┐         ┌────▼──┴────┐
-   │          ├───────────►  Credential   ├─────────►            │
-   │ Attester │           │  Acquisition  │         |  Verifier  │
-   │          ◄───────────┤    System     ◄─────────┤            │
-   └──────────┘ Initiate- └───────┬──▲────┘         └────┬──▲────┘
-                Response/         │  │                   │  │
-                Credential        │  │                   │  │
-                                  │  │  Credential  ┌────▼──┴────┐
-                                  │  └──────────────┤   Secret   │
-                                  └─────────────────►   Vault    │
-                                        Retrieve    └────────────┘
+                                         Enroll     +------------+
+                                  +-----------------> Credential |
+                                  |  +--------------+ Authority  |
+                                  |  |  Credential  +----+--^----+
+                Initiate/         |  |                   |  |
+                Enroll/           |  |                   |  |
+   +----------+ Retrieve  +-------+--v----+         +----v--+----+
+   |          +----------->  Credential   +--------->            |
+   | Attester |           |  Acquisition  |         |  Verifier  |
+   |          <-----------+    System     <---------+            |
+   +----------+ Initiate- +-------+--^----+         +----+--^----+
+                Response/         |  |                   |  |
+                Credential        |  |                   |  |
+                                  |  |  Credential  +----v--+----+
+                                  |  +--------------+   Secret   |
+                                  +----------------->   Vault    |
+                                        Retrieve    +------------+
 
                   Figure 1: High-Level TACRA Architecture
 
    A more detailed architecture is illustrated below.
 
      Attesting
-     Environment      ┌─────── Credential Acquisition System ─────────┐
-   ┌─[Attester]───┐   │ SPIRE Agent,                   SPIRE Server,  │
-   │   Workload   │   │ EST Client,...                 EST Server,... │
-   │┌───<CAI>────┐│   │┌──────────────┐  Credential   ┌──────────────┐│
-   ││    CAI     ││   ││  CAS Client  │  Acquisition  │  CAS Server  ││
-   ││ Library or ││   ││┌────────────┐│   Protocol    │┌────────────┐││
-   ││ Container  ││   │││   TACRA    ││ (EST, SPIRE,  ││   TACRA    │││
-   ││┌─<CAAPI>──┐││   │││ CAS Client ││     etc.)     ││ CAS Server │││
-   │││  CAAPI   ├┼┼───┼┼►  Plug-in   │├───────────────┼►  Plug-in   │││
-   │││  Client  │││   ││└────────────┘│               │└──────────┬─┘││
-   ││└──────────┘││   │└──────────────┘               └───────────┼──┘│
-   ││┌──────────┐││   └───────────────────────────────────────────┼───┘
-   │││ Platform │││                    ┌─Retrieve Key/Credential──┴──┐
-   │││ Plug-in  │││                    │        ┌─Remote Attestation─┤
-   ││└─────┬────┘││                    │        │         ┌─Mint New─┘
-   │└──────┼─────┘├───┐                │        │         │ Credential
-   └───────┼──────┘   │   ┌─[RATS RP]──▼─┐ ┌────▼─────┐ ┌─▼─[RATS RP]─┐
-   ┌───────▼──────┐   │   │ Secret Vault ├─►   RATS   ◄─┤ Credential  │
-   ├<Platform ABI>┤   │   └──────────────┘ │ Verifier │ │ Authority   │
-   │ (Quote, RNG, │   │                    └──────────┘ └─────────────┘
-   │     etc.)    │ ┌─▼─[RATS-Unaware RP]───────────────┐
-   └──────────────┘ │ Existing Unmodified Relying Party │
-                    └───────────────────────────────────┘
+     Environment      +------- Credential Acquisition System ---------+
+   +-[Attester]---+   | SPIRE Agent,                   SPIRE Server,  |
+   |   Workload   |   | EST Client,...                 EST Server,... |
+   |+---<CAI>----+|   |+--------------+  Credential   +--------------+|
+   ||    CAI     ||   ||  CAS Client  |  Acquisition  |  CAS Server  ||
+   || Library or ||   ||+------------+|   Protocol    |+------------+||
+   || Container  ||   |||   TACRA    || (EST, SPIRE,  ||   TACRA    |||
+   ||+-<CAAPI>--+||   ||| CAS Client ||     etc.)     || CAS Server |||
+   |||  CAAPI   +++---++>  Plug-in   |+---------------+>  Plug-in   |||
+   |||  Client  |||   ||+------------+|               |+----------+-+||
+   ||+----------+||   |+--------------+               +-----------+--+|
+   ||+----------+||   +-------------------------------------------+---+
+   ||| Platform |||                    +-Retrieve Key/Credential--+--+
+   ||| Plug-in  |||                    |        +-Remote Attestation-+
+   ||+-----+----+||                    |        |         +-Mint New-+
+   |+------+-----++---+                |        |         | Credential
+   +-------+------+   |   +-[RATS RP]--v-+ +----v-----+ +-v-[RATS RP]-+
+   +-------v------+   |   | Secret Vault +->   RATS   <-+ Credential  |
+   +<Platform ABI>+   |   +--------------+ | Verifier | | Authority   |
+   | (Quote, RNG, |   |                    +----------+ +-------------+
+   |     etc.)    | +-v-[RATS-Unaware RP]---------------+
+   +--------------+ | Existing Unmodified Relying Party |
+                    +-----------------------------------+
 
                    Figure 2: Detailed TACRA architecture
 
@@ -1392,9 +1392,9 @@ Table of Contents
               Birkholz, H., Eckel, M., Pan, W., and E. Voit, "Reference
               Interaction Models for Remote Attestation Procedures",
               Work in Progress, Internet-Draft, draft-ietf-rats-
-              reference-interaction-models-18, 17 September 2026,
+              reference-interaction-models-20, 28 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-rats-
-              reference-interaction-models-18>.
+              reference-interaction-models-20>.
 
    [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key
