@@ -440,7 +440,7 @@ A protocol profile specifies the HPKE suite, the labels and the encoding of the 
 The Attester, through its Credential Acquisition Interface, MUST refuse a container whose associated data does not name its Target, its freshness element and its Credential Hint, or whose suite is not one the profile sets.
 These checks come before it opens anything.
 After these checks pass, the Attester unseals the ciphertext using CEKpri.
-The Secret Vault's container for another request does not open, sealed to another CEK as it is.
+The Secret Vault's container for another request does not open, since it is not encrypted to the same CEKpub.
 The CAS saw CEKpub and can seal a container of its own to it, in place of the Secret Vault's.
 That container passes these checks and opens, and what the Attester then holds is stated in {{untrusted-cas}}.
 
