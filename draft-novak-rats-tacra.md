@@ -447,7 +447,7 @@ That container passes these checks and opens, and what the Attester then holds i
 CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding ({{binding}}).
 For a Diffie-Hellman KEM that is the DER encoding of a SubjectPublicKeyInfo ({{RFC5280}}).
 For the KEMs of {{HPKE-PQ}}, which have no SubjectPublicKeyInfo form, it is the encapsulation key itself.
-The CEK is generated for one exchange inside the Attesting Environment and is not reused.
+The Attesting Environment MUST generate a brand new CEK for each Retrieve-Credential request.
 
 ## Summary of RATS Roles
 
