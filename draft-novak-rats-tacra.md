@@ -387,7 +387,7 @@ Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substituti
 * without the freshness element, it could replay;
 * without the CSR or CEKpub, it could substitute a key.
 
-The digest shows that the attested environment chose this CSR or CEKpub. That CSKpri or CEKpri was generated in that environment and stays there is what the appraised launch says of the Credential Acquisition Interface it runs. The digest does not prove it: a public key or its hash in platform Evidence does not by itself demonstrate where its private key is (Section 6.1 of {{CSR-ATTEST}}).
+The digest shows that the attested environment chose this CSR or CEKpub. That CSKpri or CEKpri was generated in that environment and stays there is what the Attestation Results say of the software the Attester runs, the Credential Acquisition Interface among it. The digest does not prove it: a public key or its hash in platform Evidence does not by itself demonstrate where its private key is (Section 6.1 of {{CSR-ATTEST}}).
 For Enrollment the subject is the finished CSR, so Evidence that carries this digest cannot travel inside that CSR, as the attribute of {{CSR-ATTEST}} does, and {{CSR-ATTEST}} does not replace this binding. A CSR MAY carry further attestations about its key under {{CSR-ATTEST}}, a second attestation beside this one. A Credential Authority that relies on them ensures that their binding to the key has been validated, as Section 6.1 of {{CSR-ATTEST}} requires.
 
 The binding carries no Relying Party identifier. Which RATS Relying Party serves the Attester, and what a deployment does about it, is in {{untrusted-cas}}.
@@ -611,7 +611,7 @@ What a malicious CAS that delays, replays, rewrites or redirects messages can do
 What each party holds, and what bounds it:
 
 * The Attester, with its Credential Acquisition Interface, holds CSKpri or CEKpri inside the environment its Evidence attests.
-  It can produce Evidence over any value it chooses as the freshness input, and ask for any Target. The Verifier appraises its platform and its launch, and the Credential Authority or Secret Vault decides by its policy, not by what the Attester asks.
+  It can produce Evidence over any value it chooses as the freshness input, and ask for any Target. The Verifier appraises its platform and the software it runs, and the Credential Authority or Secret Vault decides by its policy, not by what the Attester asks.
 * The CAS Client and the CAS Server see every message in transit: the Freshness Handle, the Evidence, the CSR or CEKpub, the Credential Type and the Credential Hint, and the credential or the sealed container. In the Passport model, the CAS Server also sees the Attestation Results.
   The CAS Client and CAS Server can delay, replay and reorder messages. They can obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, and change what the binding ({{binding}}) does not cover. In the Passport model, they can also choose the Verifier.
   What bounds them:
@@ -630,8 +630,8 @@ The various attacks the CAS is capable of and their mitigations are listed below
 * Substitution of a value. If the CAS changes a request by modifying its Target, CSR, CEKpub, or freshness element, that request would be refused by the RATS Relying Party: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence ({{binding}}).
 * Substitution of the Attester. The CAS can replace the Evidence the Attester supplied with Evidence from a platform of its choosing. It obtains nothing for the Attester's keys:
   * a platform that is not genuine: its Evidence does not chain to the vendor's root;
-  * a genuine platform running another launch: it fails the Reference Values the policy sets for that Target;
-  * a genuine platform running the same launch: it is another instance of the attested workload, with its own keys, and what it obtains is a credential for those keys.
+  * a genuine platform running other software: it fails the Reference Values the policy sets for that Target;
+  * a genuine platform running the same software: it is another instance of the attested workload, with its own keys, and what it obtains is a credential for those keys.
 * Replay at the same RATS Relying Party. The RATS Relying Party keeps no record of a CSR or CEKpub it served. Only the freshness element can refuse a second offer of the same request:
   * `present-nonce`: one Evidence serves once, as the Handle is consumed on first use;
   * `present-epoch` and `absent-epoch`: the same request is served again until the epoch moves;
