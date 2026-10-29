@@ -60,7 +60,6 @@ informative:
   INTERACTION-MODELS: I-D.ietf-rats-reference-interaction-models
   ATTESTATION-FRESHNESS: I-D.ietf-lamps-attestation-freshness
   DAA: I-D.ietf-rats-daa
-  HPKE-BIS: I-D.ietf-hpke-hpke
   HPKE-PQ: I-D.ietf-hpke-pq
   TWISIGCharter:
     target: https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md
@@ -431,7 +430,7 @@ The CAS carries CEKpub and the container, and it is not trusted ({{untrusted-cas
 Sealing keeps the bundle from the CAS.
 It does not tell the Attester who sealed it: anyone who saw CEKpub can seal a container to it.
 This architecture accepts that.
-A deployment that cannot accept it can have the Secret Vault authenticate itself as the origin of the container, a security configuration this document does not specify ({{untrusted-cas}}).
+What the Attester then holds is stated in {{untrusted-cas}}.
 
 The construction is as follows.
 A protocol profile specifies the HPKE suite, the labels and the encoding of the container and of its parts.
@@ -675,7 +674,7 @@ The various attacks the CAS is capable of and their mitigations are listed below
   * A deployment that wants one RATS Relying Party, and no other, to serve a given Attester gives each RATS Relying Party its own Target names. The Target is bound, and a RATS Relying Party refuses a request for a Target it does not serve.
   * Nor does the binding bind the channel. A channel binding, such as a TLS exporter ({{RFC9266}}), would have to reach the Attesting Environment from the CAS Client, which this architecture does not assume (Design Goal 8). What pins the RATS Relying Party is the Target name.
   * A Credential Acquisition Mechanism MAY name the Credential Authority or Secret Vault a CAS Server uses by a name of its own, the optional path segment of EST for instance (Section 3.2.2 of {{RFC7030}}). Such a name is not the Target.
-* Substitution of the response. In Retrieval, the CAS can return a container of its own making, sealed to CEKpub, which it saw in the request, or the Secret Vault's container for another request. The second was sealed to another CEK and does not open. The first opens, and the Attester then holds a credential of the CAS's choosing, not the one the Secret Vault released, which the CAS cannot read. What follows depends on the Credential Type: with an API key, the Attester's calls then run under the account the CAS chose, and what it sends goes there. This architecture accepts that risk. A deployment that cannot accept it can have the Secret Vault sign the container under a key the Attester holds for the Target, as a security configuration. That would be a signature rather than an authenticated HPKE mode: the successor of {{RFC9180}} removes those modes ({{HPKE-BIS}}), and the post-quantum KEMs have no authenticated encapsulation (Section 7.2 of {{HPKE-PQ}}). This document does not specify it.
+* Substitution of the response. In Retrieval, the CAS can return a container of its own making, sealed to CEKpub, which it saw in the request, or the Secret Vault's container for another request. The second was sealed to another CEK and does not open. The first opens, and the Attester then holds a credential of the CAS's choosing, not the one the Secret Vault released, which the CAS cannot read. At the least that is a denial of service: the Target refuses a credential it did not issue. With an API key of an account the CAS holds at the Target, the Attester's calls run under that account, and what it sends goes there. This architecture accepts that risk.
 * The choice of Verifier in the Passport model. The CAS Server chooses the Verifier it sends Evidence to, and relays the Attestation Results.
   A RATS Relying Party MUST accept Attestation Results only from a Verifier it trusts, and MUST check that the freshness input they report equals its own recomputation of the binding ({{binding}}). Any other Verifier chosen by the CAS is therefore of no use to it.
 * What the binding does not cover. The Credential Type and the Credential Hint travel unbound, and a CAS can change them. Two things bound that. The RATS Relying Party's policy issues or releases nothing beyond what it allows for the attested context, whatever the request says. The Attester sees whether the credential it receives is the one it asked for ({{binding}}, {{credential-hint}}, {{credential-scope}}).
