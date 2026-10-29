@@ -688,8 +688,7 @@ The CAS Client SHOULD be outside the Attester's trust boundary.
 Outside it, the CAS Client is not attested as part of the Attester, and this architecture relies on it for nothing beyond carrying messages.
 Inside it, as when the CAS Client runs in the same Confidential VM, it shares the Attester's environment and can inspect the secrets the Attester generates and the secrets the CAS Server returns.
 A deployment that runs it there accepts that.
-A CAS Server that took a credential from the Secret Vault in plaintext and sealed it to CEKpub itself would expose the secret to the CAS Server.
-This architecture does not permit that variant: the Secret Vault seals what it releases (Design Goal 10).
+While it is possible for the Secret Vault to release the secrets to the CAS Server in plaintext and have the CAS Server seal them using CEKpub, this architecture does not allow it, as doing so would violate Design Goal 10.
 
 A compromised platform attestation key breaks every guarantee above.
 The Verifier's defences are the vendor's root, which the key must chain to, and the TCB level the Evidence reports, which the Verifier's policy can require to be current.
