@@ -683,8 +683,6 @@ In the Passport model, the CAS Server can also inspect the Attestation Results.
 Evidence identifies the platform, its firmware level and the launched software, and may identify the device (Section 7.2 and Section 11 of {{RFC9334}}).
 The RATS architecture expects an entity that relays Evidence, without being the Attester or the intended Verifier, not to have access to it (Section 12.2 of {{RFC9334}}).
 This architecture accepts that the CAS reads Evidence and Attestation Results, and a deployment accepts it with the CAS it operates.
-A deployment that cannot accept it encrypts Evidence to the Verifier, which requires the Attester to hold the Verifier's key before it produces Evidence.
-This document does not specify that.
 What the CAS cannot read is CSKpri, CEKpri and the secret the Secret Vault seals to CEKpub.
 
 The CAS Client SHOULD be outside the Attester's trust boundary.
