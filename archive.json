@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-25T02:40:24.917222+00:00",
+  "timestamp": "2026-10-29T03:50:22.724348+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -3089,6 +3089,60 @@
       "mergeCommit": {
         "oid": "9cb617d5afa1b226c99a52ec17c4b63903ddd72e"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 26,
+      "id": "PR_kwDOULZBls8AAAABLQoVRg",
+      "title": "Figures in plain ASCII",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/26",
+      "state": "MERGED",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The text output of an Internet-Draft allows only ASCII art (RFC 7994, Section 3), and idnits flags every other character. Both figures now use plain ASCII with the same layout, the same widths and the same arrows.\n\nYour first drawing of the high-level figure was already plain ASCII. The build failed only because the template's container has no aasvg.\n\nI built the draft the way the Datatracker does and ran idnits in submission mode. The only remaining notes are the -latest docname of the editor's copy and the no-break space that kramdown-rfc puts into the BCP 14 boilerplate. The published -01 carries the same one.\n",
+      "createdAt": "2026-10-28T12:39:03Z",
+      "updatedAt": "2026-10-28T16:40:47Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "8c4f6fba8650b665c2290de0518619413fbb5d68",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "figures-ascii",
+      "headRefOid": "8eb61f327217c81b7b3be73d7ec19a8127338d7a",
+      "closedAt": "2026-10-28T16:40:46Z",
+      "mergedAt": "2026-10-28T16:40:46Z",
+      "mergedBy": "TheBankster",
+      "mergeCommit": {
+        "oid": "3d3b306bb5709380319df9a54d0d4e005c6871a3"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 27,
+      "id": "PR_kwDOULZBls8AAAABLaFv_g",
+      "title": "Sealing the Released Credential: the container, its origin authentication by the Target's policy, and the clarifications of lamps-tacra-est #20 to #26",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/27",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The Trust Model lists what the CAS can substitute, but not the response. The CAS carries CEKpub, so anyone who saw it can seal a container to it. The new section gives the construction: HPKE in base mode to CEKpub, with info and associated data taken from the request, and, where the Target requires origin authentication, the Secret Vault's signature over the suite, CEKpub, info, the associated data, the encapsulated key and the ciphertext, under a key the Attester holds for the Target. A signature and not an authenticated HPKE mode, because HPKE's successor removes those modes and the post-quantum KEMs have none. The encoding of CEKpub, the subject of the binding, is named per KEM.\n\nThe Trust Model gains the substitution of the response as the accepted risk it is (lamps-tacra-est#15): the Secret Vault's container for another request does not open, sealed to another CEK, and a container of the CAS's making opens, so the Attester holds a credential of the CAS's choosing. With an API key its calls then run under the account the CAS chose. A deployment that cannot accept that requires origin authentication for the Target. The plaintext re-encryption by the CAS Server stays not permitted (Design Goal 10).\n\nMeasured on the bench (TWI-Unified-Model/attestation-bench, branch container/origin-optional, 12 runs on 29 October): with origin authentication, 10 of 10 Targets on Google Cloud SEV-SNP, AWS SEV-SNP and Google Cloud TDX, in both RATS models, and the conduit's own container and the Secret Vault's container for another request refused in every Retrieval; without it, 10 of 10 as well, the conduit's container opened in 5 of 5 Retrievals, the Attester holding the key the conduit chose and the relying party refusing it, and the other request's container still refused, by the CEK and the associated data. The profile: TheBankster/lamps-tacra-est#29, TheBankster/lamps-tacra-est#30 and TheBankster/lamps-tacra-est#31.\n\nThe second commit carries what TheBankster/lamps-tacra-est#20, TheBankster/lamps-tacra-est#21, TheBankster/lamps-tacra-est#22, TheBankster/lamps-tacra-est#23, TheBankster/lamps-tacra-est#24 and TheBankster/lamps-tacra-est#26 asked of TACRA: what the digest proves and what it does not (Section 6.1 of CSR-ATTEST), the properties of a present-nonce Handle and why no length is requested, that a CAS Server's correlation of a Handle is not appraisal, the channel binding the binding does not carry (Design Goal 8, RFC 9266) and the mechanism's own names for the Relying Parties, and the credential group as the Secret Vault's policy, the hint selecting within it.\n",
+      "createdAt": "2026-10-29T01:32:45Z",
+      "updatedAt": "2026-10-29T01:39:37Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "3d3b306bb5709380319df9a54d0d4e005c6871a3",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "retrieval-container-origin",
+      "headRefOid": "0760d434a46be6b4eaaa4d38b6451077445ade38",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
