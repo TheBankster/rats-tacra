@@ -441,7 +441,7 @@ The Attester, through its Credential Acquisition Interface, MUST refuse a contai
 These checks come before it opens anything.
 After these checks pass, the Attester unseals the ciphertext using CEKpri.
 The Secret Vault's container for another request does not open, since it is not encrypted to the same CEKpub.
-The CAS saw CEKpub and can seal a container of its own to it, in place of the Secret Vault's.
+The CAS can see CEKpub and therefore can seal a container of its own choosing to it instead of the one returned by the Secret Vault.
 That container passes these checks and opens, and what the Attester then holds is stated in {{untrusted-cas}}.
 
 CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding ({{binding}}).
