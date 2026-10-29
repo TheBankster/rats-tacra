@@ -175,8 +175,10 @@ That makes them proof-of-possession credentials, whereas JWTs are used without k
 
 This document classifies Evidence freshness for a credential-acquisition exchange by combining the methods in Section 10 of {{RFC9334}} with whether Initiate-Credential-Acquisition ({{Initiate-Credential-Acquisition}}) returns a Freshness Handle.
 
-`present-*` kinds return a Freshness Handle. The Attester binds that Handle into Evidence ({{binding}}).
-`absent-*` kinds return no Handle. The Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.
+`present-*` kinds return a Freshness Handle.
+The Attester binds that Handle into Evidence ({{binding}}).
+`absent-*` kinds return no Handle.
+The Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.
 
 The Freshness Kind is one of:
 
@@ -186,14 +188,18 @@ The Freshness Kind is one of:
 * `present-nonce`: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester binds that Handle into Evidence ({{RFC9334}}, Section 10.2)
 * `present-epoch`: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester binds that Handle into Evidence and retries Initiate-Credential-Acquisition if the epoch has moved ({{RFC9334}}, Section 10.3)
 
-A Freshness Handle has a lifetime, set by its originator, after which the originator no longer accepts it. Initiate-Credential-Acquisition MAY return the lifetime with the Handle.
+A Freshness Handle has a lifetime, set by its originator, after which the originator no longer accepts it.
+Initiate-Credential-Acquisition MAY return the lifetime with the Handle.
 The lifetime SHOULD leave the Attester time to produce the Evidence that carries the Handle: a platform may rate-limit attestation requests, so that an Attester waits several seconds for one report.
 A Freshness Handle originator SHOULD NOT set a lifetime below 60 seconds.
 
-A `present-nonce` Freshness Handle is unpredictable (Section 10.2 of {{RFC9334}}): its originator MUST generate it with at least 64 bits of entropy, issue it once and never reuse it. Its length is set by the protocol profile.
-Initiate-Credential-Acquisition takes no requested length. The Handle enters the Evidence through the digest ({{binding}}), not as the freshness input itself, so no platform needs a Handle of a particular size.
+A `present-nonce` Freshness Handle is unpredictable (Section 10.2 of {{RFC9334}}): its originator MUST generate it with at least 64 bits of entropy, issue it once and never reuse it.
+Its length is set by the protocol profile.
+Initiate-Credential-Acquisition takes no requested length.
+The Handle enters the Evidence through the digest ({{binding}}), not as the freshness input itself, so no platform needs a Handle of a particular size.
 
-Under `absent-timestamp`, the RATS Relying Party accepts Evidence whose timestamp is no older than the maximum age its policy sets, and no later than its own clock by more than the skew it tolerates. Initiate-Credential-Acquisition MAY return that maximum age, so that the Attester knows it.
+Under `absent-timestamp`, the RATS Relying Party accepts Evidence whose timestamp is no older than the maximum age its policy sets, and no later than its own clock by more than the skew it tolerates.
+Initiate-Credential-Acquisition MAY return that maximum age, so that the Attester knows it.
 Section 10.1 of {{RFC9334}} notes that in many TEEs a clock is only available outside the TEE and cannot be trusted by it.
 On such a platform the timestamp bounds the age of the Evidence by a clock set by whoever serves the Attester the current time: Evidence made with that clock set ahead is accepted once the RATS Relying Party's clock reaches the timestamp, less the skew, and for the maximum age after that.
 A RATS Relying Party that needs a bound on the real age of Evidence uses a `present-*` Freshness Kind, or requires the Attester's time to be attested.
@@ -334,12 +340,15 @@ In both cases, the associated secrets remain opaque to the CAS at all times (Goa
 
 During both Enrollment and Retrieval, the Attester MAY supply a Credential Hint.
 During Enrollment, a Credential Authority MAY use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
-During Retrieval, a Secret Vault maps the Attestation Results to a credential group: stable for replica workloads, and distinct across security domains, tenants and the credentials it releases. That mapping is its policy, and this document does not specify the identifier.
-A Secret Vault MAY use the Credential Hint to select among the credentials that mapping allows for the attested context. The hint MUST NOT enlarge that set: a CAS that rewrites it obtains nothing the policy would not release, for that Target, to the attested workload the Attestation Results describe.
+During Retrieval, a Secret Vault maps the Attestation Results to a credential group: stable for replica workloads, and distinct across security domains, tenants and the credentials it releases.
+That mapping is its policy, and this document does not specify the identifier.
+A Secret Vault MAY use the Credential Hint to select among the credentials that mapping allows for the attested context.
+The hint MUST NOT enlarge that set: a CAS that rewrites it obtains nothing the policy would not release, for that Target, to the attested workload the Attestation Results describe.
 The RATS Relying Party MAY reject the request if it will not honor the hint.
 
 A Credential Authority MAY include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
-In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties. For example, it keeps the addition small and, in a certificate, places it in a non-critical extension, which a certificate-using system that does not recognize may ignore (Section 4.2 of {{RFC5280}}).
+In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties.
+For example, it keeps the addition small and, in a certificate, places it in a non-critical extension, which a certificate-using system that does not recognize may ignore (Section 4.2 of {{RFC5280}}).
 Attestation Results can reveal much about the Attester's platform (Section 11 of {{RFC9334}}), and every party the credential is presented to can read what it carries, so the Credential Authority SHOULD limit what it adds to what those parties need.
 
 ## Binding Credential Keys to Evidence {#binding}
@@ -366,17 +375,22 @@ where:
 * `subject` is, for Enrollment, the DER encoding of the CSR; for Retrieval, CEKpub in the encoding the Credential Acquisition Mechanism carries it in, which the protocol profile specifies.
 
 The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
-The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are. For a field of another size, a protocol profile specifies a hash whose output is the size of the field.
+The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are.
+For a field of another size, a protocol profile specifies a hash whose output is the size of the field.
 
-The Verifier MUST report in the Attestation Results the value in the freshness input of the Evidence it appraised. That is the value it read from the Evidence. Where the value to expect is submitted with the Evidence, as in challenge-response appraisal, it is that value, after the Verifier has checked that the Evidence carries it.
-The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from the freshness element and the Target of the request and the CSR or CEKpub it received. It MUST reject the request unless the result equals the value reported in the Attestation Results.
+The Verifier MUST report in the Attestation Results the value in the freshness input of the Evidence it appraised.
+That is the value it read from the Evidence.
+Where the value to expect is submitted with the Evidence, as in challenge-response appraisal, it is that value, after the Verifier has checked that the Evidence carries it.
+The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from the freshness element and the Target of the request and the CSR or CEKpub it received.
+It MUST reject the request unless the result equals the value reported in the Attestation Results.
 This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.
 
 The Freshness Kind reaches the Attester through the CAS, so the Relying Party MUST take the Freshness Kind for a Target from its own policy, not from the request.
 The freshness element MUST be checked under that kind before a credential is issued or released.
 For the `absent-*` kinds, which return no Freshness Handle, the Relying Party makes that check.
 For the `present-*` kinds, the Freshness Handle is either Verifier-originated or RATS Relying Party-originated.
-The party that issues a Freshness Handle checks it. A party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check:
+The party that issues a Freshness Handle checks it.
+A party, the Verifier included, MUST NOT issue a Freshness Handle that it cannot check:
 
 * Verifier-originated: the Verifier issues the Handle and checks it, and the Relying Party relies on the Verifier's check, never on the request alone. The Evidence carries the digest, not the Handle. The Verifier therefore either recomputes the digest from the three values or, in the Background Check model, checks at the Relying Party's request the same Handle the Relying Party used to recompute the digest.
 * RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself. A `present-nonce` Handle is one it issued and has not been used before. A `present-epoch` Handle is the current epoch marker.
@@ -387,10 +401,15 @@ Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substituti
 * without the freshness element, it could replay;
 * without the CSR or CEKpub, it could substitute a key.
 
-The digest shows that the attested environment chose this CSR or CEKpub. That CSKpri or CEKpri was generated in that environment and stays there is what the Attestation Results say of the software the Attester runs, the Credential Acquisition Interface among it. The digest does not prove it: a public key or its hash in platform Evidence does not by itself demonstrate where its private key is (Section 6.1 of {{CSR-ATTEST}}).
-For Enrollment the subject is the finished CSR, so Evidence that carries this digest cannot travel inside that CSR, as the attribute of {{CSR-ATTEST}} does, and {{CSR-ATTEST}} does not replace this binding. A CSR MAY carry further attestations about its key under {{CSR-ATTEST}}, a second attestation beside this one. A Credential Authority that relies on them ensures that their binding to the key has been validated, as Section 6.1 of {{CSR-ATTEST}} requires.
+The digest shows that the attested environment chose this CSR or CEKpub.
+That CSKpri or CEKpri was generated in that environment and stays there is what the Attestation Results say of the software the Attester runs, the Credential Acquisition Interface among it.
+The digest does not prove it: a public key or its hash in platform Evidence does not by itself demonstrate where its private key is (Section 6.1 of {{CSR-ATTEST}}).
+For Enrollment the subject is the finished CSR, so Evidence that carries this digest cannot travel inside that CSR, as the attribute of {{CSR-ATTEST}} does, and {{CSR-ATTEST}} does not replace this binding.
+A CSR MAY carry further attestations about its key under {{CSR-ATTEST}}, a second attestation beside this one.
+A Credential Authority that relies on them ensures that their binding to the key has been validated, as Section 6.1 of {{CSR-ATTEST}} requires.
 
-The binding carries no Relying Party identifier. Which RATS Relying Party serves the Attester, and what a deployment does about it, is in {{untrusted-cas}}.
+The binding carries no Relying Party identifier.
+Which RATS Relying Party serves the Attester, and what a deployment does about it, is in {{untrusted-cas}}.
 
 Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
 It takes one of three forms:
@@ -409,10 +428,13 @@ Nor does it cover the Credential Type or the Credential Hint, which the CAS can 
 
 In Retrieval, the Secret Vault releases a credential bundle inside a container sealed to CEKpub ({{binding}}).
 The CAS carries CEKpub and the container, and it is not trusted ({{untrusted-cas}}).
-Sealing keeps the bundle from the CAS. It does not tell the Attester who sealed it: anyone who saw CEKpub can seal a container to it.
-This architecture accepts that. A deployment that cannot accept it can have the Secret Vault authenticate itself as the origin of the container, a security configuration this document does not specify ({{untrusted-cas}}).
+Sealing keeps the bundle from the CAS.
+It does not tell the Attester who sealed it: anyone who saw CEKpub can seal a container to it.
+This architecture accepts that.
+A deployment that cannot accept it can have the Secret Vault authenticate itself as the origin of the container, a security configuration this document does not specify ({{untrusted-cas}}).
 
-The construction is as follows. A protocol profile specifies the HPKE suite, the labels and the encoding of the container and of its parts.
+The construction is as follows.
+A protocol profile specifies the HPKE suite, the labels and the encoding of the container and of its parts.
 
 1. The Secret Vault seals the bundle to CEKpub with HPKE in base mode (Section 5.1.1 of {{RFC9180}}), with the `info` and the associated data below.
 2. `info` is the length-prefixed concatenation, as in {{binding}}, of a label the profile sets, the Target and the freshness element of the request.
@@ -421,10 +443,13 @@ The construction is as follows. A protocol profile specifies the HPKE suite, the
 
 The Attester, through its Credential Acquisition Interface, MUST refuse a container whose associated data does not name its Target, its freshness element and its Credential Hint, or whose suite is not one the profile sets.
 These checks come before it opens anything.
-Under them, the Secret Vault's container for another request is refused, sealed to another CEK as it is. A container the CAS sealed itself opens: what the Attester then holds is stated in {{untrusted-cas}}.
+Under them, the Secret Vault's container for another request is refused, sealed to another CEK as it is.
+A container the CAS sealed itself opens: what the Attester then holds is stated in {{untrusted-cas}}.
 
 
-CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding ({{binding}}). For a Diffie-Hellman KEM that is the DER encoding of a SubjectPublicKeyInfo ({{RFC5280}}). For the KEMs of {{HPKE-PQ}}, which have no SubjectPublicKeyInfo form, it is the encapsulation key itself.
+CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding ({{binding}}).
+For a Diffie-Hellman KEM that is the DER encoding of a SubjectPublicKeyInfo ({{RFC5280}}).
+For the KEMs of {{HPKE-PQ}}, which have no SubjectPublicKeyInfo form, it is the encapsulation key itself.
 The CEK is generated for one exchange inside the Attesting Environment and is not reused.
 
 ## Summary of RATS Roles
@@ -602,10 +627,14 @@ While the specification takes care to deliver bearer token credentials to the At
 
 ## Trust Model: the Credential Acquisition System as an Untrusted Conduit {#untrusted-cas}
 
-This section exists because in this architecture the Attester never communicates with the Verifier or the RATS Relying Party directly. Instead, all messages between the Attester and these services flow through the Credential Acquisition System, and the Attester need not know what those entities are.
-Transport security is therefore not end to end. There is a secure channel between the CAS Client and the CAS Server, and another between the CAS Server and the Verifier or the RATS Relying Party. The CAAPI between the Attester and the CAS Client is local to the Attester's system.
+This section exists because in this architecture the Attester never communicates with the Verifier or the RATS Relying Party directly.
+Instead, all messages between the Attester and these services flow through the Credential Acquisition System, and the Attester need not know what those entities are.
+Transport security is therefore not end to end.
+There is a secure channel between the CAS Client and the CAS Server, and another between the CAS Server and the Verifier or the RATS Relying Party.
+The CAAPI between the Attester and the CAS Client is local to the Attester's system.
 This architecture seeks to protect credentials acquired by the Attester from disclosure to the Credential Acquisition System.
-For that reason, the Attester does not treat the Credential Acquisition System as anything other than a conduit between itself and the services needed for Remote Attestation and credential issuance. The CAS Client and the CAS Server hold no RATS role and no credential, and they are not assumed to be benevolent.
+For that reason, the Attester does not treat the Credential Acquisition System as anything other than a conduit between itself and the services needed for Remote Attestation and credential issuance.
+The CAS Client and the CAS Server hold no RATS role and no credential, and they are not assumed to be benevolent.
 What a malicious CAS that delays, replays, rewrites or redirects messages can do is restricted as follows.
 
 What each party holds, and what bounds it:
@@ -654,16 +683,25 @@ The various attacks the CAS is capable of and their mitigations are listed below
   The Freshness Kind is set by the RATS Relying Party's policy for the Target, not by the request ({{binding}}). The Freshness Handle, for the `present-*` kinds, is originated by the Verifier or by the RATS Relying Party ({{binding}}).
 * Denial. The CAS can delay or drop any message, and obtain Freshness Handles it never uses. This is mitigated by the CAS Client authenticating to the CAS Server, and the CAS Server authenticating to the Verifier and to the RATS Relying Party. Whichever of them originates Freshness Handles can then bound what it originates per client ({{cas-client-auth}}).
 
-What the CAS reads. Evidence is signed, not encrypted, and the CAS Client and the CAS Server read it in transit. In the Passport model, the CAS Server can also inspect the Attestation Results.
-Evidence identifies the platform, its firmware level and the launched software, and may identify the device (Section 7.2 and Section 11 of {{RFC9334}}). The RATS architecture expects an entity that relays Evidence, without being the Attester or the intended Verifier, not to have access to it (Section 12.2 of {{RFC9334}}).
+What the CAS reads.
+Evidence is signed, not encrypted, and the CAS Client and the CAS Server read it in transit.
+In the Passport model, the CAS Server can also inspect the Attestation Results.
+Evidence identifies the platform, its firmware level and the launched software, and may identify the device (Section 7.2 and Section 11 of {{RFC9334}}).
+The RATS architecture expects an entity that relays Evidence, without being the Attester or the intended Verifier, not to have access to it (Section 12.2 of {{RFC9334}}).
 This architecture accepts that the CAS reads Evidence and Attestation Results, and a deployment accepts it with the CAS it operates.
-A deployment that cannot accept it encrypts Evidence to the Verifier, which requires the Attester to hold the Verifier's key before it produces Evidence. This document does not specify that.
+A deployment that cannot accept it encrypts Evidence to the Verifier, which requires the Attester to hold the Verifier's key before it produces Evidence.
+This document does not specify that.
 What the CAS cannot read is CSKpri, CEKpri and the secret the Secret Vault seals to CEKpub.
 
-The CAS Client SHOULD be outside the Attester's trust boundary. Outside it, the CAS Client is not attested as part of the Attester, and this architecture relies on it for nothing beyond carrying messages. Inside it, as when the CAS Client runs in the same Confidential VM, it shares the Attester's environment and can inspect the secrets the Attester generates and the secrets the CAS Server returns. A deployment that runs it there accepts that.
-A CAS Server that took a credential from the Secret Vault in plaintext and sealed it to CEKpub itself would expose the secret to the CAS Server. This architecture does not permit that variant: the Secret Vault seals what it releases (Design Goal 10).
+The CAS Client SHOULD be outside the Attester's trust boundary.
+Outside it, the CAS Client is not attested as part of the Attester, and this architecture relies on it for nothing beyond carrying messages.
+Inside it, as when the CAS Client runs in the same Confidential VM, it shares the Attester's environment and can inspect the secrets the Attester generates and the secrets the CAS Server returns.
+A deployment that runs it there accepts that.
+A CAS Server that took a credential from the Secret Vault in plaintext and sealed it to CEKpub itself would expose the secret to the CAS Server.
+This architecture does not permit that variant: the Secret Vault seals what it releases (Design Goal 10).
 
-A compromised platform attestation key breaks every guarantee above. The Verifier's defences are the vendor's root, which the key must chain to, and the TCB level the Evidence reports, which the Verifier's policy can require to be current.
+A compromised platform attestation key breaks every guarantee above.
+The Verifier's defences are the vendor's root, which the key must chain to, and the TCB level the Evidence reports, which the Verifier's policy can require to be current.
 Under `absent-timestamp`, Evidence carries the current value of the Attester's clock, and its freshness is only as good as that clock ({{freshness-kind}}).
 Where a credential is honoured once issued or released is set by the Credential Authority's or Secret Vault's policy, as for any credential, and not by the binding, which only keeps Evidence for one Target from obtaining a credential for another ({{credential-scope}}).
 
