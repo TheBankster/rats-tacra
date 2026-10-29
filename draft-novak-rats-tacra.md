@@ -418,7 +418,7 @@ A Relying Party MUST NOT assume the Direct form; it learns the form from the Att
 This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness.
 It does not by itself tie the exchange to the channel over which the credential is acquired.
 It does not cover the Credential Type or the Credential Hint, which the CAS can change.
-A Relying Party MUST NOT issue or release a credential beyond what its policy allows for the attested context.
+A RATS Relying Party MUST NOT issue or release a credential beyond what its policy allows for the attested context.
 
 ## Sealing the Released Credential {#container}
 
