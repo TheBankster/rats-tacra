@@ -397,7 +397,7 @@ Because the CAS is untrusted ({{untrusted-cas}}), each value closes a substituti
 * without the CSR or CEKpub, it could substitute a key.
 
 The digest shows that the attested environment chose this CSR or CEKpub.
-Whether CSKpri or CEKpri was generated in that environment and stays there is what the Attestation Results say of the software the Attester runs, the Credential Acquisition Interface included.
+The private keys generated inside the Attesting Environment, CSKpri and CEKpri, MUST NOT leave it.
 The digest does not prove it: a public key or its hash in platform Evidence does not by itself demonstrate where its private key is (Section 6.1 of {{CSR-ATTEST}}).
 For Enrollment the subject is the finished CSR, so Evidence that carries this digest cannot travel inside that CSR, as the attribute of {{CSR-ATTEST}} does, and {{CSR-ATTEST}} does not replace this binding.
 A CSR MAY carry further attestations about its key under {{CSR-ATTEST}}, a second attestation beside this one.
