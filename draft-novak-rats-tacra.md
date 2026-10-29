@@ -458,7 +458,7 @@ The CEK is generated for one exchange inside the Attesting Environment and is no
 | CAAPI Client | Part of Attester | Invoked by CAI to communicate with CAS Client |
 | CAS Client | None: Conduit only | CAS Client extended by Remote Attestation Plug-in; SHOULD be outside the Attester's trust boundary and, wherever it runs, is trusted for nothing beyond carrying messages ({{untrusted-cas}}) |
 | CAS Server | None: Conduit only | CAS Server extended by Remote Attestation Plug-in; forwards Freshness Handles, Evidence, and Attestation Results; does not appraise |
-| Secret Vault | RATS Relying Party | Invoked in the Retrieval variant of this architecture; seals what it releases to CEKpub, out of the CAS Server's sight ({{container}}) |
+| Secret Vault | RATS Relying Party | Invoked in the Retrieval variant of this architecture; seals what it releases to CEKpub, opaquely to CAS Client and CAS Server ({{container}}) |
 | Credential Authority | RATS Relying Party | Invoked in the Enrollment variant of this architecture |
 | Verifier | Verifier | No changes in RATS Verifier role or implementation |
 | RATS-Unaware Relying Party | None | No changes in RUP role or implementation |
