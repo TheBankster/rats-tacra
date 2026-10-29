@@ -417,7 +417,8 @@ A Relying Party MUST NOT assume the Direct form; it learns the form from the Att
 
 This binding ties the CSR or CEKpub to the Attester's platform, to the intended Relying Party and Target, and to freshness.
 It does not by itself tie the exchange to the channel over which the credential is acquired.
-Nor does it cover the Credential Type or the Credential Hint, which the CAS can change; a Relying Party MUST NOT issue or release a credential beyond what its policy allows for the attested context.
+It does not cover the Credential Type or the Credential Hint, which the CAS can change.
+A Relying Party MUST NOT issue or release a credential beyond what its policy allows for the attested context.
 
 ## Sealing the Released Credential {#container}
 
@@ -667,7 +668,7 @@ The various attacks the CAS is capable of and their mitigations are listed below
   * This document binds no Relying Party identifier ({{binding}}). Binding one would make the second RATS Relying Party refuse every Freshness Kind, including a Freshness Handle it originated itself.
   * As it is, the CAS Server chooses among the RATS Relying Parties that trust the same Verifier and serve that Target name. `present-nonce` keeps one Evidence from serving a second RATS Relying Party, but not the one the CAS Server started the exchange at.
   * A deployment that wants one RATS Relying Party, and no other, to serve a given Attester gives each RATS Relying Party its own Target names. The Target is bound, and a RATS Relying Party refuses a request for a Target it does not serve.
-  * Nor does the binding bind the channel. A channel binding, such as a TLS exporter ({{RFC9266}}), would have to reach the Attesting Environment from the CAS Client, which this architecture does not assume (Design Goal 8). What pins the RATS Relying Party is the Target name.
+  * The binding does not bind the channel. A channel binding, such as a TLS exporter ({{RFC9266}}), would have to reach the Attesting Environment from the CAS Client, which this architecture does not assume (Design Goal 8). What pins the RATS Relying Party is the Target name.
   * A Credential Acquisition Mechanism MAY name the Credential Authority or Secret Vault a CAS Server uses by a name of its own, the optional path segment of EST for instance (Section 3.2.2 of {{RFC7030}}). Such a name is not the Target.
 * Substitution of the response. In Retrieval, the CAS can return a container of its own making, sealed to CEKpub, which it saw in the request, or the Secret Vault's container for another request. The second was sealed to another CEK and does not open. The first opens, and the Attester then holds a credential of the CAS's choosing, not the one the Secret Vault released, which the CAS cannot read. At the least that is a denial of service: the Target refuses a credential it did not issue. With an API key of an account the CAS holds at the Target, the Attester's calls run under that account, and what it sends goes there. This architecture accepts that risk.
 * The choice of Verifier in the Passport model. The CAS Server chooses the Verifier it sends Evidence to, and relays the Attestation Results.
