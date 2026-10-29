@@ -375,7 +375,7 @@ For a field of another size, a protocol profile specifies a hash whose output is
 
 The Verifier MUST report in the Attestation Results the value in the freshness input of the Evidence it appraised.
 That is the value it read from the Evidence.
-Where the expected value is submitted with the Evidence, as in challenge-response appraisal, it is that value, after the Verifier has checked that the Evidence carries it.
+Where the expected freshness value is submitted with the Evidence, as in challenge-response appraisal, it is that value, after the Verifier has checked that the Evidence carries it.
 The Credential Authority (Enrollment) or Secret Vault (Retrieval) MUST recompute the digest from the freshness element and the Target of the request and the CSR or CEKpub it received.
 It MUST reject the request unless the result equals the value reported in the Attestation Results.
 This is the same in the Passport and the Background Check model: either way, the Relying Party compares against a value the Verifier took from, or checked against, the appraised Evidence, never one it has from the CAS alone.
