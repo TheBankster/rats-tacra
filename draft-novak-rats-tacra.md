@@ -108,7 +108,6 @@ Likewise, the choice between RATS Passport and Background Check models is made o
 
 --- middle
 
-
 # Introduction {#intro}
 
 Success of a technology is ultimately measured by its adoption.
@@ -137,7 +136,6 @@ This RATS-Unaware Relying Party is typically unable to make the corresponding ch
 * Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep
 
 In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the pre-shared key, bearer token, or proof-of-possession credential obtained by the workload following Remote Attestation matches that expected by the RUP.
-
 
 # Conventions and Definitions
 
@@ -203,7 +201,6 @@ Section 10.1 of {{RFC9334}} notes that in many TEEs a clock is only available ou
 On such a platform the timestamp bounds the age of the Evidence by a clock set by whoever serves the Attester the current time: Evidence made with that clock set ahead is accepted once the RATS Relying Party's clock reaches the timestamp, less the skew, and for the maximum age after that.
 A RATS Relying Party that needs a bound on the real age of Evidence uses a `present-*` Freshness Kind, or requires the Attester's time to be attested.
 
-
 # Design Goals
 
 This architecture is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}.
@@ -232,7 +229,6 @@ The design goals specified here fully align with the TWI SIG requirements, while
 8. MUST NOT assume that the Attester has network access
 9. MUST be compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation
 10. SHOULD restrict visibility of fetched secrets to the Attester, specifically excluding visibility by the CAS Client and CAS Server
-
 
 # Architecture
 
@@ -444,8 +440,8 @@ The Attester, through its Credential Acquisition Interface, MUST refuse a contai
 These checks come before it opens anything.
 After these checks pass, the Attester opens the ciphertext under CEKpri.
 The Secret Vault's container for another request does not open, sealed to another CEK as it is.
-A container the CAS sealed itself opens: what the Attester then holds is stated in {{untrusted-cas}}.
-
+The CAS saw CEKpub and can seal a container of its own to it, in place of the Secret Vault's.
+That container passes these checks and opens, and what the Attester then holds is stated in {{untrusted-cas}}.
 
 CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding ({{binding}}).
 For a Diffie-Hellman KEM that is the DER encoding of a SubjectPublicKeyInfo ({{RFC5280}}).
@@ -467,7 +463,6 @@ The CEK is generated for one exchange inside the Attesting Environment and is no
 | Verifier | Verifier | No changes in RATS Verifier role or implementation |
 | RATS-Unaware Relying Party | None | No changes in RUP role or implementation |
 {: #tab-rats-roles title="RATS roles in TACRA"}
-
 
 # Credential Acquisition API (CAAPI)
 
@@ -616,7 +611,6 @@ Returns:
     * Server error: server unreachable
     * etc. (TBD)
 
-
 # Security Considerations {#security}
 
 ## Undesirability and Inevitability of Bearer Tokens
@@ -727,14 +721,11 @@ In any given implementation, the CAS Client MAY still authenticate to the CAS Se
 Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.
 TODO: Define what that binding looks like.
 
-
 # IANA Considerations {#iana}
 
 This document has no IANA actions.
 
-
 --- back
-
 
 # Acknowledgments
 {:numbered="false"}
