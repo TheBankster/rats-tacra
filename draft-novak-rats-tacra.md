@@ -26,7 +26,7 @@ venue:
 
 author:
  - ins: M. Novak
-   name: Mark Novak
+   name: Mark F. Novak
    org: J.P. Morgan Chase & Co.
    email: mark.f.novak@jpmchase.com
 
