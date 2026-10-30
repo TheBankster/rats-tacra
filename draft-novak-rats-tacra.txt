@@ -5,12 +5,12 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 2 May 2027                             Sandelman Software Works
+Expires: 3 May 2027                             Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
                                                           S. Nikolaichuk
                                                    The Capital Index LLC
-                                                         29 October 2026
+                                                         30 October 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -75,7 +75,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 May 2027.
+   This Internet-Draft will expire on 3 May 2027.
 
 Copyright Notice
 
@@ -1566,7 +1566,7 @@ Acknowledgments
 
 Authors' Addresses
 
-   Mark Novak
+   Mark F. Novak
    J.P. Morgan Chase & Co.
    Email: mark.f.novak@jpmchase.com
 
