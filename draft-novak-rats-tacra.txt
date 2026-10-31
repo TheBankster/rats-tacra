@@ -339,6 +339,10 @@ Table of Contents
       Handle into Evidence and retries Initiate-Credential-Acquisition
       if the epoch has moved ([RFC9334], Section 10.3)
 
+   It is NOT RECOMMENDED to use the absent-none Freshness Kind as it
+   creates an opportunity of an unlimited replay of Evidence against the
+   RATS Relying Party.
+
    A Freshness Handle has a lifetime, set by its originator, after which
    the originator no longer accepts it.  Initiate-Credential-Acquisition
    MAY return the lifetime with the Handle.  The lifetime SHOULD leave
@@ -729,10 +733,10 @@ Table of Contents
 
    The length prefixes make the encoding unambiguous: no two different
    sequences of values produce the same octets.  The digest is SHA-512
-   where the freshness input is 64 octets, e.g., REPORT_DATA of AMD SEV-
-   SNP and REPORTDATA of Intel TDX.  For a field of another size, a
-   protocol profile specifies a hash whose output is the size of the
-   field.
+   ([RFC6234]) where the freshness input is 64 octets, e.g., REPORT_DATA
+   of AMD SEV-SNP and REPORTDATA of Intel TDX.  For a field of another
+   size, a protocol profile specifies a hash whose output is the size of
+   the field.
 
    The Verifier MUST report in the Attestation Results the value of the
    freshness input of the Evidence it appraised.  Where the expected
@@ -1106,11 +1110,9 @@ Table of Contents
 
       -  Unsupported Credential Type
 
-      -  Invalid Credential Hint
-
       -  Rejected or unsupported Credential Hint
 
-      -  Server error: Remote Attestation failure
+      -  Server error: remote attestation failure
 
       -  Server error: permission failure
 
@@ -1155,8 +1157,6 @@ Table of Contents
       -  Invalid Credential Type
 
       -  Rejected or unsupported Credential Hint
-
-      -  Server error: failed remote attestation
 
       -  Server error: permission failure
 
@@ -1257,7 +1257,7 @@ Table of Contents
 
       -  Rejected or unsupported Credential Hint
 
-      -  Server error: Remote Attestation failure
+      -  Server error: remote attestation failure
 
       -  Server error: permission failure
 
@@ -1557,6 +1557,11 @@ Table of Contents
    [RFC5958]  Turner, S., "Asymmetric Key Packages", RFC 5958,
               DOI 10.17487/RFC5958, August 2010,
               <https://www.rfc-editor.org/rfc/rfc5958>.
+
+   [RFC6234]  Eastlake 3rd, D. and T. Hansen, "US Secure Hash Algorithms
+              (SHA and SHA-based HMAC and HKDF)", RFC 6234,
+              DOI 10.17487/RFC6234, May 2011,
+              <https://www.rfc-editor.org/rfc/rfc6234>.
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
