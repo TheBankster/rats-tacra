@@ -206,7 +206,7 @@ Initiate-Credential-Acquisition MAY return the lifetime with the Handle.
 The lifetime SHOULD leave the Attester time to produce the Evidence that carries the Handle: a platform may rate-limit attestation requests, so that an Attester waits several seconds for one report.
 A Freshness Handle originator SHOULD NOT set a lifetime below 60 seconds.
 
-A `present-nonce` Freshness Handle is unpredictable (Section 10.2 of {{RFC9334}}): its originator MUST generate it with at least 64 bits of entropy, issue it once and never reuse it.
+A `present-nonce` Freshness Handle is unpredictable (Section 10.2 of {{RFC9334}}): its originator MUST generate it with at least 128 bits of entropy, issue it once and never reuse it.
 Its length is set by the protocol profile.
 Initiate-Credential-Acquisition takes no requested length.
 The Handle enters the Evidence through the digest ({{binding}}), not as the freshness input itself, so no platform needs a Handle of a particular size.
@@ -324,7 +324,7 @@ There can be as many Credential Acquisition Client implementations as there are 
 There is no restriction against multiple Credential Acquisition Mechanisms collectively serving the same Attester, with different mechanisms utilized for different targets (Goal 5).
 Existing CAS Clients are extended to support Remote Attestation via dedicated CAS Client Plug-ins.
 
-The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement (Goal 1).
+The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mode (enrollment, retrieval) can be offered to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement (Goal 1).
 If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result.
 It is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type(s) it requires.
 
@@ -594,7 +594,7 @@ Returns:
     * Unsupported Target
     * Unsupported Credential Type
     * Rejected or unsupported Credential Hint
-    * Server error: remote attestation failure
+    * Server error: Remote Attestation failure
     * Server error: permission failure
     * Server error: server too busy; try again later
     * Server error: server unreachable
@@ -618,10 +618,10 @@ Returns:
 * On failure: enumerated reason for failure, such as:
     * Invalid Target
     * Unsupported Target
-    * Invalid Credential Type
+    * Unsupported Credential Type
     * Rejected or unsupported Credential Hint
     * Server error: permission failure
-    * Server error: remote attestation failure
+    * Server error: Remote Attestation failure
     * Server error: server too busy; try again later
     * Server error: server unreachable
 
@@ -632,7 +632,7 @@ CAAPI offers no facilities for discovering these; they are decided out of band, 
 
 The typical invocation flow is:
 
-1. CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)
+1. CAAPI: Initiate-Credential-Acquisition(Target, Credential Type, Credential Hint)
     * Returns Freshness kind and the Credential Acquisition Mode for this Target and Credential Type
 2. Platform Plug-in: Generate keys and Evidence for the Credential Acquisition Mode and Freshness kind returned in step 1, with the binding of {{binding}}, whose freshness element is:
     * Freshness kind of `present-nonce` or `present-epoch`: the Freshness Handle
@@ -674,7 +674,7 @@ Returns:
     * Unsupported Target
     * Unsupported Credential Type
     * Rejected or unsupported Credential Hint
-    * Server error: remote attestation failure
+    * Server error: Remote Attestation failure
     * Server error: permission failure
     * Server error: server too busy; try again later
     * Server error: server unreachable
