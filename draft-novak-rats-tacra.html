@@ -15,7 +15,7 @@ Existing deployed services, which precede the introduction of Remote Attestation
 There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers. 
        This document describes an architecture by which Remote Attestation is utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs.
 This architecture is intended to work with common credential acquisition protocols and mechanisms such as EST, SPIFFE/SPIRE, ACMEv2, and many others. 
-       Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how Envoy does it.
+       Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition.
 This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the Credential Acquisition Mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
 Likewise, the choice between RATS Passport and Background Check models is made opaque to the Attester, further simplifying its development. 
     ' name="description">
@@ -1058,7 +1058,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Novak, et al.</td>
-<td class="center">Expires 3 May 2027</td>
+<td class="center">Expires 4 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg {
 <dd class="internet-draft">draft-novak-rats-tacra-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-30" class="published">30 October 2026</time>
+<time datetime="2026-10-31" class="published">31 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-03">3 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-04">4 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1106,7 +1106,7 @@ Existing deployed services, which precede the introduction of Remote Attestation
 There are significant advantages if workloads can be incrementally updated in the trustworthiness of the platform, without disrupting their clients and servers.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">This document describes an architecture by which Remote Attestation is utilized for providing Attesters with Identity Documents (keys or credentials) to authenticate to RUPs.
 This architecture is intended to work with common credential acquisition protocols and mechanisms such as EST, SPIFFE/SPIRE, ACMEv2, and many others.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
-<p id="section-abstract-3">Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition similar to how Envoy does it.
+<p id="section-abstract-3">Another important but separate goal is to encapsulate the Attester-side complexity of Remote Attestation and credential acquisition.
 This allows Attesters to be implemented in a way that abstracts away the details of credential acquisition: both the protocols used and the Credential Acquisition Mechanisms employed, whether minting new (Enrollment), or requesting existing (Retrieval) credentials.
 Likewise, the choice between RATS Passport and Background Check models is made opaque to the Attester, further simplifying its development.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
 </section>
@@ -1145,7 +1145,7 @@ Likewise, the choice between RATS Passport and Background Check models is made o
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 4 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1294,12 +1294,12 @@ Likewise, the choice between RATS Passport and Background Check models is made o
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
 <p id="section-1-1">Success of a technology is ultimately measured by its adoption.
-The Remote ATestation procedureS (RATS) Architecture <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> requires that RATS Relying Parties understand Attestation Results, execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
+The Remote ATtestation procedureS (RATS) Architecture <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> requires that RATS Relying Parties understand Attestation Results, execute Appraisal Policy for Attestation Results, and have trust in Verifiers.
 A change in Evidence may lead to a change in either the Attestation Results or Appraisal Policy for Attestation Results.
-However, it is common for authentication and authorization policies on Relying Parties to remain static for long periods of time.
-This is achieved by limiting which entities get to receive the credentials used for authentication and authorization, rather than have the Relying Party make complex decisions based on the credential's changing content.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">One key requirement for successful deployment of Remote Attestation-capable workloads is minimal blast radius.
-When a workload is moved from a legacy to a remotely attestable Trusted Execution Environment, that workload can use Remote Attestation to obtain a stable and trustworthy Identity Document, while its clients and servers do not notice anything different.
+One key requirement for successful deployment of Remote Attestation-capable workloads is minimal blast radius: so long as a change in the workload is authorized, the clients and servers it interacts with should not notice any difference.
+The minimum blast radius requirement comes from real-world deployments: it is common for authentication and authorization policies on Relying Parties to remain static for long periods of time.
+It is therefore impractical to have the Relying Party make complex decisions based on the credential's changing content.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">When a workload is moved from a legacy to a remotely attestable Trusted Execution Environment, that workload can use Remote Attestation to obtain a stable and trustworthy Identity Document, while its clients and servers do not notice anything different.
 For that, a mechanism is required by means of which a Secret Vault or a Credential Authority takes on the role of RATS Relying Party.
 This provides an intermediation between Attestation Results and the RATS-Unaware Relying Parties whose authentication and authorization policies may precede the introduction of Remotely Attestable Workloads and remain static for long periods of time.
 For the RATS-Unaware Relying Parties, these adoption barriers are eliminated, as these RUPs are capable of authenticating their clients utilizing Identity Document types they are already familiar with.<a href="#section-1-2" class="pilcrow">¶</a></p>
@@ -1317,13 +1317,13 @@ This RATS-Unaware Relying Party is typically unable to make the corresponding ch
             <p id="section-1.1-2.1.1">It may be a compiled object or container provided by a third party<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.2">
-            <p id="section-1.1-2.2.1">Or it may be implemented in a language not easily changed or upgraded with new capabilities<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.2.1">It may be implemented in a language not easily changed or upgraded with new capabilities<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.3">
-            <p id="section-1.1-2.3.1">Further, such a system may require extensive and significant review by an authority before changes to the core algorithm can be made<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.3.1">Such a system may require extensive and significant review by an authority before changes to the core algorithm can be made<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-2.4">
-            <p id="section-1.1-2.4.1">Or, finally, the reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them moving in lockstep<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.4.1">The reluctance to change may come from organizational friction within an enterprise where the remotely attesting workload is organizationally separate from its Relying Party and different priorities of different parts of organization prevent them from moving in lockstep<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-1.1-3">In all of these cases, it is assumed that the remotely attesting workload can make the necessary changes to perform remote attestation, and that interoperability with the RUP will be preserved so long as the pre-shared key, bearer token, or proof-of-possession credential obtained by the workload following Remote Attestation matches that expected by the RUP.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
@@ -1414,7 +1414,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <p id="section-2-2.13.1">Freshness Handle: a Handle as defined in <span>[<a href="#INTERACTION-MODELS" class="cite xref">INTERACTION-MODELS</a>]</span> (for example an attestation nonce or an Epoch Marker), bound into Evidence to demonstrate freshness<a href="#section-2-2.13.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.14">
-          <p id="section-2-2.14.1">Freshness Kind: how freshness is established for one credential-acquisition exchange; see <a href="#freshness-kind" class="auto internal xref">Section 2.1</a><a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.14.1">Freshness Kind: how freshness is established for one credential acquisition exchange; see <a href="#freshness-kind" class="auto internal xref">Section 2.1</a><a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-2-3">Note: WITs are JWTs that require key confirmation.
@@ -1425,10 +1425,14 @@ That makes them proof-of-possession credentials, whereas JWTs are used without k
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-freshness-kind" class="section-name selfRef">Freshness Kind</a>
         </h3>
 <p id="section-2.1-1">This document classifies Evidence freshness for a credential-acquisition exchange by combining the methods in Section 10 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span> with whether Initiate-Credential-Acquisition (<a href="#Initiate-Credential-Acquisition" class="auto internal xref">Section 5.1</a>) returns a Freshness Handle.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2"><code>present-*</code> kinds return a Freshness Handle.
-The Attester binds that Handle into Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).
-<code>absent-*</code> kinds return no Handle.
-The Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1-2.1">
+            <p id="section-2.1-2.1.1"><code>present-*</code> kinds return a Freshness Handle. The Attester binds that Handle into Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-2.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.1-2.2">
+            <p id="section-2.1-2.2.1"><code>absent-*</code> kinds return no Handle. The Attester binds a timestamp from a trusted clock or an epoch marker already held locally, or makes no freshness claim.<a href="#section-2.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
 <p id="section-2.1-3">The Freshness Kind is one of:<a href="#section-2.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2.1-4.1">
@@ -1529,7 +1533,7 @@ The design goals specified here fully align with the TWI SIG requirements, while
           <p id="section-3-2.5.1"><span class="bcp14">MUST</span> support Workloads utilizing different Credential Acquisition Mechanisms per-target<a href="#section-3-2.5.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-2.6">
-          <p id="section-3-2.6.1"><span class="bcp14">MUST</span> support both Background Check and Passport RATS modes, indistinguishably from the PoV of the Attester<a href="#section-3-2.6.1" class="pilcrow">¶</a></p>
+          <p id="section-3-2.6.1"><span class="bcp14">MUST</span> support both Background Check and Passport RATS modes, indistinguishably from the point of view of the Attester<a href="#section-3-2.6.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-2.7">
           <p id="section-3-2.7.1"><span class="bcp14">MUST</span> support most current and future RATS Verifiers, Credential Authorities, and Secret Vaults, transparently to the Attester<a href="#section-3-2.7.1" class="pilcrow">¶</a></p>
@@ -1697,13 +1701,13 @@ There is no restriction against multiple Credential Acquisition Mechanisms colle
 Existing CAS Clients are extended to support Remote Attestation via dedicated CAS Client Plug-ins.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
 <p id="section-4.4-3">The Credential Acquisition System controls which Credential Types and which Credential Acquisition Mechanisms (enrollment, retrieval) can be provisioned to the Attester for any Attester-supplied target, without the Attester's knowledge or involvement (Goal 1).
 If a Credential Type specified by the Attester is unavailable due to Credential Acquisition System limitations, an error will result.
-It is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type it requires.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+It is an administrative error to pair an Attester with a Credential Acquisition System that is unable to supply it with the Credential Type(s) it requires.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
 <p id="section-4.4-4">The Credential Acquisition Server implements the server side of the corresponding Credential Acquisition Mechanism and interacts with the RATS Verifier, the Identity Provider (e.g., a Credential Authority for minting new certificates) and the Secret Vault for fetching existing keys or credentials, on the Attester's behalf (Goal 7).
 The Credential Types supported by this Architecture are limited only by what the Credential Acquisition System can support (Goal 2).
 Existing Credential Acquisition Servers are extended to support Remote Attestation via dedicated CAS Server Plug-ins.
 The CAS Server's interactions with the Verifier are those of a conduit, not of a Relying Party.
 When Initiate-Credential-Acquisition returns a Verifier-originated or RATS Relying Party-originated Freshness Handle, the CAS Server obtains that Handle and forwards it; it <span class="bcp14">MUST NOT</span> generate <code>present-nonce</code> or <code>present-epoch</code> values.
-In the Passport model, the CAS Server forwards Evidence to the Verifier and forwards the resulting Attestation Results to the Credential Authority or Secret Vault, which remain the Relying Parties that execute Appraisal Policy for Attestation Results.
+In the Passport model, the CAS Server forwards Evidence to the Verifier and forwards the resulting Attestation Results to the Credential Authority or Secret Vault, which take on the role of the Relying Parties that execute Appraisal Policy for Attestation Results.
 In the Background Check model, the Relying Party typically obtains Attestation Results from the Verifier directly; the CAS Server need not be on that path.
 The CAS Server <span class="bcp14">MUST NOT</span> appraise, modify, or replace Attestation Results.
 These Verifier exchanges are opaque to the Attester.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
@@ -1724,7 +1728,7 @@ In both cases, the associated secrets remain opaque to the CAS at all times (Goa
 <p id="section-4.4-8">During both Enrollment and Retrieval, the Attester <span class="bcp14">MAY</span> supply a Credential Hint.
 During Enrollment, a Credential Authority <span class="bcp14">MAY</span> use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
 During Retrieval, a Secret Vault maps the Attestation Results to a credential group: stable for replica workloads, and distinct across security domains, tenants and the credentials it releases.
-That mapping is its policy, and this document does not specify the identifier.
+That mapping is performed per the RATS Relying Party's policy; this document does not specify the identifier.
 A Secret Vault <span class="bcp14">MAY</span> use the Credential Hint to select among the credentials that mapping allows for the attested context.
 The hint <span class="bcp14">MUST NOT</span> enlarge that set: a CAS that rewrites it obtains nothing the policy would not release, for that Target, to the attested workload the Attestation Results describe.
 The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it will not honor the hint.<a href="#section-4.4-8" class="pilcrow">¶</a></p>
@@ -1775,10 +1779,9 @@ binding_input = len32(freshness) || freshness
 </li>
         </ul>
 <p id="section-4.5-7">The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
-The digest is SHA-512 where the freshness input is 64 octets, as REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX are.
+The digest is SHA-512 where the freshness input is 64 octets, e.g., REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX.
 For a field of another size, a protocol profile specifies a hash whose output is the size of the field.<a href="#section-4.5-7" class="pilcrow">¶</a></p>
-<p id="section-4.5-8">The Verifier <span class="bcp14">MUST</span> report in the Attestation Results the value in the freshness input of the Evidence it appraised.
-That is the value it read from the Evidence.
+<p id="section-4.5-8">The Verifier <span class="bcp14">MUST</span> report in the Attestation Results the value of the freshness input of the Evidence it appraised.
 Where the expected freshness value is submitted with the Evidence, as in challenge-response appraisal, it is that value, after the Verifier has checked that the Evidence carries it.
 The Credential Authority (Enrollment) or Secret Vault (Retrieval) <span class="bcp14">MUST</span> recompute the digest from the freshness element and the Target of the request and the CSR or CEKpub it received.
 It <span class="bcp14">MUST</span> reject the request unless the result equals the value reported in the Attestation Results.
@@ -1797,7 +1800,7 @@ A party, the Verifier included, <span class="bcp14">MUST NOT</span> issue a Fres
             <p id="section-4.5-10.2.1">RATS Relying Party-originated: the Credential Authority (Enrollment) or Secret Vault (Retrieval) issues the Handle and checks it itself. A <code>present-nonce</code> Handle is one it issued and has not been used before. A <code>present-epoch</code> Handle is the current epoch marker.<a href="#section-4.5-10.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-4.5-11">Because the CAS is untrusted (<a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>), each value closes a substitution:<a href="#section-4.5-11" class="pilcrow">¶</a></p>
+<p id="section-4.5-11">Because the CAS is untrusted (<a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>), each value mitigates a threat:<a href="#section-4.5-11" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.5-12.1">
             <p id="section-4.5-12.1.1">without the Target, the CAS could initiate, at the intended Relying Party, for a Target the Attester did not ask for;<a href="#section-4.5-12.1.1" class="pilcrow">¶</a></p>
@@ -1813,10 +1816,10 @@ A party, the Verifier included, <span class="bcp14">MUST NOT</span> issue a Fres
 The private keys generated inside the Attesting Environment, CSKpri and CEKpri, <span class="bcp14">MUST NOT</span> leave it.
 The digest does not prove it: a public key or its hash in platform Evidence does not by itself demonstrate where its private key is (Section 6.1 of <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>).
 For Enrollment the subject is the finished CSR, so Evidence that carries this digest cannot travel inside that CSR, as the attribute of <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span> does, and <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span> does not replace this binding.
-A CSR <span class="bcp14">MAY</span> carry further attestations about its key under <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>, a second attestation beside this one.
-A Credential Authority that relies on them ensures that their binding to the key has been validated, as Section 6.1 of <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span> requires.<a href="#section-4.5-13" class="pilcrow">¶</a></p>
+A CSR <span class="bcp14">MAY</span> carry further attestations about its key under <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span>.
+A Credential Authority that relies on such further attestations ensures that their binding to the key has been validated, as Section 6.1 of <span>[<a href="#CSR-ATTEST" class="cite xref">CSR-ATTEST</a>]</span> requires.<a href="#section-4.5-13" class="pilcrow">¶</a></p>
 <p id="section-4.5-14">The binding carries no Relying Party identifier.
-Which RATS Relying Party serves the Attester, and what a deployment does about it, is in <a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>.<a href="#section-4.5-14" class="pilcrow">¶</a></p>
+Which RATS Relying Party serves the Attester, and what a deployment does about it, is described in <a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>.<a href="#section-4.5-14" class="pilcrow">¶</a></p>
 <p id="section-4.5-15">Producing the binding is the responsibility of the Platform Plug-in, because where the freshness input lives is platform-specific.
 It takes one of three forms:<a href="#section-4.5-15" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -2000,7 +2003,10 @@ Here only the high-level description is provided.<a href="#section-5-1" class="p
                 <p id="section-5.1-5.1.2.5.1">Maximum Evidence age, when the Freshness Kind is <code>absent-timestamp</code> (optional, <a href="#freshness-kind" class="auto internal xref">Section 2.1</a>)<a href="#section-5.1-5.1.2.5.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.1-5.1.2.6">
-                <p id="section-5.1-5.1.2.6.1">Other TBD pertinent information, such as supported ciphers, etc. (TODO: define)<a href="#section-5.1-5.1.2.6.1" class="pilcrow">¶</a></p>
+                <p id="section-5.1-5.1.2.6.1">The signature algorithms the Credential Authority accepts for the CSK, when the Credential Acquisition Mode is Enrollment<a href="#section-5.1-5.1.2.6.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-5.1.2.7">
+                <p id="section-5.1-5.1.2.7.1">The HPKE suites of the container (<a href="#container" class="auto internal xref">Section 4.6</a>) the Secret Vault accepts, when the Credential Acquisition Mode is Retrieval<a href="#section-5.1-5.1.2.7.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
@@ -2027,9 +2033,6 @@ Here only the high-level description is provided.<a href="#section-5-1" class="p
 </li>
               <li class="normal" id="section-5.1-5.2.2.7">
                 <p id="section-5.1-5.2.2.7.1">Server error: server unreachable<a href="#section-5.1-5.2.2.7.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="normal" id="section-5.1-5.2.2.8">
-                <p id="section-5.1-5.2.2.8.1">etc. (TBD)<a href="#section-5.1-5.2.2.8.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
@@ -2098,9 +2101,6 @@ Here only the high-level description is provided.<a href="#section-5-1" class="p
               <li class="normal" id="section-5.2-5.2.2.9">
                 <p id="section-5.2-5.2.2.9.1">Server error: server unreachable<a href="#section-5.2-5.2.2.9.1" class="pilcrow">¶</a></p>
 </li>
-              <li class="normal" id="section-5.2-5.2.2.10">
-                <p id="section-5.2-5.2.2.10.1">etc. (TBD)<a href="#section-5.2-5.2.2.10.1" class="pilcrow">¶</a></p>
-</li>
             </ul>
 </li>
         </ul>
@@ -2167,9 +2167,6 @@ Here only the high-level description is provided.<a href="#section-5-1" class="p
 </li>
               <li class="normal" id="section-5.3-5.2.2.9">
                 <p id="section-5.3-5.2.2.9.1">Server error: server unreachable<a href="#section-5.3-5.2.2.9.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="normal" id="section-5.3-5.2.2.10">
-                <p id="section-5.3-5.2.2.10.1">etc. (TBD)<a href="#section-5.3-5.2.2.10.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
@@ -2300,9 +2297,6 @@ The Acquire-Credential implementation follows the recommended CAAPI invocation s
               <li class="normal" id="section-6.1-6.2.2.8">
                 <p id="section-6.1-6.2.2.8.1">Server error: server unreachable<a href="#section-6.1-6.2.2.8.1" class="pilcrow">¶</a></p>
 </li>
-              <li class="normal" id="section-6.1-6.2.2.9">
-                <p id="section-6.1-6.2.2.9.1">etc. (TBD)<a href="#section-6.1-6.2.2.9.1" class="pilcrow">¶</a></p>
-</li>
             </ul>
 </li>
         </ul>
@@ -2343,11 +2337,15 @@ What a malicious CAS that delays, replays, rewrites or redirects messages can do
 <ul class="normal">
 <li class="normal" id="section-7.2-3.1">
             <p id="section-7.2-3.1.1">The Attester, with its Credential Acquisition Interface, holds CSKpri or CEKpri inside the environment its Evidence attests.
-It can produce Evidence over any value it chooses as the freshness input, and ask for any Target. The Verifier appraises its platform and the software it runs, and the Credential Authority or Secret Vault decides by its policy, not by what the Attester asks.<a href="#section-7.2-3.1.1" class="pilcrow">¶</a></p>
+It can produce Evidence over any value it chooses as the freshness input, and ask for any Target.
+The Verifier appraises its platform and the software it runs, and the Credential Authority or Secret Vault decides by its policy, not by what the Attester asks.<a href="#section-7.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.2-3.2">
-            <p id="section-7.2-3.2.1">The CAS Client and the CAS Server see every message in transit: the Freshness Handle, the Evidence, the CSR or CEKpub, the Credential Type and the Credential Hint, and the credential or the sealed container. In the Passport model, the CAS Server also sees the Attestation Results.
-The CAS Client and CAS Server can delay, replay and reorder messages. They can obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, and change what the binding (<a href="#binding" class="auto internal xref">Section 4.5</a>) does not cover. In the Passport model, they can also choose the Verifier.
+            <p id="section-7.2-3.2.1">The CAS Client and the CAS Server see every message in transit: the Freshness Handle, the Evidence, the CSR or CEKpub, the Credential Type and the Credential Hint, and the credential or the sealed container.
+In the Passport model, the CAS Server also sees the Attestation Results.
+The CAS Client and CAS Server can delay, replay and reorder messages.
+They can obtain a Freshness Handle from any RATS Relying Party for any Target, carry a request to another RATS Relying Party, and change what the binding (<a href="#binding" class="auto internal xref">Section 4.5</a>) does not cover.
+In the Passport model, they can also choose the Verifier.
 What bounds them:<a href="#section-7.2-3.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2-3.2.2.1">
@@ -2360,7 +2358,7 @@ What bounds them:<a href="#section-7.2-3.2.1" class="pilcrow">¶</a></p>
                 <p id="section-7.2-3.2.2.3.1">the RATS Relying Party's policy;<a href="#section-7.2-3.2.2.3.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-7.2-3.2.2.4">
-                <p id="section-7.2-3.2.2.4.1">the Verifiers the RATS Relying Party trusts;<a href="#section-7.2-3.2.2.4.1" class="pilcrow">¶</a></p>
+                <p id="section-7.2-3.2.2.4.1">the Verifier(s) the RATS Relying Party trusts;<a href="#section-7.2-3.2.2.4.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-7.2-3.2.2.5">
                 <p id="section-7.2-3.2.2.5.1">the container sealed to CEKpub (<a href="#container" class="auto internal xref">Section 4.6</a>).<a href="#section-7.2-3.2.2.5.1" class="pilcrow">¶</a></p>
@@ -2373,16 +2371,20 @@ It appraises Evidence and reports the freshness input it read. It decides nothin
 </li>
           <li class="normal" id="section-7.2-3.4">
             <p id="section-7.2-3.4.1">The Credential Authority and the Secret Vault hold the issuance policy, the signing key or the secrets, and the Verifiers they trust.
-Each recomputes the binding from the request and from what it holds (<a href="#binding" class="auto internal xref">Section 4.5</a>), and checks the freshness element under the Freshness Kind of its policy. The Secret Vault seals what it releases to CEKpub (<a href="#container" class="auto internal xref">Section 4.6</a>).<a href="#section-7.2-3.4.1" class="pilcrow">¶</a></p>
+Each recomputes the binding from the request and from what it holds (<a href="#binding" class="auto internal xref">Section 4.5</a>), and checks the freshness element under the Freshness Kind of its policy.
+The Secret Vault seals what it releases to CEKpub (<a href="#container" class="auto internal xref">Section 4.6</a>).<a href="#section-7.2-3.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-7.2-4">The various attacks the CAS is capable of and their mitigations are listed below:<a href="#section-7.2-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2-5.1">
-            <p id="section-7.2-5.1.1">Substitution of a value. If the CAS changes a request by modifying its Target, CSR, CEKpub, or freshness element, that request would be refused by the RATS Relying Party: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-7.2-5.1.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.1.1">Substitution of a value.
+If the CAS changes a request by modifying its Target, CSR, CEKpub, or freshness element, that request would be refused by the RATS Relying Party: the digest the RATS Relying Party recomputes no longer equals the one the Verifier read from the Evidence (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-7.2-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.2-5.2">
-            <p id="section-7.2-5.2.1">Substitution of the Attester. The CAS can replace the Evidence the Attester supplied with Evidence from a platform of its choosing. It obtains nothing for the Attester's keys:<a href="#section-7.2-5.2.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.2.1">Substitution of the Attester.
+The CAS can replace the Evidence the Attester supplied with Evidence from a platform of its choosing.
+It obtains nothing for the Attester's keys:<a href="#section-7.2-5.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2-5.2.2.1">
                 <p id="section-7.2-5.2.2.1.1">a platform that is not genuine: its Evidence does not chain to the vendor's root;<a href="#section-7.2-5.2.2.1.1" class="pilcrow">¶</a></p>
@@ -2396,7 +2398,8 @@ Each recomputes the binding from the request and from what it holds (<a href="#b
             </ul>
 </li>
           <li class="normal" id="section-7.2-5.3">
-            <p id="section-7.2-5.3.1">Replay at the same RATS Relying Party. The RATS Relying Party keeps no record of a CSR or CEKpub it served. Only the freshness element can refuse a second offer of the same request:<a href="#section-7.2-5.3.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.3.1">Replay at the same RATS Relying Party.
+The RATS Relying Party keeps no record of a CSR or CEKpub it served. Only the freshness element can refuse a second offer of the same request:<a href="#section-7.2-5.3.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2-5.3.2.1">
                 <p id="section-7.2-5.3.2.1.1"><code>present-nonce</code>: one Evidence serves once, as the Handle is consumed on first use;<a href="#section-7.2-5.3.2.1.1" class="pilcrow">¶</a></p>
@@ -2412,55 +2415,84 @@ Each recomputes the binding from the request and from what it holds (<a href="#b
 </li>
             </ul>
 <p id="section-7.2-5.3.3">
-What the CAS obtains is a second credential, or a second release, for the Attester's key. A deployment that counts or audits credentials uses <code>present-nonce</code>.<a href="#section-7.2-5.3.3" class="pilcrow">¶</a></p>
+What the CAS obtains is a second credential, or a second release, for the Attester's key.
+A deployment that counts or audits credentials uses <code>present-nonce</code>.<a href="#section-7.2-5.3.3" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.2-5.4">
-            <p id="section-7.2-5.4.1">Redirection to another RATS Relying Party. The CAS can offer Evidence made for one Credential Authority or Secret Vault to another that trusts the same Verifier and serves a Target of the same name.
-Whatever that RATS Relying Party issues or releases is bound to the Attester's keys, so the CAS obtains nothing it can use. What is at stake is which RATS Relying Party serves the Attester, and who chooses it:<a href="#section-7.2-5.4.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.4.1">Redirection to another RATS Relying Party.
+The CAS can offer Evidence made for one Credential Authority or Secret Vault to another that trusts the same Verifier and serves a Target of the same name.
+Whatever that RATS Relying Party issues or releases is bound to the Attester's keys, so the CAS obtains nothing it can use.
+What is at stake is which RATS Relying Party serves the Attester, and who chooses it:<a href="#section-7.2-5.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2-5.4.2.1">
-                <p id="section-7.2-5.4.2.1.1">This document binds no Relying Party identifier (<a href="#binding" class="auto internal xref">Section 4.5</a>). Binding one would make the second RATS Relying Party refuse every Freshness Kind, including a Freshness Handle it originated itself.<a href="#section-7.2-5.4.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-7.2-5.4.2.1.1">This document binds no Relying Party identifier (<a href="#binding" class="auto internal xref">Section 4.5</a>).
+Binding one would make the second RATS Relying Party refuse every Freshness Kind, including a Freshness Handle it originated itself.<a href="#section-7.2-5.4.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-7.2-5.4.2.2">
-                <p id="section-7.2-5.4.2.2.1">As it is, the CAS Server chooses among the RATS Relying Parties that trust the same Verifier and serve that Target name. <code>present-nonce</code> keeps one Evidence from serving a second RATS Relying Party, but not the one the CAS Server started the exchange at.<a href="#section-7.2-5.4.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-7.2-5.4.2.2.1">As it is, the CAS Server chooses among the RATS Relying Parties that trust the same Verifier and serve that Target name.
+<code>present-nonce</code> keeps one Evidence from serving a second RATS Relying Party, but not the one the CAS Server started the exchange at.<a href="#section-7.2-5.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-7.2-5.4.2.3">
-                <p id="section-7.2-5.4.2.3.1">The binding does not bind the channel. A channel binding, such as a TLS exporter (<span>[<a href="#RFC9266" class="cite xref">RFC9266</a>]</span>), would have to reach the Attesting Environment from the CAS Client, which this architecture does not assume (Design Goal 8). The binding names the Target, not the RATS Relying Party, and Evidence can reach any RATS Relying Party.<a href="#section-7.2-5.4.2.3.1" class="pilcrow">¶</a></p>
+                <p id="section-7.2-5.4.2.3.1">The binding does not bind the channel.
+A channel binding, such as a TLS exporter (<span>[<a href="#RFC9266" class="cite xref">RFC9266</a>]</span>), would have to reach the Attesting Environment from the CAS Client, which this architecture does not assume (Design Goal 8).
+The binding names the Target, not the RATS Relying Party, and Evidence can reach any RATS Relying Party.<a href="#section-7.2-5.4.2.3.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-7.2-5.4.2.4">
-                <p id="section-7.2-5.4.2.4.1">The CAS Server picks which Credential Authority or Secret Vault to use as the RATS Relying Party. A Credential Acquisition Mechanism <span class="bcp14">MAY</span> name that choice, the optional path segment of EST for instance (Section 3.2.2 of <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>), and such a name is not the Target.<a href="#section-7.2-5.4.2.4.1" class="pilcrow">¶</a></p>
+                <p id="section-7.2-5.4.2.4.1">The CAS Server picks which Credential Authority or Secret Vault to use as the RATS Relying Party.
+A Credential Acquisition Mechanism <span class="bcp14">MAY</span> name that choice, the optional path segment of EST for instance (Section 3.2.2 of <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>), and such a name is not the Target.<a href="#section-7.2-5.4.2.4.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
           <li class="normal" id="section-7.2-5.5">
-            <p id="section-7.2-5.5.1">Substitution of the response. In Retrieval, the CAS can return a container of its own making, sealed to CEKpub, which it saw in the request, or the Secret Vault's container for another request. The second was sealed to another CEK and does not open. The first opens, and the Attester then holds a credential of the CAS's choosing, not the one the Secret Vault released, which the CAS cannot read. What follows depends on the Credential Type: with an API key, the Attester's calls then run under the account the CAS chose, and what it sends goes there. This architecture accepts that risk.<a href="#section-7.2-5.5.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.5.1">Substitution of the response.
+In Retrieval, the CAS can return a container of its own making, sealed to CEKpub, which it saw in the request, or the Secret Vault's container for another request.
+The second was sealed to another CEK and cannot be unsealed.
+The first unseals, and the Attester then holds a credential of the CAS's choosing, not the one the Secret Vault released, which the CAS cannot read.
+What follows depends on the Credential Type: with an API key, the Attester's calls then run under the account the CAS chose.
+This architecture accepts that risk.<a href="#section-7.2-5.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.2-5.6">
-            <p id="section-7.2-5.6.1">The choice of Verifier in the Passport model. The CAS Server chooses the Verifier it sends Evidence to, and relays the Attestation Results.
-A RATS Relying Party <span class="bcp14">MUST</span> accept Attestation Results only from a Verifier it trusts, and <span class="bcp14">MUST</span> check that the freshness input they report equals its own recomputation of the binding (<a href="#binding" class="auto internal xref">Section 4.5</a>). Any other Verifier chosen by the CAS is therefore of no use to it.<a href="#section-7.2-5.6.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.6.1">The choice of Verifier in the Passport model.
+The CAS Server chooses the Verifier it sends Evidence to, and relays the Attestation Results.
+A RATS Relying Party <span class="bcp14">MUST</span> accept Attestation Results only from a Verifier it trusts, and <span class="bcp14">MUST</span> check that the freshness input they report equals its own recomputation of the binding (<a href="#binding" class="auto internal xref">Section 4.5</a>).
+Any other Verifier chosen by the CAS is therefore of no use to it.<a href="#section-7.2-5.6.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.2-5.7">
-            <p id="section-7.2-5.7.1">What the binding does not cover. The Credential Type and the Credential Hint travel unbound, and a CAS can change them. Two things limit that. The RATS Relying Party's policy issues or releases nothing beyond what it allows for the attested context, whatever the request says. The Attester sees whether the credential it receives is the one it asked for (<a href="#binding" class="auto internal xref">Section 4.5</a>, <a href="#credential-hint" class="auto internal xref">Section 7.3</a>, <a href="#credential-scope" class="auto internal xref">Section 7.4</a>).
-The Freshness Kind is set by the RATS Relying Party's policy for the Target, not by the request (<a href="#binding" class="auto internal xref">Section 4.5</a>). The Freshness Handle, for the <code>present-*</code> kinds, is originated by the Verifier or by the RATS Relying Party (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-7.2-5.7.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.7.1">What the binding does not cover.
+The Credential Type and the Credential Hint travel unbound, and a CAS can change them.
+Two things limit the impact of such substitution:<a href="#section-7.2-5.7.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-7.2-5.7.2">
+<li id="section-7.2-5.7.2.1">
+                <p id="section-7.2-5.7.2.1.1">The RATS Relying Party's policy issues or releases nothing beyond what it allows for the attested context, whatever the request says.<a href="#section-7.2-5.7.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-7.2-5.7.2.2">
+                <p id="section-7.2-5.7.2.2.1">The Attester sees whether the credential it receives is the one it asked for (<a href="#binding" class="auto internal xref">Section 4.5</a>, <a href="#credential-hint" class="auto internal xref">Section 7.3</a>, <a href="#credential-scope" class="auto internal xref">Section 7.4</a>).<a href="#section-7.2-5.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
+<p id="section-7.2-5.7.3">
+The Freshness Kind is set by the RATS Relying Party's policy for the Target, not by the request (<a href="#binding" class="auto internal xref">Section 4.5</a>).
+The Freshness Handle, for the <code>present-*</code> kinds, is originated by the Verifier or by the RATS Relying Party (<a href="#binding" class="auto internal xref">Section 4.5</a>).<a href="#section-7.2-5.7.3" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.2-5.8">
-            <p id="section-7.2-5.8.1">Denial. The CAS can delay or drop any message, and obtain Freshness Handles it never uses. This is mitigated by the CAS Client authenticating to the CAS Server, and the CAS Server authenticating to the Verifier and to the RATS Relying Party. Whichever of them originates Freshness Handles can then bound what it originates per client (<a href="#cas-client-auth" class="auto internal xref">Section 7.5</a>).<a href="#section-7.2-5.8.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-5.8.1">Denial of service.
+The CAS can delay or drop any message, and obtain Freshness Handles it never uses.
+This is mitigated by the CAS Client authenticating to the CAS Server, and the CAS Server authenticating to the Verifier and to the RATS Relying Party.
+Whichever of them originates Freshness Handles can then bound what it originates per client (<a href="#cas-client-auth" class="auto internal xref">Section 7.5</a>).<a href="#section-7.2-5.8.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-7.2-6">What the CAS reads.
 Evidence is signed, not encrypted, and the CAS Client and the CAS Server read it in transit.
 In the Passport model, the CAS Server can also inspect the Attestation Results.
 Evidence identifies the platform, its firmware level and the launched software, and may identify the device (Section 7.2 and Section 11 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>).
-The RATS architecture expects an entity that relays Evidence, without being the Attester or the intended Verifier, not to have access to it (Section 12.2 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>).
-This architecture accepts that the CAS reads Evidence and Attestation Results, and a deployment accepts it with the CAS it operates.
+The RATS architecture expects any entity that relays Evidence, other than the Attester or the intended Verifier, to not have access to it (Section 12.2 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>).
+This architecture accepts that the CAS reads Evidence and Attestation Results.
 What the CAS cannot read is CSKpri, CEKpri and the secret the Secret Vault seals to CEKpub.<a href="#section-7.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.2-7">The CAS Client <span class="bcp14">SHOULD</span> be outside the Attester's trust boundary.
 Outside it, the CAS Client is not attested as part of the Attester, and this architecture relies on it for nothing beyond carrying messages.
 Inside it, as when the CAS Client runs in the same Confidential VM, it shares the Attester's environment and can inspect the secrets the Attester generates and the secrets the CAS Server returns.
-A deployment that runs it there accepts that.
 While it is possible for the Secret Vault to release the secrets to the CAS Server in plaintext and have the CAS Server seal them using CEKpub, this architecture does not allow it, as doing so would violate Design Goal 10.<a href="#section-7.2-7" class="pilcrow">¶</a></p>
 <p id="section-7.2-8">A compromised platform attestation key breaks every guarantee above.
-The Verifier's defences are the vendor's root, which the key must chain to, and the TCB level the Evidence reports, which the Verifier's policy can require to be current.
+The Verifier's defences are the vendor's root, which the platform attestation key must chain to, and the TCB level the Evidence reports, which the Verifier's policy can require to be current.
 Under <code>absent-timestamp</code>, Evidence carries the current value of the Attester's clock, and its freshness is only as good as that clock (<a href="#freshness-kind" class="auto internal xref">Section 2.1</a>).
 Where a credential is honoured once issued or released is set by the Credential Authority's or Secret Vault's policy, as for any credential, and not by the binding, which only keeps Evidence for one Target from obtaining a credential for another (<a href="#credential-scope" class="auto internal xref">Section 7.4</a>).<a href="#section-7.2-8" class="pilcrow">¶</a></p>
 </section>
@@ -2494,8 +2526,7 @@ A deployment that needs a credential usable only at the requested Target issues 
         </h3>
 <p id="section-7.5-1">In this architecture, Remote Attestation is used to authenticate the Attester to the services (Secret Vault or Credential Authority) involved in Credential Issuance.
 In any given implementation, the CAS Client <span class="bcp14">MAY</span> still authenticate to the CAS Server.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
-<p id="section-7.5-2">Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.
-TODO: Define what that binding looks like.<a href="#section-7.5-2" class="pilcrow">¶</a></p>
+<p id="section-7.5-2">Whether CAS Client authentication must be bound to Attester authentication is left to protocol profiles.<a href="#section-7.5-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2610,7 +2641,7 @@ TODO: Define what that binding looks like.<a href="#section-7.5-2" class="pilcro
 <dd class="break"></dd>
 <dt id="WIMSE">[WIMSE]</dt>
       <dd>
-<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Salowey, J. A.</span>, <span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Sheffer, Y.</span>, and <span class="refAuthor">Y. Rosomakho</span>, <span class="refTitle">"WIMSE Workload Credentials"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-workload-creds-02</span>, <time datetime="2026-07-02" class="refDate">2 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-02</a>&gt;</span>. </dd>
+<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Salowey, J. A.</span>, <span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Sheffer, Y.</span>, and <span class="refAuthor">Y. Rosomakho</span>, <span class="refTitle">"WIMSE Workload Credentials"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-wimse-workload-creds-03</span>, <time datetime="2026-10-30" class="refDate">30 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-03">https://datatracker.ietf.org/doc/html/draft-ietf-wimse-workload-creds-03</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
