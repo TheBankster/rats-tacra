@@ -261,8 +261,11 @@ The design goals specified here fully align with the TWI SIG requirements, while
 It is not a goal, and, at any rate, it is not possible, to leave credential acquisition protocols and mechanisms (EST, SPIFFE/SPIRE, etc.) unmodified.
 These mechanisms currently do not support Remote Attestation, for the following reasons:
 
-1. None of the existing broadly deployed Credential Acquisition Mechanisms support this two-phase sequence, but all appear extensible to accommodate such changes without a lot of additional effort, and without risking backwards compatibility. CAS protocols MUST be able to carry Initiate-Credential-Acquisition; they need not be nonce-based.
+1. None of the existing broadly deployed Credential Acquisition Mechanisms support this two-phase sequence.
 2. The credentials that these existing mechanisms return are typically visible in plaintext to the control plane (the CAS Client and the CAS Server), whereas it is a common requirement to keep the knowledge of authentication secrets to the Attesters and a small number of trusted services, such as Secret Vaults and HSMs.
+
+CAS protocols that are supported must therefore be able to carry Initiate-Credential-Acquisition, and must be capable of fetching and returning sealed, rather than plaintext, secrets.
+All Credential Acquisition Mechanisms examined to date appear extensible to accommodate such changes without a lot of additional effort, and without risking backwards compatibility.
 
 ## Architecture Overview
 
