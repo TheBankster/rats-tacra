@@ -220,8 +220,8 @@ This architecture is a result of work by the Confidential Computing Consortium's
 The requirements published by the TWI SIG are deliberately high-level.
 The design goals specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
-1. MUST support mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime.
-2. MUST support current and future credential formats:
+1. Must support mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime
+2. Must support current and future credential formats:
    * X.509 Certificates
    * WIMSE Workload Identity Certificates (WICs)
    * WIMSE Workload Identity Tokens (WITs)
@@ -229,19 +229,19 @@ The design goals specified here fully align with the TWI SIG requirements, while
    * TPM 2.0 DAA Group Certificates (for Replica workloads)
    * Pre-shared keys
    * Future formats through architectural extensibility
-3. SHOULD limit the trust boundary expansion of the Attesting Environment to the minimum
-4. MUST support, transparently to the Attester, most current and future Credential Acquisition Mechanisms:
+3. Should limit the trust boundary expansion of the Attesting Environment to the minimum
+4. Must support, transparently to the Attester, most current and future Credential Acquisition Mechanisms:
    * EST (RFC 7030)
    * SPIFFE/SPIRE
    * ACMEv2 (RFC 8555)
    * TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)
    * Future mechanisms through architectural extensibility
-5. MUST support Workloads utilizing different Credential Acquisition Mechanisms per-target
-6. MUST support both Background Check and Passport RATS modes, indistinguishably from the point of view of the Attester
-7. MUST support most current and future RATS Verifiers, Credential Authorities, and Secret Vaults, transparently to the Attester
-8. MUST NOT assume that the Attester has network access
-9. MUST be compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation
-10. SHOULD restrict visibility of fetched secrets to the Attester, specifically excluding visibility by the CAS Client and CAS Server
+5. Must support Workloads utilizing different Credential Acquisition Mechanisms per-target
+6. Must support both Background Check and Passport RATS modes, indistinguishably from the point of view of the Attester
+7. Must support most current and future RATS Verifiers, Credential Authorities, and Secret Vaults, transparently to the Attester
+8. Must not assume that the Attester has network access
+9. Must be compatible with all existing and future Confidential Computing platforms meeting minimum requirements around secure cryptography and evidence generation
+10. Should restrict visibility of fetched secrets to the Attester, specifically excluding visibility by the CAS Client and CAS Server
 
 # Architecture
 
