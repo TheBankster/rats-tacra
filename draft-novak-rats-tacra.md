@@ -46,15 +46,16 @@ author:
    email: nikolaichuk.s.f@gmail.com
 
 normative:
-  RFC9334: RATS
-  RFC9180: HPKE
+  RFC4648:
   RFC5280: PKIX
   RFC5480:
   RFC5958:
-  RFC4648:
+  RFC6234:
   RFC8259:
   RFC8610: CDDL
   RFC8785: JCS
+  RFC9180: HPKE
+  RFC9334: RATS
   RFC9741:
 
 informative:
@@ -197,6 +198,8 @@ The Freshness Kind is one of:
 * `absent-epoch`: no Freshness Handle is returned; the Attester binds an epoch marker already held locally into Evidence ({{RFC9334}}, Section 10.3)
 * `present-nonce`: Initiate-Credential-Acquisition returns a single-use nonce as the Freshness Handle; the Attester binds that Handle into Evidence ({{RFC9334}}, Section 10.2)
 * `present-epoch`: Initiate-Credential-Acquisition returns the current epoch marker as the Freshness Handle; the Attester binds that Handle into Evidence and retries Initiate-Credential-Acquisition if the epoch has moved ({{RFC9334}}, Section 10.3)
+
+It is NOT RECOMMENDED to use the `absent-none` Freshness Kind as it creates an opportunity of an unlimited replay of Evidence against the RATS Relying Party.
 
 A Freshness Handle has a lifetime, set by its originator, after which the originator no longer accepts it.
 Initiate-Credential-Acquisition MAY return the lifetime with the Handle.
@@ -386,7 +389,7 @@ where:
 * `subject` is, for Enrollment, the DER encoding of the CSR; for Retrieval, CEKpub in the encoding the Credential Acquisition Mechanism carries it in, which the protocol profile specifies.
 
 The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
-The digest is SHA-512 where the freshness input is 64 octets, e.g., REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX.
+The digest is SHA-512 ({{RFC6234}}) where the freshness input is 64 octets, e.g., REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX.
 For a field of another size, a protocol profile specifies a hash whose output is the size of the field.
 
 The Verifier MUST report in the Attestation Results the value of the freshness input of the Evidence it appraised.
@@ -590,9 +593,8 @@ Returns:
     * Invalid Target
     * Unsupported Target
     * Unsupported Credential Type
-    * Invalid Credential Hint
     * Rejected or unsupported Credential Hint
-    * Server error: Remote Attestation failure
+    * Server error: remote attestation failure
     * Server error: permission failure
     * Server error: server too busy; try again later
     * Server error: server unreachable
@@ -618,7 +620,6 @@ Returns:
     * Unsupported Target
     * Invalid Credential Type
     * Rejected or unsupported Credential Hint
-    * Server error: failed remote attestation
     * Server error: permission failure
     * Server error: remote attestation failure
     * Server error: server too busy; try again later
@@ -673,7 +674,7 @@ Returns:
     * Unsupported Target
     * Unsupported Credential Type
     * Rejected or unsupported Credential Hint
-    * Server error: Remote Attestation failure
+    * Server error: remote attestation failure
     * Server error: permission failure
     * Server error: server too busy; try again later
     * Server error: server unreachable
