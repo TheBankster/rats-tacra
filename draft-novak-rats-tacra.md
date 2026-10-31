@@ -48,9 +48,16 @@ author:
 normative:
   RFC9334: RATS
   RFC9180: HPKE
+  RFC5280: PKIX
+  RFC5480:
+  RFC5958:
+  RFC4648:
+  RFC8259:
+  RFC8610: CDDL
+  RFC8785: JCS
+  RFC9741:
 
 informative:
-  RFC5280: PKIX
   RFC7030: EST
   RFC7519: JWT
   RFC8555: ACMEv2
@@ -152,6 +159,14 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     * etc.
 * Credential Type: a catch-all term for any concrete credential type from the two lists above
 * Credential, a.k.a. Identity Document: an instance of a Credential Type
+* Credential Type token: the name of a Credential Type in a Credential Acquisition Mechanism and in the container of {{container}}:
+    * `x509`: a PKIX certificate
+    * `wic`: a WIMSE Workload Identity Certificate
+    * `wit`: a WIMSE Workload Identity Token
+    * `jwt`: a JSON Web Token used as a bearer token
+    * `api-key`: an API key
+    * `psk`: a pre-shared symmetric key
+    * `private-key`: a private key shared by the instances of a replicated service
 * Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as {{RFC7030}}, {{SPIFFE}}/{{SPIRE}}, {{RFC8555}}, {{DAA}}, etc.
 * Credential Acquisition System (CAS): a client-server architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism
 * Credential Acquisition Mode: one of
@@ -335,6 +350,9 @@ During both Enrollment and Retrieval, the Attester MAY supply a Credential Hint.
 During Enrollment, a Credential Authority MAY use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
 During Retrieval, a Secret Vault maps the Attestation Results to a credential group: stable for replica workloads, and distinct across security domains, tenants and the credentials it releases.
 That mapping is performed per the RATS Relying Party's policy; this document does not specify the identifier.
+An example of a mapping, not a requirement: SHA-256 over the length-prefixed concatenation, as {{binding}} prefixes, of an octet string the Secret Vault derives from the Attestation Results, the Target and an octet string that names the release policy.
+It is derived from the Attestation Results and not from the Evidence, so that freshness does not change the group.
+
 A Secret Vault MAY use the Credential Hint to select among the credentials that mapping allows for the attested context.
 The hint MUST NOT enlarge that set: a CAS that rewrites it obtains nothing the policy would not release, for that Target, to the attested workload the Attestation Results describe.
 The RATS Relying Party MAY reject the request if it will not honor the hint.
@@ -426,15 +444,67 @@ It does not tell the Attester who sealed it: anyone who saw CEKpub can seal a co
 This architecture accepts that.
 What the Attester then holds is stated in {{untrusted-cas}}.
 
+The container is an agreement between the Secret Vault that seals it and the Attester that opens it.
+The Credential Acquisition Mechanism carries it and does not read it, so this document specifies it, and a protocol profile names only the suites a Secret Vault accepts.
 The construction is as follows.
-A protocol profile specifies the HPKE suite, the labels and the encoding of the container and of its parts.
 
 1. The Secret Vault seals the bundle to CEKpub with HPKE in base mode (Section 5.1.1 of {{RFC9180}}), with the `info` and the associated data below.
-2. `info` is the length-prefixed concatenation, as in {{binding}}, of a label the profile sets, the Target and the freshness element of the request.
-3. The associated data names the credential group, the Target, the freshness element and the Credential Hint of the request, in an encoding the profile sets. The AEAD authenticates it, and the Attester checks that it names what its Evidence bound.
+2. `info` is the length-prefixed concatenation, as in {{binding}}, of the label `tacra hpke-base v1`, the Target and the freshness element of the request. The label is ASCII, without a terminating NUL.
+3. The associated data names the credential group, the Target, the freshness element and the Credential Hint of the request, in the encoding below. The AEAD authenticates it, and the Attester checks that it names what its Evidence bound.
 4. The container carries the encapsulated key, the ciphertext and the associated data, and names its suite.
 
-The Attester, through its Credential Acquisition Interface, MUST refuse a container whose associated data does not name its Target, its freshness element and its Credential Hint, or whose suite is not one the profile sets.
+The mandatory HPKE suite is KEM DHKEM(P-256, HKDF-SHA256) (identifier 0x0010), KDF HKDF-SHA256 (0x0001) and AEAD AES-256-GCM (0x0002), all of {{RFC9180}}.
+Implementations MUST support it.
+A Secret Vault and an Attester MAY use another suite of the HPKE registries ({{RFC9180}}), named as those registries name its KEM, KDF and AEAD, the hybrid KEM MLKEM768-P256 of {{HPKE-PQ}} for instance.
+Which suites a Secret Vault accepts, the Credential Acquisition Mechanism tells the Attester at Initiate-Credential-Acquisition.
+
+The container is a JSON object ({{RFC8259}}), the `encrypted-credential-bundle` below, in CDDL ({{RFC8610}}).
+A byte string is carried as a text string holding its unpadded base64url encoding (Section 5 of {{RFC4648}}), as the control operator `.b64u` defines it (Section 2.1 of {{RFC9741}}).
+The associated data is the JSON Canonicalization Scheme serialization ({{RFC8785}}) of the `aad` object, and the plaintext is the JCS serialization of a `credential-bundle` object.
+In `aad`, `handle` is the freshness element and is present when the request carried one, and `credential_hint` is present when the request carried one.
+
+~~~ cddl
+encrypted-credential-bundle = {
+  container: "hpke-base",
+  suite: {
+    kem: text,
+    kdf: text,
+    aead: text,
+  },
+  enc: text .b64u bytes,
+  ciphertext: text .b64u bytes,
+  aad: {
+    group_id: text,
+    target: text,
+    ? handle: text .b64u bytes,
+    ? credential_hint: text,
+  },
+}
+
+credential-bundle = {
+  credential_items: [+ credential-item],
+  ? metadata: { * text => any },
+}
+
+credential-item = {
+  type: text,
+  value: text .b64u bytes,
+  ? format: text,
+  ? kid: text,
+  ? purpose: [+ text],
+  ? algorithm: text,
+  ? exportable: bool,
+  ? shared: bool,
+}
+~~~
+
+Each credential item carries a Credential Type token as its `type` and the credential as its `value`, the unpadded base64url of the credential's octets.
+Those octets are a DER certificate for `x509` and `wic`, a DER PrivateKeyInfo ({{RFC5958}}) for `private-key`, the key octets for `psk`, and the UTF-8 encoding of the token for `wit`, `jwt` and `api-key`.
+`format`, when present, names another encoding of those octets, which the Secret Vault and the Attesters it serves agree on out of band.
+`kid`, `purpose`, `algorithm`, `exportable` and `shared` are the key-block attributes the Secret Vault's policy sets.
+`metadata` MAY carry `validity_seconds` (integer) and `secret_version` (string).
+
+The Attester, through its Credential Acquisition Interface, MUST refuse a container whose associated data does not name its Target, its freshness element and its Credential Hint, or whose suite it does not support.
 These checks come before it opens anything.
 After these checks pass, the Attester unseals the ciphertext using CEKpri.
 The Secret Vault's container for another request does not open, since it is not encrypted to the same CEKpub.
@@ -443,6 +513,8 @@ That container passes these checks and opens, and what the Attester then holds i
 
 CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding ({{binding}}).
 For a Diffie-Hellman KEM that is the DER encoding of a SubjectPublicKeyInfo ({{RFC5280}}).
+For DHKEM(P-256, HKDF-SHA256) it is one for id-ecPublicKey on prime256v1 ({{RFC5480}}), whose subjectPublicKey holds the uncompressed point (Section 2.2 of {{RFC5480}}).
+Those 65 octets are the recipient public key that HPKE deserializes (Section 7.1.1 of {{RFC9180}}).
 For the KEMs of {{HPKE-PQ}}, which have no SubjectPublicKeyInfo form, it is the encapsulation key itself.
 The Attesting Environment MUST generate a brand new CEK for each Retrieve-Credential request.
 
