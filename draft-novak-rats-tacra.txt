@@ -235,6 +235,25 @@ Table of Contents
    *  Credential, a.k.a. Identity Document: an instance of a Credential
       Type
 
+   *  Credential Type token: the name of a Credential Type in a
+      Credential Acquisition Mechanism and in the container of
+      Section 4.6:
+
+      -  x509: a PKIX certificate
+
+      -  wic: a WIMSE Workload Identity Certificate
+
+      -  wit: a WIMSE Workload Identity Token
+
+      -  jwt: a JSON Web Token used as a bearer token
+
+      -  api-key: an API key
+
+      -  psk: a pre-shared symmetric key
+
+      -  private-key: a private key shared by the instances of a
+         replicated service
+
    *  Credential Acquisition Mechanism: one of any number of existing or
       future mechanisms for acquiring credentials, such as [RFC7030],
       [SPIFFE]/[SPIRE], [RFC8555], [DAA], etc.
@@ -643,12 +662,19 @@ Table of Contents
    workloads, and distinct across security domains, tenants and the
    credentials it releases.  That mapping is performed per the RATS
    Relying Party's policy; this document does not specify the
-   identifier.  A Secret Vault MAY use the Credential Hint to select
-   among the credentials that mapping allows for the attested context.
-   The hint MUST NOT enlarge that set: a CAS that rewrites it obtains
-   nothing the policy would not release, for that Target, to the
-   attested workload the Attestation Results describe.  The RATS Relying
-   Party MAY reject the request if it will not honor the hint.
+   identifier.  An example of a mapping, not a requirement: SHA-256 over
+   the length-prefixed concatenation, as Section 4.5 prefixes, of an
+   octet string the Secret Vault derives from the Attestation Results,
+   the Target and an octet string that names the release policy.  It is
+   derived from the Attestation Results and not from the Evidence, so
+   that freshness does not change the group.
+
+   A Secret Vault MAY use the Credential Hint to select among the
+   credentials that mapping allows for the attested context.  The hint
+   MUST NOT enlarge that set: a CAS that rewrites it obtains nothing the
+   policy would not release, for that Target, to the attested workload
+   the Attestation Results describe.  The RATS Relying Party MAY reject
+   the request if it will not honor the hint.
 
    A Credential Authority MAY include information from the Attestation
    Results in the credential, for parties that accept the credential and
@@ -813,44 +839,114 @@ Table of Contents
    architecture accepts that.  What the Attester then holds is stated in
    Section 7.2.
 
-   The construction is as follows.  A protocol profile specifies the
-   HPKE suite, the labels and the encoding of the container and of its
-   parts.
+   The container is an agreement between the Secret Vault that seals it
+   and the Attester that opens it.  The Credential Acquisition Mechanism
+   carries it and does not read it, so this document specifies it, and a
+   protocol profile names only the suites a Secret Vault accepts.  The
+   construction is as follows.
 
    1.  The Secret Vault seals the bundle to CEKpub with HPKE in base
        mode (Section 5.1.1 of [RFC9180]), with the info and the
        associated data below.
 
    2.  info is the length-prefixed concatenation, as in Section 4.5, of
-       a label the profile sets, the Target and the freshness element of
-       the request.
+       the label tacra hpke-base v1, the Target and the freshness
+       element of the request.  The label is ASCII, without a
+       terminating NUL.
 
    3.  The associated data names the credential group, the Target, the
-       freshness element and the Credential Hint of the request, in an
-       encoding the profile sets.  The AEAD authenticates it, and the
-       Attester checks that it names what its Evidence bound.
+       freshness element and the Credential Hint of the request, in the
+       encoding below.  The AEAD authenticates it, and the Attester
+       checks that it names what its Evidence bound.
 
    4.  The container carries the encapsulated key, the ciphertext and
        the associated data, and names its suite.
 
+   The mandatory HPKE suite is KEM DHKEM(P-256, HKDF-SHA256) (identifier
+   0x0010), KDF HKDF-SHA256 (0x0001) and AEAD AES-256-GCM (0x0002), all
+   of [RFC9180].  Implementations MUST support it.  A Secret Vault and
+   an Attester MAY use another suite of the HPKE registries ([RFC9180]),
+   named as those registries name its KEM, KDF and AEAD, the hybrid KEM
+   MLKEM768-P256 of [HPKE-PQ] for instance.  Which suites a Secret Vault
+   accepts, the Credential Acquisition Mechanism tells the Attester at
+   Initiate-Credential-Acquisition.
+
+   The container is a JSON object ([RFC8259]), the encrypted-credential-
+   bundle below, in CDDL ([RFC8610]).  A byte string is carried as a
+   text string holding its unpadded base64url encoding (Section 5 of
+   [RFC4648]), as the control operator .b64u defines it (Section 2.1 of
+   [RFC9741]).  The associated data is the JSON Canonicalization Scheme
+   serialization ([RFC8785]) of the aad object, and the plaintext is the
+   JCS serialization of a credential-bundle object.  In aad, handle is
+   the freshness element and is present when the request carried one,
+   and credential_hint is present when the request carried one.
+
+   encrypted-credential-bundle = {
+     container: "hpke-base",
+     suite: {
+       kem: text,
+       kdf: text,
+       aead: text,
+     },
+     enc: text .b64u bytes,
+     ciphertext: text .b64u bytes,
+     aad: {
+       group_id: text,
+       target: text,
+       ? handle: text .b64u bytes,
+       ? credential_hint: text,
+     },
+   }
+
+   credential-bundle = {
+     credential_items: [+ credential-item],
+     ? metadata: { * text => any },
+   }
+
+   credential-item = {
+     type: text,
+     value: text .b64u bytes,
+     ? format: text,
+     ? kid: text,
+     ? purpose: [+ text],
+     ? algorithm: text,
+     ? exportable: bool,
+     ? shared: bool,
+   }
+
+   Each credential item carries a Credential Type token as its type and
+   the credential as its value, the unpadded base64url of the
+   credential's octets.  Those octets are a DER certificate for x509 and
+   wic, a DER PrivateKeyInfo ([RFC5958]) for private-key, the key octets
+   for psk, and the UTF-8 encoding of the token for wit, jwt and api-
+   key. format, when present, names another encoding of those octets,
+   which the Secret Vault and the Attesters it serves agree on out of
+   band. kid, purpose, algorithm, exportable and shared are the key-
+   block attributes the Secret Vault's policy sets. metadata MAY carry
+   validity_seconds (integer) and secret_version (string).
+
    The Attester, through its Credential Acquisition Interface, MUST
    refuse a container whose associated data does not name its Target,
-   its freshness element and its Credential Hint, or whose suite is not
-   one the profile sets.  These checks come before it opens anything.
-   After these checks pass, the Attester unseals the ciphertext using
-   CEKpri.  The Secret Vault's container for another request does not
-   open, since it is not encrypted to the same CEKpub.  The CAS can see
-   CEKpub and therefore can seal a container of its own choosing to it
-   instead of the one returned by the Secret Vault.  That container
-   passes these checks and opens, and what the Attester then holds is
-   stated in Section 7.2.
+   its freshness element and its Credential Hint, or whose suite it does
+   not support.  These checks come before it opens anything.  After
+   these checks pass, the Attester unseals the ciphertext using CEKpri.
+   The Secret Vault's container for another request does not open, since
+   it is not encrypted to the same CEKpub.  The CAS can see CEKpub and
+   therefore can seal a container of its own choosing to it instead of
+   the one returned by the Secret Vault.  That container passes these
+   checks and opens, and what the Attester then holds is stated in
+   Section 7.2.
 
    CEKpub travels in the encoding its KEM defines, and those octets are
    the subject of the binding (Section 4.5).  For a Diffie-Hellman KEM
    that is the DER encoding of a SubjectPublicKeyInfo ([RFC5280]).  For
-   the KEMs of [HPKE-PQ], which have no SubjectPublicKeyInfo form, it is
-   the encapsulation key itself.  The Attesting Environment MUST
-   generate a brand new CEK for each Retrieve-Credential request.
+   DHKEM(P-256, HKDF-SHA256) it is one for id-ecPublicKey on prime256v1
+   ([RFC5480]), whose subjectPublicKey holds the uncompressed point
+   (Section 2.2 of [RFC5480]).  Those 65 octets are the recipient public
+   key that HPKE deserializes (Section 7.1.1 of [RFC9180]).  For the
+   KEMs of [HPKE-PQ], which have no SubjectPublicKeyInfo form, it is the
+   encapsulation key itself.  The Attesting Environment MUST generate a
+   brand new CEK for each Retrieve-Credential request.
 
 4.7.  Summary of RATS Roles
 
@@ -1443,9 +1539,44 @@ Table of Contents
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
 
+   [RFC4648]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", RFC 4648, DOI 10.17487/RFC4648, October 2006,
+              <https://www.rfc-editor.org/rfc/rfc4648>.
+
+   [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+              Housley, R., and W. Polk, "Internet X.509 Public Key
+              Infrastructure Certificate and Certificate Revocation List
+              (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
+              <https://www.rfc-editor.org/rfc/rfc5280>.
+
+   [RFC5480]  Turner, S., Brown, D., Yiu, K., Housley, R., and T. Polk,
+              "Elliptic Curve Cryptography Subject Public Key
+              Information", RFC 5480, DOI 10.17487/RFC5480, March 2009,
+              <https://www.rfc-editor.org/rfc/rfc5480>.
+
+   [RFC5958]  Turner, S., "Asymmetric Key Packages", RFC 5958,
+              DOI 10.17487/RFC5958, August 2010,
+              <https://www.rfc-editor.org/rfc/rfc5958>.
+
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC8259]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", STD 90, RFC 8259,
+              DOI 10.17487/RFC8259, December 2017,
+              <https://www.rfc-editor.org/rfc/rfc8259>.
+
+   [RFC8610]  Birkholz, H., Vigano, C., and C. Bormann, "Concise Data
+              Definition Language (CDDL): A Notational Convention to
+              Express Concise Binary Object Representation (CBOR) and
+              JSON Data Structures", RFC 8610, DOI 10.17487/RFC8610,
+              June 2019, <https://www.rfc-editor.org/rfc/rfc8610>.
+
+   [RFC8785]  Rundgren, A., Jordan, B., and S. Erdtman, "JSON
+              Canonicalization Scheme (JCS)", RFC 8785,
+              DOI 10.17487/RFC8785, June 2020,
+              <https://www.rfc-editor.org/rfc/rfc8785>.
 
    [RFC9180]  Barnes, R., Bhargavan, K., Lipp, B., and C. Wood, "Hybrid
               Public Key Encryption", RFC 9180, DOI 10.17487/RFC9180,
@@ -1455,6 +1586,11 @@ Table of Contents
               W. Pan, "Remote ATtestation procedureS (RATS)
               Architecture", RFC 9334, DOI 10.17487/RFC9334, January
               2023, <https://www.rfc-editor.org/rfc/rfc9334>.
+
+   [RFC9741]  Bormann, C., "Concise Data Definition Language (CDDL):
+              Additional Control Operators for the Conversion and
+              Processing of Text", RFC 9741, DOI 10.17487/RFC9741, March
+              2025, <https://www.rfc-editor.org/rfc/rfc9741>.
 
 9.2.  Informative References
 
@@ -1496,12 +1632,6 @@ Table of Contents
               reference-interaction-models-20, 28 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-rats-
               reference-interaction-models-20>.
-
-   [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
-              Housley, R., and W. Polk, "Internet X.509 Public Key
-              Infrastructure Certificate and Certificate Revocation List
-              (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
-              <https://www.rfc-editor.org/rfc/rfc5280>.
 
    [RFC7030]  Pritikin, M., Ed., Yee, P., Ed., and D. Harkins, Ed.,
               "Enrollment over Secure Transport", RFC 7030,

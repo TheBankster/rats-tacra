@@ -1379,42 +1379,68 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <p id="section-2-2.4.1">Credential, a.k.a. Identity Document: an instance of a Credential Type<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.5">
-          <p id="section-2-2.5.1">Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, <span>[<a href="#SPIFFE" class="cite xref">SPIFFE</a>]</span>/<span>[<a href="#SPIRE" class="cite xref">SPIRE</a>]</span>, <span>[<a href="#RFC8555" class="cite xref">RFC8555</a>]</span>, <span>[<a href="#DAA" class="cite xref">DAA</a>]</span>, etc.<a href="#section-2-2.5.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.5.1">Credential Type token: the name of a Credential Type in a Credential Acquisition Mechanism and in the container of <a href="#container" class="auto internal xref">Section 4.6</a>:<a href="#section-2-2.5.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.5.2.1">
+              <p id="section-2-2.5.2.1.1"><code>x509</code>: a PKIX certificate<a href="#section-2-2.5.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.5.2.2">
+              <p id="section-2-2.5.2.2.1"><code>wic</code>: a WIMSE Workload Identity Certificate<a href="#section-2-2.5.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.5.2.3">
+              <p id="section-2-2.5.2.3.1"><code>wit</code>: a WIMSE Workload Identity Token<a href="#section-2-2.5.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.5.2.4">
+              <p id="section-2-2.5.2.4.1"><code>jwt</code>: a JSON Web Token used as a bearer token<a href="#section-2-2.5.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.5.2.5">
+              <p id="section-2-2.5.2.5.1"><code>api-key</code>: an API key<a href="#section-2-2.5.2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.5.2.6">
+              <p id="section-2-2.5.2.6.1"><code>psk</code>: a pre-shared symmetric key<a href="#section-2-2.5.2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.5.2.7">
+              <p id="section-2-2.5.2.7.1"><code>private-key</code>: a private key shared by the instances of a replicated service<a href="#section-2-2.5.2.7.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
 </li>
         <li class="normal" id="section-2-2.6">
-          <p id="section-2-2.6.1">Credential Acquisition System (CAS): a client-server architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.6.1">Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, <span>[<a href="#SPIFFE" class="cite xref">SPIFFE</a>]</span>/<span>[<a href="#SPIRE" class="cite xref">SPIRE</a>]</span>, <span>[<a href="#RFC8555" class="cite xref">RFC8555</a>]</span>, <span>[<a href="#DAA" class="cite xref">DAA</a>]</span>, etc.<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.7">
-          <p id="section-2-2.7.1">Credential Acquisition Mode: one of<a href="#section-2-2.7.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-2-2.7.2">
-<li id="section-2-2.7.2.1">
-              <p id="section-2-2.7.2.1.1">Credential Enrollment (minting new proof-of-possession credential), or<a href="#section-2-2.7.2.1.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.7.1">Credential Acquisition System (CAS): a client-server architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism<a href="#section-2-2.7.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-2-2.7.2.2">
-              <p id="section-2-2.7.2.2.1">Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)<a href="#section-2-2.7.2.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-2.8">
+          <p id="section-2-2.8.1">Credential Acquisition Mode: one of<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-2-2.8.2">
+<li id="section-2-2.8.2.1">
+              <p id="section-2-2.8.2.1.1">Credential Enrollment (minting new proof-of-possession credential), or<a href="#section-2-2.8.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-2-2.8.2.2">
+              <p id="section-2-2.8.2.2.1">Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)<a href="#section-2-2.8.2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 </li>
-        <li class="normal" id="section-2-2.8">
-          <p id="section-2-2.8.1">Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
-</li>
         <li class="normal" id="section-2-2.9">
-          <p id="section-2-2.9.1">Target: the RATS-unaware Relying Party for which the Attester seeks credentials<a href="#section-2-2.9.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.9.1">Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel<a href="#section-2-2.9.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.10">
-          <p id="section-2-2.10.1">Credential Hint: optional, implementation-defined information supplied by the Attester about the credential it expects. The Attester <span class="bcp14">MAY</span> obtain the hint from runtime configuration. A RATS Relying Party <span class="bcp14">MAY</span> use the hint, ignore it, or reject the request. This document does not specify the hint's syntax or meaning.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.10.1">Target: the RATS-unaware Relying Party for which the Attester seeks credentials<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.11">
-          <p id="section-2-2.11.1">CSK: Credential Signing Key for proof-of-possession credentials; CSKpri and CSKpub refer to the private and public portions, respectively<a href="#section-2-2.11.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.11.1">Credential Hint: optional, implementation-defined information supplied by the Attester about the credential it expects. The Attester <span class="bcp14">MAY</span> obtain the hint from runtime configuration. A RATS Relying Party <span class="bcp14">MAY</span> use the hint, ignore it, or reject the request. This document does not specify the hint's syntax or meaning.<a href="#section-2-2.11.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.12">
-          <p id="section-2-2.12.1">CEK: Credential Encryption Key for retrieved secrets; CEKpri and CEKpub refer to the private and public portions, respectively<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.12.1">CSK: Credential Signing Key for proof-of-possession credentials; CSKpri and CSKpub refer to the private and public portions, respectively<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.13">
-          <p id="section-2-2.13.1">Freshness Handle: a Handle as defined in <span>[<a href="#INTERACTION-MODELS" class="cite xref">INTERACTION-MODELS</a>]</span> (for example an attestation nonce or an Epoch Marker), bound into Evidence to demonstrate freshness<a href="#section-2-2.13.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.13.1">CEK: Credential Encryption Key for retrieved secrets; CEKpri and CEKpub refer to the private and public portions, respectively<a href="#section-2-2.13.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-2.14">
-          <p id="section-2-2.14.1">Freshness Kind: how freshness is established for one credential acquisition exchange; see <a href="#freshness-kind" class="auto internal xref">Section 2.1</a><a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.14.1">Freshness Handle: a Handle as defined in <span>[<a href="#INTERACTION-MODELS" class="cite xref">INTERACTION-MODELS</a>]</span> (for example an attestation nonce or an Epoch Marker), bound into Evidence to demonstrate freshness<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.15">
+          <p id="section-2-2.15.1">Freshness Kind: how freshness is established for one credential acquisition exchange; see <a href="#freshness-kind" class="auto internal xref">Section 2.1</a><a href="#section-2-2.15.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-2-3">Note: WITs are JWTs that require key confirmation.
@@ -1729,13 +1755,15 @@ In both cases, the associated secrets remain opaque to the CAS at all times (Goa
 During Enrollment, a Credential Authority <span class="bcp14">MAY</span> use the Credential Hint when assigning a Subject Alternative Name or other certificate properties.
 During Retrieval, a Secret Vault maps the Attestation Results to a credential group: stable for replica workloads, and distinct across security domains, tenants and the credentials it releases.
 That mapping is performed per the RATS Relying Party's policy; this document does not specify the identifier.
-A Secret Vault <span class="bcp14">MAY</span> use the Credential Hint to select among the credentials that mapping allows for the attested context.
+An example of a mapping, not a requirement: SHA-256 over the length-prefixed concatenation, as <a href="#binding" class="auto internal xref">Section 4.5</a> prefixes, of an octet string the Secret Vault derives from the Attestation Results, the Target and an octet string that names the release policy.
+It is derived from the Attestation Results and not from the Evidence, so that freshness does not change the group.<a href="#section-4.4-8" class="pilcrow">¶</a></p>
+<p id="section-4.4-9">A Secret Vault <span class="bcp14">MAY</span> use the Credential Hint to select among the credentials that mapping allows for the attested context.
 The hint <span class="bcp14">MUST NOT</span> enlarge that set: a CAS that rewrites it obtains nothing the policy would not release, for that Target, to the attested workload the Attestation Results describe.
-The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it will not honor the hint.<a href="#section-4.4-8" class="pilcrow">¶</a></p>
-<p id="section-4.4-9">A Credential Authority <span class="bcp14">MAY</span> include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
+The RATS Relying Party <span class="bcp14">MAY</span> reject the request if it will not honor the hint.<a href="#section-4.4-9" class="pilcrow">¶</a></p>
+<p id="section-4.4-10">A Credential Authority <span class="bcp14">MAY</span> include information from the Attestation Results in the credential, for parties that accept the credential and can act on that information.
 In that case, the Credential Authority is responsible for ensuring that what it adds does not break RATS-unaware Relying Parties.
 For example, it keeps the addition small and, in a certificate, places it in a non-critical extension, which a certificate-using system that does not recognize may ignore (Section 4.2 of <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>).
-Attestation Results can reveal much about the Attester's platform (Section 11 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>), and every party the credential is presented to can read what it carries, so the Credential Authority <span class="bcp14">SHOULD</span> limit what it adds to what those parties need.<a href="#section-4.4-9" class="pilcrow">¶</a></p>
+Attestation Results can reveal much about the Attester's platform (Section 11 of <span>[<a href="#RFC9334" class="cite xref">RFC9334</a>]</span>), and every party the credential is presented to can read what it carries, so the Credential Authority <span class="bcp14">SHOULD</span> limit what it adds to what those parties need.<a href="#section-4.4-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="binding">
@@ -1851,32 +1879,84 @@ Sealing keeps the bundle from the CAS.
 It does not tell the Attester who sealed it: anyone who saw CEKpub can seal a container to it.
 This architecture accepts that.
 What the Attester then holds is stated in <a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>.<a href="#section-4.6-1" class="pilcrow">¶</a></p>
-<p id="section-4.6-2">The construction is as follows.
-A protocol profile specifies the HPKE suite, the labels and the encoding of the container and of its parts.<a href="#section-4.6-2" class="pilcrow">¶</a></p>
+<p id="section-4.6-2">The container is an agreement between the Secret Vault that seals it and the Attester that opens it.
+The Credential Acquisition Mechanism carries it and does not read it, so this document specifies it, and a protocol profile names only the suites a Secret Vault accepts.
+The construction is as follows.<a href="#section-4.6-2" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.6-3">
 <li id="section-4.6-3.1">
             <p id="section-4.6-3.1.1">The Secret Vault seals the bundle to CEKpub with HPKE in base mode (Section 5.1.1 of <span>[<a href="#RFC9180" class="cite xref">RFC9180</a>]</span>), with the <code>info</code> and the associated data below.<a href="#section-4.6-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.6-3.2">
-            <p id="section-4.6-3.2.1"><code>info</code> is the length-prefixed concatenation, as in <a href="#binding" class="auto internal xref">Section 4.5</a>, of a label the profile sets, the Target and the freshness element of the request.<a href="#section-4.6-3.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.6-3.2.1"><code>info</code> is the length-prefixed concatenation, as in <a href="#binding" class="auto internal xref">Section 4.5</a>, of the label <code>tacra hpke-base v1</code>, the Target and the freshness element of the request. The label is ASCII, without a terminating NUL.<a href="#section-4.6-3.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.6-3.3">
-            <p id="section-4.6-3.3.1">The associated data names the credential group, the Target, the freshness element and the Credential Hint of the request, in an encoding the profile sets. The AEAD authenticates it, and the Attester checks that it names what its Evidence bound.<a href="#section-4.6-3.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.6-3.3.1">The associated data names the credential group, the Target, the freshness element and the Credential Hint of the request, in the encoding below. The AEAD authenticates it, and the Attester checks that it names what its Evidence bound.<a href="#section-4.6-3.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.6-3.4">
             <p id="section-4.6-3.4.1">The container carries the encapsulated key, the ciphertext and the associated data, and names its suite.<a href="#section-4.6-3.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-4.6-4">The Attester, through its Credential Acquisition Interface, <span class="bcp14">MUST</span> refuse a container whose associated data does not name its Target, its freshness element and its Credential Hint, or whose suite is not one the profile sets.
+<p id="section-4.6-4">The mandatory HPKE suite is KEM DHKEM(P-256, HKDF-SHA256) (identifier 0x0010), KDF HKDF-SHA256 (0x0001) and AEAD AES-256-GCM (0x0002), all of <span>[<a href="#RFC9180" class="cite xref">RFC9180</a>]</span>.
+Implementations <span class="bcp14">MUST</span> support it.
+A Secret Vault and an Attester <span class="bcp14">MAY</span> use another suite of the HPKE registries (<span>[<a href="#RFC9180" class="cite xref">RFC9180</a>]</span>), named as those registries name its KEM, KDF and AEAD, the hybrid KEM MLKEM768-P256 of <span>[<a href="#HPKE-PQ" class="cite xref">HPKE-PQ</a>]</span> for instance.
+Which suites a Secret Vault accepts, the Credential Acquisition Mechanism tells the Attester at Initiate-Credential-Acquisition.<a href="#section-4.6-4" class="pilcrow">¶</a></p>
+<p id="section-4.6-5">The container is a JSON object (<span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>), the <code>encrypted-credential-bundle</code> below, in CDDL (<span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>).
+A byte string is carried as a text string holding its unpadded base64url encoding (Section 5 of <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>]</span>), as the control operator <code>.b64u</code> defines it (Section 2.1 of <span>[<a href="#RFC9741" class="cite xref">RFC9741</a>]</span>).
+The associated data is the JSON Canonicalization Scheme serialization (<span>[<a href="#RFC8785" class="cite xref">RFC8785</a>]</span>) of the <code>aad</code> object, and the plaintext is the JCS serialization of a <code>credential-bundle</code> object.
+In <code>aad</code>, <code>handle</code> is the freshness element and is present when the request carried one, and <code>credential_hint</code> is present when the request carried one.<a href="#section-4.6-5" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-4.6-6">
+<pre>
+encrypted-credential-bundle = {
+  container: "hpke-base",
+  suite: {
+    kem: text,
+    kdf: text,
+    aead: text,
+  },
+  enc: text .b64u bytes,
+  ciphertext: text .b64u bytes,
+  aad: {
+    group_id: text,
+    target: text,
+    ? handle: text .b64u bytes,
+    ? credential_hint: text,
+  },
+}
+
+credential-bundle = {
+  credential_items: [+ credential-item],
+  ? metadata: { * text =&gt; any },
+}
+
+credential-item = {
+  type: text,
+  value: text .b64u bytes,
+  ? format: text,
+  ? kid: text,
+  ? purpose: [+ text],
+  ? algorithm: text,
+  ? exportable: bool,
+  ? shared: bool,
+}
+</pre><a href="#section-4.6-6" class="pilcrow">¶</a>
+</div>
+<p id="section-4.6-7">Each credential item carries a Credential Type token as its <code>type</code> and the credential as its <code>value</code>, the unpadded base64url of the credential's octets.
+Those octets are a DER certificate for <code>x509</code> and <code>wic</code>, a DER PrivateKeyInfo (<span>[<a href="#RFC5958" class="cite xref">RFC5958</a>]</span>) for <code>private-key</code>, the key octets for <code>psk</code>, and the UTF-8 encoding of the token for <code>wit</code>, <code>jwt</code> and <code>api-key</code>.
+<code>format</code>, when present, names another encoding of those octets, which the Secret Vault and the Attesters it serves agree on out of band.
+<code>kid</code>, <code>purpose</code>, <code>algorithm</code>, <code>exportable</code> and <code>shared</code> are the key-block attributes the Secret Vault's policy sets.
+<code>metadata</code> <span class="bcp14">MAY</span> carry <code>validity_seconds</code> (integer) and <code>secret_version</code> (string).<a href="#section-4.6-7" class="pilcrow">¶</a></p>
+<p id="section-4.6-8">The Attester, through its Credential Acquisition Interface, <span class="bcp14">MUST</span> refuse a container whose associated data does not name its Target, its freshness element and its Credential Hint, or whose suite it does not support.
 These checks come before it opens anything.
 After these checks pass, the Attester unseals the ciphertext using CEKpri.
 The Secret Vault's container for another request does not open, since it is not encrypted to the same CEKpub.
 The CAS can see CEKpub and therefore can seal a container of its own choosing to it instead of the one returned by the Secret Vault.
-That container passes these checks and opens, and what the Attester then holds is stated in <a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>.<a href="#section-4.6-4" class="pilcrow">¶</a></p>
-<p id="section-4.6-5">CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding (<a href="#binding" class="auto internal xref">Section 4.5</a>).
+That container passes these checks and opens, and what the Attester then holds is stated in <a href="#untrusted-cas" class="auto internal xref">Section 7.2</a>.<a href="#section-4.6-8" class="pilcrow">¶</a></p>
+<p id="section-4.6-9">CEKpub travels in the encoding its KEM defines, and those octets are the subject of the binding (<a href="#binding" class="auto internal xref">Section 4.5</a>).
 For a Diffie-Hellman KEM that is the DER encoding of a SubjectPublicKeyInfo (<span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>).
+For DHKEM(P-256, HKDF-SHA256) it is one for id-ecPublicKey on prime256v1 (<span>[<a href="#RFC5480" class="cite xref">RFC5480</a>]</span>), whose subjectPublicKey holds the uncompressed point (Section 2.2 of <span>[<a href="#RFC5480" class="cite xref">RFC5480</a>]</span>).
+Those 65 octets are the recipient public key that HPKE deserializes (Section 7.1.1 of <span>[<a href="#RFC9180" class="cite xref">RFC9180</a>]</span>).
 For the KEMs of <span>[<a href="#HPKE-PQ" class="cite xref">HPKE-PQ</a>]</span>, which have no SubjectPublicKeyInfo form, it is the encapsulation key itself.
-The Attesting Environment <span class="bcp14">MUST</span> generate a brand new CEK for each Retrieve-Credential request.<a href="#section-4.6-5" class="pilcrow">¶</a></p>
+The Attesting Environment <span class="bcp14">MUST</span> generate a brand new CEK for each Retrieve-Credential request.<a href="#section-4.6-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="summary-of-rats-roles">
@@ -2554,17 +2634,49 @@ In any given implementation, the CAS Client <span class="bcp14">MAY</span> still
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC4648">[RFC4648]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10" class="refDate">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4648">https://www.rfc-editor.org/rfc/rfc4648</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5280">[RFC5280]</dt>
+        <dd>
+<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5480">[RFC5480]</dt>
+        <dd>
+<span class="refAuthor">Turner, S.</span>, <span class="refAuthor">Brown, D.</span>, <span class="refAuthor">Yiu, K.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">T. Polk</span>, <span class="refTitle">"Elliptic Curve Cryptography Subject Public Key Information"</span>, <span class="seriesInfo">RFC 5480</span>, <span class="seriesInfo">DOI 10.17487/RFC5480</span>, <time datetime="2009-03" class="refDate">March 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5480">https://www.rfc-editor.org/rfc/rfc5480</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5958">[RFC5958]</dt>
+        <dd>
+<span class="refAuthor">Turner, S.</span>, <span class="refTitle">"Asymmetric Key Packages"</span>, <span class="seriesInfo">RFC 5958</span>, <span class="seriesInfo">DOI 10.17487/RFC5958</span>, <time datetime="2010-08" class="refDate">August 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5958">https://www.rfc-editor.org/rfc/rfc5958</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
         <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8259">[RFC8259]</dt>
+        <dd>
+<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8259">https://www.rfc-editor.org/rfc/rfc8259</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8610">[RFC8610]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Vigano, C.</span>, and <span class="refAuthor">C. Bormann</span>, <span class="refTitle">"Concise Data Definition Language (CDDL): A Notational Convention to Express Concise Binary Object Representation (CBOR) and JSON Data Structures"</span>, <span class="seriesInfo">RFC 8610</span>, <span class="seriesInfo">DOI 10.17487/RFC8610</span>, <time datetime="2019-06" class="refDate">June 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8610">https://www.rfc-editor.org/rfc/rfc8610</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8785">[RFC8785]</dt>
+        <dd>
+<span class="refAuthor">Rundgren, A.</span>, <span class="refAuthor">Jordan, B.</span>, and <span class="refAuthor">S. Erdtman</span>, <span class="refTitle">"JSON Canonicalization Scheme (JCS)"</span>, <span class="seriesInfo">RFC 8785</span>, <span class="seriesInfo">DOI 10.17487/RFC8785</span>, <time datetime="2020-06" class="refDate">June 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8785">https://www.rfc-editor.org/rfc/rfc8785</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9180">[RFC9180]</dt>
         <dd>
 <span class="refAuthor">Barnes, R.</span>, <span class="refAuthor">Bhargavan, K.</span>, <span class="refAuthor">Lipp, B.</span>, and <span class="refAuthor">C. Wood</span>, <span class="refTitle">"Hybrid Public Key Encryption"</span>, <span class="seriesInfo">RFC 9180</span>, <span class="seriesInfo">DOI 10.17487/RFC9180</span>, <time datetime="2022-02" class="refDate">February 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9180">https://www.rfc-editor.org/rfc/rfc9180</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9334">[RFC9334]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Thaler, D.</span>, <span class="refAuthor">Richardson, M.</span>, <span class="refAuthor">Smith, N.</span>, and <span class="refAuthor">W. Pan</span>, <span class="refTitle">"Remote ATtestation procedureS (RATS) Architecture"</span>, <span class="seriesInfo">RFC 9334</span>, <span class="seriesInfo">DOI 10.17487/RFC9334</span>, <time datetime="2023-01" class="refDate">January 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9334">https://www.rfc-editor.org/rfc/rfc9334</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9741">[RFC9741]</dt>
+      <dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"Concise Data Definition Language (CDDL): Additional Control Operators for the Conversion and Processing of Text"</span>, <span class="seriesInfo">RFC 9741</span>, <span class="seriesInfo">DOI 10.17487/RFC9741</span>, <time datetime="2025-03" class="refDate">March 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9741">https://www.rfc-editor.org/rfc/rfc9741</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -2598,10 +2710,6 @@ In any given implementation, the CAS Client <span class="bcp14">MAY</span> still
 <dt id="INTERACTION-MODELS">[INTERACTION-MODELS]</dt>
         <dd>
 <span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Eckel, M.</span>, <span class="refAuthor">Pan, W.</span>, and <span class="refAuthor">E. Voit</span>, <span class="refTitle">"Reference Interaction Models for Remote Attestation Procedures"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-reference-interaction-models-20</span>, <time datetime="2026-10-28" class="refDate">28 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-rats-reference-interaction-models-20">https://datatracker.ietf.org/doc/html/draft-ietf-rats-reference-interaction-models-20</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC5280">[RFC5280]</dt>
-        <dd>
-<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7030">[RFC7030]</dt>
         <dd>
