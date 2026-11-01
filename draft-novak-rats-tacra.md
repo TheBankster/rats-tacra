@@ -477,7 +477,9 @@ Which suites a Secret Vault accepts, the Credential Acquisition Mechanism tells 
 The container is a JSON object ({{RFC8259}}), the `encrypted-credential-bundle` below, in CDDL ({{RFC8610}}).
 A byte string is carried as a text string holding its unpadded base64url encoding (Section 5 of {{RFC4648}}), as the control operator `.b64u` defines it (Section 2.1 of {{RFC9741}}).
 The associated data is the JSON Canonicalization Scheme serialization ({{RFC8785}}) of the `aad` object, and the plaintext is the JCS serialization of a `credential-bundle` object.
-In `aad`, `handle` is the freshness element and is present when the request carried one, and `credential_hint` is present when the request carried one.
+In `aad`, `target` is the Target octet string of the request.
+`handle` is the freshness element and is present when the request carried one, and `credential_hint` is present when the request carried one.
+The Attester compares the decoded `target` octets to the Target of the request; they are the same Target only when those octets are identical.
 
 ~~~ cddl
 encrypted-credential-bundle = {
@@ -491,7 +493,7 @@ encrypted-credential-bundle = {
   ciphertext: text .b64u bytes,
   aad: {
     group_id: text,
-    target: text,
+    target: text .b64u bytes,
     ? handle: text .b64u bytes,
     ? credential_hint: text,
   },
