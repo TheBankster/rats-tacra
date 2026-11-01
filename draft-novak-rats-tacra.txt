@@ -256,7 +256,7 @@ Table of Contents
 
    *  Credential Acquisition Mechanism: one of any number of existing or
       future mechanisms for acquiring credentials, such as [RFC7030],
-      [SPIFFE]/[SPIRE], [RFC8555], [DAA], etc.
+      [SPIFFE]/[SPIRE], [RFC8555], etc.
 
    *  Credential Acquisition System (CAS): a client-server architecture
       comprising a CAS Client and a CAS Server which implements a
@@ -276,8 +276,15 @@ Table of Contents
       in "horizontal scale-out" scenarios where multiple identical
       workload instances are launched to handle the load in parallel
 
-   *  Target: the RATS-unaware Relying Party for which the Attester
-      seeks credentials
+   *  Target: an octet string that identifies the RATS-unaware Relying
+      Party for which the Attester seeks credentials.  Two Targets are
+      the same only when those octets are identical.  This document does
+      not assign a character encoding or a Unicode normalization.  A
+      protocol profile specifies how a configured name is encoded into
+      that octet string.  A profile that starts from Unicode text uses
+      UTF-8 in Normalization Form C ([RFC5198]), so the Attester and the
+      RATS Relying Party produce the same octets from the same name.
+      Examples of such names are a URI and a SPIFFE ID ([SPIFFE]).
 
    *  Credential Hint: optional, implementation-defined information
       supplied by the Attester about the credential it expects.  The
@@ -379,9 +386,9 @@ Table of Contents
    Consortium's Trustworthy Workload Identity (TWI) SIG [TWISIGCharter]
    which has published a set of Definitions [TWISIGDef] and Requirements
    [TWISIGReq].  The requirements published by the TWI SIG are
-   deliberately high-level.  The design goals specified here fully align
-   with the TWI SIG requirements, while focusing on a portable and
-   extensible implementation.
+   deliberately high-level.  The design goals specified here are
+   motivated by the TWI SIG requirements, while focusing on a portable
+   and extensible implementation.
 
    1.   Must support mechanisms for enrolling (minting new) as well as
         retrieving (pre-existing) credentials; the workload knows what
@@ -399,8 +406,6 @@ Table of Contents
 
         *  Bearer tokens (JWTs, API Keys)
 
-        *  TPM 2.0 DAA Group Certificates (for Replica workloads)
-
         *  Pre-shared keys
 
         *  Future formats through architectural extensibility
@@ -416,8 +421,6 @@ Table of Contents
         *  SPIFFE/SPIRE
 
         *  ACMEv2 (RFC 8555)
-
-        *  TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)
 
         *  Future mechanisms through architectural extensibility
 
@@ -727,8 +730,9 @@ Table of Contents
    *  freshness is the freshness element; a timestamp is an 8-octet big-
       endian unsigned count of seconds since 1970-01-01T00:00:00Z;
 
-   *  target is the UTF-8 encoding of the Target, used as an exact octet
-      string;
+   *  target is the Target octet string; it is not recoded or normalized
+      when the digest is computed: the octets the Attester bound are the
+      octets the RATS Relying Party recomputes over;
 
    *  subject is, for Enrollment, the DER encoding of the CSR; for
       Retrieval, CEKpub in the encoding the Credential Acquisition
@@ -740,6 +744,15 @@ Table of Contents
    of AMD SEV-SNP and REPORTDATA of Intel TDX.  For a field of another
    size, a protocol profile specifies a hash whose output is the size of
    the field.
+
+   A configured target name that is not already an octet string, such as
+   a URI typed into Attester runtime configuration, is encoded once, by
+   the rule the protocol profile sets, before it is supplied as the
+   Target of Initiate-Credential-Acquisition, Enroll-Credential or
+   Retrieve-Credential.  The RATS Relying Party applies that same rule
+   to the Target in its policy.  Look-alike Unicode strings remain
+   distinct Targets; a profile that uses DNS names specifies how those
+   names are prepared.
 
    The Verifier MUST report in the Attestation Results the value of the
    freshness input of the Evidence it appraised.  Where the expected
@@ -1027,8 +1040,8 @@ Table of Contents
 
    Parameters:
 
-   *  Target name, e.g., the server URI to which the Attester wishes to
-      authenticate
+   *  Target name: the octet string of the Target definition, for
+      example a profile-encoded URI of the RUP
 
    *  Credential Type the Attester plans to use with this Target
 
@@ -1237,8 +1250,8 @@ Table of Contents
 
    Parameters:
 
-   *  Target name, e.g., the server URI to which the Attester wishes to
-      authenticate
+   *  Target name: the octet string of the Target definition, for
+      example a profile-encoded URI of the RUP
 
    *  Credential Type the Attester plans to use with this Target
 
@@ -1619,13 +1632,6 @@ Table of Contents
               October 2026, <https://datatracker.ietf.org/doc/html/
               draft-ietf-lamps-csr-attestation-32>.
 
-   [DAA]      Birkholz, H., Newton, C., Chen, L., Giannetsos, T., and D.
-              Thaler, "Direct Anonymous Attestation for the Remote
-              Attestation Procedures Architecture", Work in Progress,
-              Internet-Draft, draft-ietf-rats-daa-09, 2 March 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-rats-
-              daa-09>.
-
    [ENVOY]    Envoy, "The Envoy Proxy", n.d., <https://envoyproxy.io>.
 
    [HPKE-PQ]  Barnes, R. and D. Connolly, "Post-Quantum and Post-
@@ -1641,6 +1647,10 @@ Table of Contents
               reference-interaction-models-20, 28 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-rats-
               reference-interaction-models-20>.
+
+   [RFC5198]  Klensin, J. and M. Padlipsky, "Unicode Format for Network
+              Interchange", RFC 5198, DOI 10.17487/RFC5198, March 2008,
+              <https://www.rfc-editor.org/rfc/rfc5198>.
 
    [RFC7030]  Pritikin, M., Ed., Yee, P., Ed., and D. Harkins, Ed.,
               "Enrollment over Secure Transport", RFC 7030,
