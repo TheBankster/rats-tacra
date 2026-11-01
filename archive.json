@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-29T03:50:22.724348+00:00",
+  "timestamp": "2026-11-01T03:43:06.573584+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -177,7 +177,7 @@
       "labels": [],
       "body": "```\n\n4) The architecture diagram in Figure 1 in Section 4.3 is very difficult to make sense of and is probably just too busy. For example, I can't tell where key generation would occur, but it looks to be on an arrow. The end of that arrow is Credential Authority, which would seem to be an EST server (where EST is used) but the CAS server box above appears to be labeled as an EST server. Prose clarifies that key generation is a Platform ABI function, though. Why does the CAS contact the Verifier? Oughtn't Verifier interactions be driven by the Secret Vault and Credential Authority?\n```\n",
       "createdAt": "2026-09-28T18:56:17Z",
-      "updatedAt": "2026-10-23T17:22:02Z",
+      "updatedAt": "2026-10-31T18:30:13Z",
       "closedAt": null,
       "comments": [
         {
@@ -207,6 +207,13 @@
           "body": "> Mark, would three smaller figures help here?\n> \n> 1. The Attester's side: key generation on the platform, the Evidence, and the hand-off to the CAS Client.\n> 2. Background Check: the Credential Authority or the Secret Vault contacts the Verifier.\n> 3. Passport: the CAS Server contacts the Verifier and hands the Attestation Results to the Credential Authority or the Secret Vault.\n> \n> If so, I can send them as a small pull request, drawn from Architecture Overview and CAAPI Invocation Sequence, for you to cut as you see fit.\n\nAlso to save you work, we could jump on a Zoom call and discuss the general shape of these diagrams before you spend time on ASCII art.",
           "createdAt": "2026-10-23T17:22:02Z",
           "updatedAt": "2026-10-23T17:22:02Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "Update: high-level diagram added, keeping the detailed architectural diagram intact. Others may follow post-IETF 127.",
+          "createdAt": "2026-10-31T18:30:13Z",
+          "updatedAt": "2026-10-31T18:30:13Z"
         }
       ]
     },
@@ -567,7 +574,7 @@
       "id": "I_kwDOULZBls8AAAABVX4Nvw",
       "title": "Including Relying Party identifier in Evidence and Attestation Results -- pros and cons",
       "url": "https://github.com/TheBankster/rats-tacra/issues/20",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "TheBankster",
       "authorAssociation": "OWNER",
       "assignees": [
@@ -576,8 +583,8 @@
       "labels": [],
       "body": "Discuss whether RRP ID should be included in Evidence, or Attestation Results after that, and document the result in the Security Considerations Section. If it is to be included, define the entire \"system\" around it -- where it originates, who handles it, etc.\nTODO: MCR to add his thoughts including the role of TLS in protecting the information in-transit.",
       "createdAt": "2026-10-06T13:32:44Z",
-      "updatedAt": "2026-10-08T23:00:35Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T21:12:11Z",
+      "closedAt": "2026-10-29T21:12:11Z",
       "comments": [
         {
           "author": "TheBankster",
@@ -639,6 +646,142 @@
           "updatedAt": "2026-10-23T16:06:31Z"
         }
       ]
+    },
+    {
+      "number": 29,
+      "id": "I_kwDOULZBls8AAAABbd_qPA",
+      "title": "Post-IETF 127: Split into use-case story, architecture augmentation and protocol definition drafts.",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/29",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The current version of the draft is a use-case story, an architecture augmentation, and a partial protocol in one Informational draft.\n\nRATS charter deliverable 1 says use cases are \u201cto document and achieve WG consensus but **not expected to be published as an RFC**.\u201d Deliverable 2 is architecture augmentations. Deliverable 5 is protocols.\n\nThis draft is all three: RUP motivation, new roles (CAS, CAI, CAAPI, Credential Authority, Secret Vault), plus a concrete `binding_input` encoding, SHA-512, HPKE container, and CAAPI operations.\n\nIf chairs file it as a use case, it will not become an RFC. If they file it as architecture, the wire encoding and CAAPI MUSTs will be cut or moved. If they file it as protocol, Informational is the wrong intended status and the spec is not interoperable (profiles, and ciphers are TBD).\n\n**Fix:** Split, or pick one:\n\n- Informational architecture: roles, trust model, freshness kinds as concepts, no `len32` encoding, no HPKE recipe, no CAAPI RPC list.\n- Standards-Track protocol (or a profile): CAAPI, binding, HPKE container, test vectors.\n- A short \u201cRelationship to RFC 9334\u201d section that states this is charter item 2 (architecture augmentation), not item 1.",
+      "createdAt": "2026-10-31T18:32:27Z",
+      "updatedAt": "2026-10-31T18:44:21Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 30,
+      "id": "I_kwDOULZBls8AAAABbeAJVA",
+      "title": "Post-IETF 127: \"Target\" collides with RFC 9334 \"Target Environment\"",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/30",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "RFC 9334 \u00a73.1: an Attester has an **Attesting Environment** and a **Target Environment**. Claims are collected from the Target Environment.\n\nThis draft defines **Target** as the RATS-unaware Relying Party the Attester wants credentials for. That term is load-bearing: it is in CAAPI, in the binding digest, in HPKE `info`/AAD, and in policy.\n\nRATS will reject this on sight. Every RATS document after 9334 imports those two environment names.\n\n**Fix:** Rename. Candidates: `audience`, `credential-audience`, `rup-id`, `service-name`. Keep \u201cTarget Environment\u201d for the attested workload.",
+      "createdAt": "2026-10-31T18:33:21Z",
+      "updatedAt": "2026-10-31T18:44:09Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 31,
+      "id": "I_kwDOULZBls8AAAABbeAo-w",
+      "title": "Post-IETF 127: Internal contradiction: Verfier \"unchanged\" vs. new AR requirement",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/31",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "| Location | Statement |\n|---|---|\n| Roles table | \u201cNo changes in RATS Verifier role or implementation\u201d |\n| Binding | \u201cThe Verifier MUST report in the Attestation Results the value of the freshness input of the Evidence it appraised.\u201d |\n\nThe second is a new requirement on every Verifier and on AR formats (EAT / EAR). Existing Verifiers check a nonce; they do not echo a 64-octet digest of freshness\u2016target\u2016CSR/CEKpub as an AR claim.\n\nThat also contradicts Design Goal 7 (\u201ccurrent and future RATS Verifiers, transparently to the Attester\u201d).\n\n**Fix:** Either drop the \u201cno Verifier changes\u201d claim and specify the AR claim (and coordinate with EAT/EAR), or recompute the binding only at the RP from values the Verifier already reports (e.g. nonce) plus CSR/CEKpub the RP received. Do not require a new AR field unless this document is willing to update AR specs.\n",
+      "createdAt": "2026-10-31T18:34:13Z",
+      "updatedAt": "2026-10-31T18:43:57Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 32,
+      "id": "I_kwDOULZBls8AAAABbeCAeg",
+      "title": "Post-IETF 127: Untrusted CAS vs RFC 9334 \u00a712.2",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/32",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "RFC 9334 \u00a712.2: a relaying entity that is neither Attester nor intended Verifier \u201cshould not expect to have access to the Evidence.\u201d\n\nTACRA makes the CAS exactly that relay, in the clear, and says \u201cThis architecture accepts that the CAS reads Evidence and Attestation Results.\u201d Passport mode also gives the CAS the AR.\n\nThat is a deliberate architecture change, not a footnote. RATS will treat it as an augmentation of 9334 that needs its own role (Conveyance / CMW relay) and a Privacy Considerations section, not an \u201caccepted\u201d exception.\n\nRelated gap: **RFC 9999 (CMW)** is the RATS way to wrap Evidence/AR for conveyance. This draft never mentions it. ACME-RATS already requires CMW.",
+      "createdAt": "2026-10-31T18:36:49Z",
+      "updatedAt": "2026-10-31T18:36:49Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 33,
+      "id": "I_kwDOULZBls8AAAABbeGZ2g",
+      "title": "Post-IETF 127: Retrieval authenticity hole that \u201cthe architecture accepts\u201d",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/33",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "HPKE **base mode** seals to `CEKpub` with no sender authentication. The CAS sees `CEKpub` and can seal its own bundle. The Attester\u2019s AAD checks (Target, freshness, hint) pass. For an API key, the Attester then acts as the CAS\u2019s account.\n\nThat is not \u201cthe CAS cannot read the secret.\u201d It is **the CAS can choose the secret**. Goal 10 only covers confidentiality.\n\nSECDIR and RATS security review will not accept \u201cthis architecture accepts that risk\u201d for a credential-issuance architecture unless the remaining use is explicitly \u201cpublic certificates only.\u201d Bearer retrieval is in scope.\n\n**Fix:** Authenticate the sealer: HPKE Auth mode, a vault signature over the container, or a MAC under a key the Attester can derive from attested AR. Give the Attester a way to know *who* sealed. If that is impossible under Goal 8 (no network, no RP identity), say Retrieval of bearer secrets is not a goal, and restrict Retrieval to public PoP material.",
+      "createdAt": "2026-10-31T18:44:52Z",
+      "updatedAt": "2026-10-31T18:44:52Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 34,
+      "id": "I_kwDOULZBls8AAAABbeLO1w",
+      "title": "Post-IETF 127: Add \"Relationship to other work\" section",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/34",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "| Work | Why it matters |\n|---|---|\n| [draft-ietf-acme-rats](https://datatracker.ietf.org/doc/draft-ietf-acme-rats/) | WG document: ACME challenges for Evidence/AR in CMW. TACRA says \u201cextend ACMEv2\u201d as if that were green field. Michael Richardson is on both. |\n| WIMSE (`draft-ietf-wimse-arch`, `workload-creds`) | Credential formats this draft consumes; WIMSE already has an \u201cAttestation\u201d provisioning bullet. Cross-WG note is expected. |\n| `draft-ietf-lamps-csr-attestation` | Binding the full CSR into Evidence makes Evidence-in-CSR impossible (circular). That is a LAMPS-facing design choice and needs a dedicated section, not a one-liner. |\n| RFC 9711 EAT, RFC 9999 CMW, EAR | How Evidence and AR actually move. |\n| `draft-ietf-rats-reference-interaction-models` | \u201cHandle\u201d is defined there; freshness kinds should be mapped to Challenge/Response vs Unidirectional, not only to RFC 9334 \u00a710. |\n\n",
+      "createdAt": "2026-10-31T18:53:13Z",
+      "updatedAt": "2026-10-31T18:53:25Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "May need to add sub-issues for some of the above.",
+          "createdAt": "2026-10-31T18:53:25Z",
+          "updatedAt": "2026-10-31T18:53:25Z"
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "id": "I_kwDOULZBls8AAAABbeMK3Q",
+      "title": "Post-IETF 127: Complete the Passport/Background-Check model mapping",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/35",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The Attester never talks to Verifier or RP. Both models are CAS-mediated. That is a **third topology**. RFC 9334 Passport and Background Check are about who sends Evidence to the Verifier. Here the CAS always sits on that path.\n\n\u201cIn the Background Check model, the CAS Server need not be on that path\u201d is only true for the Verifier\u2192RP AR link. Evidence still goes Attester \u2192 CAS \u2192 RP.\n\nRATS will want sequence diagrams that overlay TACRA on RFC 9334 Figures 5 and 6, including who originates the Freshness Handle in each model.\n",
+      "createdAt": "2026-10-31T18:54:42Z",
+      "updatedAt": "2026-10-31T18:54:42Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 36,
+      "id": "I_kwDOULZBls8AAAABbezV4Q",
+      "title": "Post-IETF 127: Decide on whether CSK/CEK reuse is a MUST NOT or a SHOULD NOT",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/36",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "**CSK freshness.** The draft currently says that the CEK \u201cMUST\u201d be brand new per Retrieve. Enrollment never says CSK must be unique per request. If a CSK is reused across Targets, that is a different identity story; say it.\n\nWe may decide that asymmetric key reuse is a SHOULD NOT in either case, but in any case, the justification needs to be made and the decision documented in the draft.",
+      "createdAt": "2026-10-31T20:02:50Z",
+      "updatedAt": "2026-10-31T20:02:50Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -3123,26 +3266,1038 @@
     {
       "number": 27,
       "id": "PR_kwDOULZBls8AAAABLaFv_g",
-      "title": "Sealing the Released Credential: the container, its origin authentication by the Target's policy, and the clarifications of lamps-tacra-est #20 to #26",
+      "title": "Sealing the Released Credential: the container, and the clarifications of lamps-tacra-est #20 to #26",
       "url": "https://github.com/TheBankster/rats-tacra/pull/27",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nikolaichuk7",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "The Trust Model lists what the CAS can substitute, but not the response. The CAS carries CEKpub, so anyone who saw it can seal a container to it. The new section gives the construction: HPKE in base mode to CEKpub, with info and associated data taken from the request, and, where the Target requires origin authentication, the Secret Vault's signature over the suite, CEKpub, info, the associated data, the encapsulated key and the ciphertext, under a key the Attester holds for the Target. A signature and not an authenticated HPKE mode, because HPKE's successor removes those modes and the post-quantum KEMs have none. The encoding of CEKpub, the subject of the binding, is named per KEM.\n\nThe Trust Model gains the substitution of the response as the accepted risk it is (lamps-tacra-est#15): the Secret Vault's container for another request does not open, sealed to another CEK, and a container of the CAS's making opens, so the Attester holds a credential of the CAS's choosing. With an API key its calls then run under the account the CAS chose. A deployment that cannot accept that requires origin authentication for the Target. The plaintext re-encryption by the CAS Server stays not permitted (Design Goal 10).\n\nMeasured on the bench (TWI-Unified-Model/attestation-bench, branch container/origin-optional, 12 runs on 29 October): with origin authentication, 10 of 10 Targets on Google Cloud SEV-SNP, AWS SEV-SNP and Google Cloud TDX, in both RATS models, and the conduit's own container and the Secret Vault's container for another request refused in every Retrieval; without it, 10 of 10 as well, the conduit's container opened in 5 of 5 Retrievals, the Attester holding the key the conduit chose and the relying party refusing it, and the other request's container still refused, by the CEK and the associated data. The profile: TheBankster/lamps-tacra-est#29, TheBankster/lamps-tacra-est#30 and TheBankster/lamps-tacra-est#31.\n\nThe second commit carries what TheBankster/lamps-tacra-est#20, TheBankster/lamps-tacra-est#21, TheBankster/lamps-tacra-est#22, TheBankster/lamps-tacra-est#23, TheBankster/lamps-tacra-est#24 and TheBankster/lamps-tacra-est#26 asked of TACRA: what the digest proves and what it does not (Section 6.1 of CSR-ATTEST), the properties of a present-nonce Handle and why no length is requested, that a CAS Server's correlation of a Handle is not appraisal, the channel binding the binding does not carry (Design Goal 8, RFC 9266) and the mechanism's own names for the Relying Parties, and the credential group as the Secret Vault's policy, the hint selecting within it.\n",
+      "body": "The Trust Model lists what the CAS can substitute, but not the response. The CAS carries CEKpub, so anyone who saw it can seal a container to it. The new section gives the construction: HPKE in base mode to CEKpub, with info and associated data taken from the request, and the checks the Attester makes before it opens anything. The encoding of CEKpub, the subject of the binding, is named per KEM.\n\nThe Trust Model gains the substitution of the response as the accepted risk it is (TheBankster/lamps-tacra-est#15): the Secret Vault's container for another request does not open, sealed to another CEK, and a container of the CAS's making opens, so the Attester holds a credential of the CAS's choosing. With an API key its calls then run under the account the CAS chose. A deployment that cannot accept that can have the Secret Vault sign the container under a key the Attester holds, a security configuration this document does not specify, as the review of 29 October asked. The plaintext re-encryption by the CAS Server stays not permitted (Design Goal 10).\n\nMeasured on the bench (TWI-Unified-Model/attestation-bench, 29 October), without origin authentication: 10 of 10 Targets on Google Cloud SEV-SNP, AWS SEV-SNP and Google Cloud TDX, in both RATS models. The conduit's container opened in 5 of 5 Retrievals, the Attester holding the key the conduit chose and the Target refusing it, and the other request's container was refused in every one, by the CEK and the associated data. The profile: TheBankster/lamps-tacra-est#29, TheBankster/lamps-tacra-est#30 and TheBankster/lamps-tacra-est#31.\n\nThe second commit carries what TheBankster/lamps-tacra-est#20, TheBankster/lamps-tacra-est#21, TheBankster/lamps-tacra-est#22, TheBankster/lamps-tacra-est#23, TheBankster/lamps-tacra-est#24 and TheBankster/lamps-tacra-est#26 asked of TACRA: what the digest proves and what it does not (Section 6.1 of CSR-ATTEST), the properties of a present-nonce Handle and why no length is requested, that a CAS Server's correlation of a Handle is not appraisal, the channel binding the binding does not carry (Design Goal 8, RFC 9266) and the mechanism's own names for the Relying Parties, and the credential group as the Secret Vault's policy, the hint selecting within it.\n\nThe third commit is the review of 29 October: the signature out of this version, the Target takes no part, and \"that launch\" named as the attested workload the Attestation Results describe.\n",
       "createdAt": "2026-10-29T01:32:45Z",
-      "updatedAt": "2026-10-29T01:39:37Z",
+      "updatedAt": "2026-10-29T21:10:47Z",
       "baseRepository": "TheBankster/rats-tacra",
       "baseRefName": "master",
       "baseRefOid": "3d3b306bb5709380319df9a54d0d4e005c6871a3",
       "headRepository": "nikolaichuk7/rats-tacra",
       "headRefName": "retrieval-container-origin",
-      "headRefOid": "0760d434a46be6b4eaaa4d38b6451077445ade38",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "eedef8f5ea7f187868ef629905c2049c601fcde8",
+      "closedAt": "2026-10-29T21:10:47Z",
+      "mergedAt": "2026-10-29T21:10:47Z",
+      "mergedBy": "TheBankster",
+      "mergeCommit": {
+        "oid": "30f25791543829389c2974d592da439cd5744afc"
+      },
+      "comments": [
+        {
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "body": "All of it is in 51d7256 and the commits before it: launch replaced, one sentence per line throughout, the signature and every mitigation this document does not specify out, your sentences at lines 413, 424, 440, 647, 648 and 664 in, the correlation of a Handle left to the mechanisms. The one question left is the ceiling sentence, thread at line 413. The same series is on lamps-tacra-est #30 and #31.",
+          "createdAt": "2026-10-29T18:54:23Z",
+          "updatedAt": "2026-10-29T18:54:23Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOULZBls8AAAABU9y6fw",
+          "commit": {
+            "abbreviatedOid": "0760d43"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T17:13:02Z",
+          "updatedAt": "2026-10-29T17:13:02Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "Secret Vault signing the container means each Attester must be configured with the RRP's signing key. That's a configuration and management headache and a pain point. Let's not do it now: add to security considerations and we can add it back post-IETF if reviewers demand it.",
+              "createdAt": "2026-10-29T17:13:02Z",
+              "updatedAt": "2026-10-29T17:13:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU9zlVw",
+          "commit": {
+            "abbreviatedOid": "0760d43"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T17:13:46Z",
+          "updatedAt": "2026-10-29T17:13:46Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "what do you mean by 'that launch'?",
+              "createdAt": "2026-10-29T17:13:46Z",
+              "updatedAt": "2026-10-29T17:13:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-Rhmw",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T17:50:46Z",
+          "updatedAt": "2026-10-29T17:50:47Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "Agreed, and taken out: the Secret Vault seals and nothing more. Security Considerations keep the substitution of the response and name the signature as a security configuration a deployment can add. The same commit is on #30 and the mock #8.",
+              "createdAt": "2026-10-29T17:50:47Z",
+              "updatedAt": "2026-10-29T17:50:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-RjhA",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T17:50:48Z",
+          "updatedAt": "2026-10-29T17:50:48Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "The attested workload, as the Attestation Results describe it. Reworded: \"to the attested workload the Attestation Results describe\".",
+              "createdAt": "2026-10-29T17:50:48Z",
+              "updatedAt": "2026-10-29T17:50:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-iPgw",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:11:34Z",
+          "updatedAt": "2026-10-29T18:11:35Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "Using \"launch\" here again. Consider rewording.",
+              "createdAt": "2026-10-29T18:11:34Z",
+              "updatedAt": "2026-10-29T18:11:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-i3lg",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:12:25Z",
+          "updatedAt": "2026-10-29T18:12:25Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "The convention throughout these documents is to start each new sentence on a new line.",
+              "createdAt": "2026-10-29T18:12:25Z",
+              "updatedAt": "2026-10-29T18:12:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-k76g",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:14:25Z",
+          "updatedAt": "2026-10-29T18:14:25Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Same comment. Move each sentence to a separate line.",
+              "createdAt": "2026-10-29T18:14:25Z",
+              "updatedAt": "2026-10-29T18:14:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-nqZQ",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:17:04Z",
+          "updatedAt": "2026-10-29T18:17:04Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "I would not say the second sentence as stated. If the secret vault authenticates itself, then the Attester must also understand how to validate that authentication -- and we should not say that unless we also specify how. Better to say that we accept this, and that someone who attacks the Attester by sealing the wrong credential to it is causing at most a denial of service. That clarification belongs in the security considerations.",
+              "createdAt": "2026-10-29T18:17:04Z",
+              "updatedAt": "2026-10-29T18:18:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-p38w",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:19:34Z",
+          "updatedAt": "2026-10-29T18:19:34Z",
+          "comments": [
+            {
+              "originalPosition": 77,
+              "body": "Instead of \"under them\", say \"after these checks pass...\"",
+              "createdAt": "2026-10-29T18:19:34Z",
+              "updatedAt": "2026-10-29T18:19:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-qong",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:20:31Z",
+          "updatedAt": "2026-10-29T18:20:31Z",
+          "comments": [
+            {
+              "originalPosition": 77,
+              "body": "Second sentence to separate line; CAS does not seal containers, the Secret Vault does. Also I don't quite understand the grammar of that sentence. What are you trying to say?",
+              "createdAt": "2026-10-29T18:20:31Z",
+              "updatedAt": "2026-10-29T18:20:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-q3FA",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:20:48Z",
+          "updatedAt": "2026-10-29T18:20:48Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Extra blank line here",
+              "createdAt": "2026-10-29T18:20:48Z",
+              "updatedAt": "2026-10-29T18:20:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-rQ-Q",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:21:20Z",
+          "updatedAt": "2026-10-29T18:21:20Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Each sentence to separate line.",
+              "createdAt": "2026-10-29T18:21:20Z",
+              "updatedAt": "2026-10-29T18:21:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-r66w",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:22:10Z",
+          "updatedAt": "2026-10-29T18:22:10Z",
+          "comments": [
+            {
+              "originalPosition": 91,
+              "body": "instead of \"out of the CAS Server's sight\" say \"opaquely to CAS Client and CAS Server.",
+              "createdAt": "2026-10-29T18:22:10Z",
+              "updatedAt": "2026-10-29T18:22:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-svTQ",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:23:17Z",
+          "updatedAt": "2026-10-29T18:23:17Z",
+          "comments": [
+            {
+              "originalPosition": 113,
+              "body": "'launch' needs a global search/replace, or a definition",
+              "createdAt": "2026-10-29T18:23:17Z",
+              "updatedAt": "2026-10-29T18:23:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-tHYw",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:23:46Z",
+          "updatedAt": "2026-10-29T18:23:46Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "Don't start sentences with 'Nor'. Better to say \"The binding does not bind the channel\"",
+              "createdAt": "2026-10-29T18:23:46Z",
+              "updatedAt": "2026-10-29T18:23:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-t8Cg",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:24:52Z",
+          "updatedAt": "2026-10-29T18:24:52Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "The RATS Relying Party is not bound by the Target name. Right now I think we've agreed that the Evidence can be sent to any RATS Relying Party, and the ability to redirect falls under Security Considerations.",
+              "createdAt": "2026-10-29T18:24:52Z",
+              "updatedAt": "2026-10-29T18:24:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-vBNw",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:26:17Z",
+          "updatedAt": "2026-10-29T18:26:17Z",
+          "comments": [
+            {
+              "originalPosition": 122,
+              "body": "This wording is convoluted. Are you meaning to say \"The CAS Server picks which Credential Authority or Secret Vault to use as the RATS Relying Party\"? I think that's both correct and simply stated.",
+              "createdAt": "2026-10-29T18:26:17Z",
+              "updatedAt": "2026-10-29T18:26:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-whoA",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:28:15Z",
+          "updatedAt": "2026-10-29T18:28:16Z",
+          "comments": [
+            {
+              "originalPosition": 123,
+              "body": "Similar comment to the one above: we don't recommend a way to get around the limitation we are accepting, as we are not specifying the protocol for specifying what is trusted. Reference the security consideration text here, and don't recommend mitigations.",
+              "createdAt": "2026-10-29T18:28:15Z",
+              "updatedAt": "2026-10-29T18:28:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-yLKA",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:30:24Z",
+          "updatedAt": "2026-10-29T18:30:24Z",
+          "comments": [
+            {
+              "originalPosition": 127,
+              "body": "What does \"keep its own exchanges apart\"? Do we expect CAS Server to be an active participant in deciding what message goes where based on the Target and Credential Type, as well as Freshness Handle? If so, that's what should be stated. But only if that's necessary for correct operation.",
+              "createdAt": "2026-10-29T18:30:24Z",
+              "updatedAt": "2026-10-29T18:30:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-0WpA",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:33:11Z",
+          "updatedAt": "2026-10-29T18:33:11Z",
+          "comments": [
+            {
+              "originalPosition": 136,
+              "body": "I'd instead say \"While it is possible for the Secret Vault to release the secrets to CAS Server in plaintext and have the CAS Server seal them using CEKpub, this architecture does not allow it as doing so would violate Design Goal 10.\"",
+              "createdAt": "2026-10-29T18:33:11Z",
+              "updatedAt": "2026-10-29T18:33:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU-0dnw",
+          "commit": {
+            "abbreviatedOid": "fe942a3"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:33:19Z",
+          "updatedAt": "2026-10-29T18:33:19Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GKEA",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:53:56Z",
+          "updatedAt": "2026-10-29T18:53:56Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "Reworded in all four places: the software the Attester runs, as the Attestation Results describe it. Launch is gone as a noun.",
+              "createdAt": "2026-10-29T18:53:56Z",
+              "updatedAt": "2026-10-29T18:53:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GLnA",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:53:58Z",
+          "updatedAt": "2026-10-29T18:53:58Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "Done throughout with a tool: every paragraph of this document and of the profile is one sentence per line now, and the rendered text is unchanged byte for byte.",
+              "createdAt": "2026-10-29T18:53:58Z",
+              "updatedAt": "2026-10-29T18:53:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GNOg",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:00Z",
+          "updatedAt": "2026-10-29T18:54:00Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Done throughout, as above.",
+              "createdAt": "2026-10-29T18:54:00Z",
+              "updatedAt": "2026-10-29T18:54:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GOpw",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:02Z",
+          "updatedAt": "2026-10-29T18:54:02Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "Done: the sentence about a security configuration is gone, here and in the profile, and the text says we accept it. On \"at most a denial of service\" I would like your pick between two sentences, since the merged text already names the API-key case. (A) At most that is a denial of service: the Target refuses a credential it did not issue. (B) At the least that is a denial of service: the Target refuses a credential it did not issue. With an API key of an account the CAS holds at the Target, the Attester's calls run under that account. The paragraph keeps the merged wording until you choose.",
+              "createdAt": "2026-10-29T18:54:02Z",
+              "updatedAt": "2026-10-29T18:54:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GP8w",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:03Z",
+          "updatedAt": "2026-10-29T18:54:03Z",
+          "comments": [
+            {
+              "originalPosition": 77,
+              "body": "Done: \"After these checks pass, the Attester opens the ciphertext under CEKpri\", then the two cases.",
+              "createdAt": "2026-10-29T18:54:03Z",
+              "updatedAt": "2026-10-29T18:54:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GRVw",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:05Z",
+          "updatedAt": "2026-10-29T18:54:05Z",
+          "comments": [
+            {
+              "originalPosition": 77,
+              "body": "The substitution of the response: the CAS saw CEKpub, so it can seal a container of its own to it, and that container passes the checks. Rewritten in two sentences.",
+              "createdAt": "2026-10-29T18:54:05Z",
+              "updatedAt": "2026-10-29T18:54:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GSgg",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:06Z",
+          "updatedAt": "2026-10-29T18:54:06Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Removed, and no other double blank line is left.",
+              "createdAt": "2026-10-29T18:54:06Z",
+              "updatedAt": "2026-10-29T18:54:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GT-w",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:07Z",
+          "updatedAt": "2026-10-29T18:54:08Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Done throughout, as above.",
+              "createdAt": "2026-10-29T18:54:08Z",
+              "updatedAt": "2026-10-29T18:54:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GVkA",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:09Z",
+          "updatedAt": "2026-10-29T18:54:09Z",
+          "comments": [
+            {
+              "originalPosition": 91,
+              "body": "Done.",
+              "createdAt": "2026-10-29T18:54:09Z",
+              "updatedAt": "2026-10-29T18:54:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GW2Q",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:11Z",
+          "updatedAt": "2026-10-29T18:54:11Z",
+          "comments": [
+            {
+              "originalPosition": 113,
+              "body": "Replaced throughout: the software the Attester runs. The verb stays where it is a verb.",
+              "createdAt": "2026-10-29T18:54:11Z",
+              "updatedAt": "2026-10-29T18:54:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GYrw",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:13Z",
+          "updatedAt": "2026-10-29T18:54:13Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "Done, here and in the one other sentence that began with Nor.",
+              "createdAt": "2026-10-29T18:54:13Z",
+              "updatedAt": "2026-10-29T18:54:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GaMg",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:14Z",
+          "updatedAt": "2026-10-29T18:54:14Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "Right, and the sentence now says so: the binding names the Target, not the RATS Relying Party, and Evidence can reach any RATS Relying Party.",
+              "createdAt": "2026-10-29T18:54:14Z",
+              "updatedAt": "2026-10-29T18:54:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_Gbvg",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:16Z",
+          "updatedAt": "2026-10-29T18:54:16Z",
+          "comments": [
+            {
+              "originalPosition": 122,
+              "body": "Yes. Your sentence is now the first, and the mechanism's own name for that choice, the EST path segment, follows it.",
+              "createdAt": "2026-10-29T18:54:16Z",
+              "updatedAt": "2026-10-29T18:54:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GdKg",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:18Z",
+          "updatedAt": "2026-10-29T18:54:18Z",
+          "comments": [
+            {
+              "originalPosition": 123,
+              "body": "Done: the mitigation is out, the limitation stated and accepted, and the same for the Evidence-to-the-Verifier sentence.",
+              "createdAt": "2026-10-29T18:54:18Z",
+              "updatedAt": "2026-10-29T18:54:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_Geww",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:19Z",
+          "updatedAt": "2026-10-29T18:54:20Z",
+          "comments": [
+            {
+              "originalPosition": 127,
+              "body": "Not necessary for correct operation: the RATS Relying Party's checks do not depend on it. The two sentences are out of TACRA. The EST profile keeps its own correlation of a Handle with the call that returned it, as a detail of that mechanism.",
+              "createdAt": "2026-10-29T18:54:20Z",
+              "updatedAt": "2026-10-29T18:54:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_GgVw",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T18:54:21Z",
+          "updatedAt": "2026-10-29T18:54:21Z",
+          "comments": [
+            {
+              "originalPosition": 136,
+              "body": "Done, in your words.",
+              "createdAt": "2026-10-29T18:54:21Z",
+              "updatedAt": "2026-10-29T18:54:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_QG7g",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T19:05:36Z",
+          "updatedAt": "2026-10-29T19:05:36Z",
+          "comments": [
+            {
+              "originalPosition": 120,
+              "body": "\"the value to expect\" -> \"the expected freshness value\"",
+              "createdAt": "2026-10-29T19:05:36Z",
+              "updatedAt": "2026-10-29T19:09:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_VZgg",
+          "commit": {
+            "abbreviatedOid": "51d7256"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T19:12:14Z",
+          "updatedAt": "2026-10-29T19:12:14Z",
+          "comments": [
+            {
+              "originalPosition": 141,
+              "body": "The private asymmetric keys generated inside the attested environment (CSKpri, CEKpri) MUST NOT leave that Attested Environment.\n(or just skip that sentence, it's hard to read and I don't know if it adds any value)",
+              "createdAt": "2026-10-29T19:12:14Z",
+              "updatedAt": "2026-10-29T19:12:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_jtng",
+          "commit": {
+            "abbreviatedOid": "d7ae4a5"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T19:29:54Z",
+          "updatedAt": "2026-10-29T19:29:55Z",
+          "comments": [
+            {
+              "originalPosition": 120,
+              "body": "Done: the expected freshness value.",
+              "createdAt": "2026-10-29T19:29:54Z",
+              "updatedAt": "2026-10-29T19:29:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABU_ju2w",
+          "commit": {
+            "abbreviatedOid": "d7ae4a5"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T19:29:56Z",
+          "updatedAt": "2026-10-29T19:29:56Z",
+          "comments": [
+            {
+              "originalPosition": 141,
+              "body": "Taken, in your words and TACRA's term: \"The private keys generated inside the Attesting Environment, CSKpri and CEKpri, MUST NOT leave it.\" The next sentence still says the digest does not prove that.",
+              "createdAt": "2026-10-29T19:29:56Z",
+              "updatedAt": "2026-10-29T19:29:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAixJQ",
+          "commit": {
+            "abbreviatedOid": "d7ae4a5"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T20:54:15Z",
+          "updatedAt": "2026-10-29T20:54:15Z",
+          "comments": [
+            {
+              "originalPosition": 179,
+              "body": "unseals the ciphertext using CEKpri",
+              "createdAt": "2026-10-29T20:54:15Z",
+              "updatedAt": "2026-10-29T20:54:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAjXvg",
+          "commit": {
+            "abbreviatedOid": "d7ae4a5"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T20:54:55Z",
+          "updatedAt": "2026-10-29T20:54:55Z",
+          "comments": [
+            {
+              "originalPosition": 180,
+              "body": "\"sealed to another CEK as it is\" -> \"since it is not encrypted to the same CEKpub\"",
+              "createdAt": "2026-10-29T20:54:55Z",
+              "updatedAt": "2026-10-29T20:54:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAj6rA",
+          "commit": {
+            "abbreviatedOid": "d7ae4a5"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T20:55:36Z",
+          "updatedAt": "2026-10-29T20:55:36Z",
+          "comments": [
+            {
+              "originalPosition": 181,
+              "body": "The CAS can see CEKpub and therefore can seal a container of its own choosing to it instead of the one returned by the Secret Vault.",
+              "createdAt": "2026-10-29T20:55:36Z",
+              "updatedAt": "2026-10-29T20:55:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAktXw",
+          "commit": {
+            "abbreviatedOid": "d7ae4a5"
+          },
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T20:56:46Z",
+          "updatedAt": "2026-10-29T20:56:46Z",
+          "comments": [
+            {
+              "originalPosition": 187,
+              "body": "The Attesting Environment MUST generate a brand new CEK for each \"retrieve\" request.",
+              "createdAt": "2026-10-29T20:56:46Z",
+              "updatedAt": "2026-10-29T20:56:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAncHg",
+          "commit": {
+            "abbreviatedOid": "eedef8f"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:00:46Z",
+          "updatedAt": "2026-10-29T21:00:47Z",
+          "comments": [
+            {
+              "originalPosition": 179,
+              "body": "Done, in your words.",
+              "createdAt": "2026-10-29T21:00:46Z",
+              "updatedAt": "2026-10-29T21:00:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAndRg",
+          "commit": {
+            "abbreviatedOid": "eedef8f"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:00:48Z",
+          "updatedAt": "2026-10-29T21:00:48Z",
+          "comments": [
+            {
+              "originalPosition": 180,
+              "body": "Done, in your words.",
+              "createdAt": "2026-10-29T21:00:48Z",
+              "updatedAt": "2026-10-29T21:00:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAnegQ",
+          "commit": {
+            "abbreviatedOid": "eedef8f"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:00:50Z",
+          "updatedAt": "2026-10-29T21:00:50Z",
+          "comments": [
+            {
+              "originalPosition": 181,
+              "body": "Done, in your words.",
+              "createdAt": "2026-10-29T21:00:50Z",
+              "updatedAt": "2026-10-29T21:00:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOULZBls8AAAABVAnf3Q",
+          "commit": {
+            "abbreviatedOid": "eedef8f"
+          },
+          "author": "nikolaichuk7",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:00:52Z",
+          "updatedAt": "2026-10-29T21:00:52Z",
+          "comments": [
+            {
+              "originalPosition": 187,
+              "body": "Done, with TACRA's name for the call: \"for each Retrieve-Credential request.\"",
+              "createdAt": "2026-10-29T21:00:52Z",
+              "updatedAt": "2026-10-29T21:00:52Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "id": "PR_kwDOULZBls8AAAABL5WdnQ",
+      "title": "Sealing the Released Credential: the container specified here, with the Credential Type tokens",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/28",
+      "state": "MERGED",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From the review of TheBankster/lamps-tacra-est#33: the container is an agreement between the Secret Vault that seals it and the Attester that opens it, and the Credential Acquisition Mechanism only carries it, so it is specified here.\n\n- The construction stays, with the label named: info is the length-prefixed concatenation of tacra hpke-base v1, the Target and the freshness element.\n- The mandatory suite is DHKEM(P-256, HKDF-SHA256) with HKDF-SHA256 and AES-256-GCM. Another suite of the HPKE registries MAY be used, MLKEM768-P256 for instance, which keeps HPKE-PQ informative. The mechanism tells the Attester at Initiate-Credential-Acquisition which suites the Secret Vault accepts.\n- The container is a JSON object, in CDDL: container, suite, enc, ciphertext and aad, with the associated data and the plaintext as the JCS of RFC 8785 and byte strings as unpadded base64url.\n- The plaintext: credential items typed with Credential Type tokens, now defined in Conventions and Definitions, each value the base64url of the credential's octets, named per type.\n- CEKpub for the P-256 suite: the uncompressed point inside the SubjectPublicKeyInfo is the recipient key HPKE deserializes.\n- References: RFC 5280 becomes normative, with RFC 4648, 5480, 5958, 8259, 8610, 8785 and 9741 for the encodings. No Internet-Draft is normative.\n\nThe EST profile follows in TheBankster/lamps-tacra-est#33: it carries this container and names the suites, and its CDDL keeps the wire messages only.\n\nMeasured on 31 October with this container, label included: the bench's EST server, Secret Vault and Attester on GCP SEV-SNP, AWS SEV-SNP and GCP TDX in Passport, Background Check and the conduit's seal drill on GCP SEV-SNP, and the MLKEM768-P256 suite. Six runs, all 10 Targets of each acquired and admitted, the five Freshness Kinds among them. The 120 exchanges pass the cddl tool against the EST wire rules with this container's CDDL, 96 alterations of each log are refused, and the binding formula of Section 4.5 reproduces the freshness input the hardware signed in all 60 second-leg requests.\n",
+      "createdAt": "2026-10-31T01:34:30Z",
+      "updatedAt": "2026-10-31T18:41:51Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "7deb84c8b0c986d0ed194f5e300d30fd230eebb9",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "container-in-tacra",
+      "headRefOid": "9d3b09ac3b3a91cdbd36d5fd5f28a74f47cdec37",
+      "closedAt": "2026-10-31T18:41:51Z",
+      "mergedAt": "2026-10-31T18:41:51Z",
+      "mergedBy": "TheBankster",
+      "mergeCommit": {
+        "oid": "6e2fa0c8128da381eab75bd556d97fb0a903e4fb"
+      },
       "comments": [],
       "reviews": []
     }
