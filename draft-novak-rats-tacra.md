@@ -67,7 +67,6 @@ informative:
   CSR-ATTEST: I-D.ietf-lamps-csr-attestation
   INTERACTION-MODELS: I-D.ietf-rats-reference-interaction-models
   ATTESTATION-FRESHNESS: I-D.ietf-lamps-attestation-freshness
-  DAA: I-D.ietf-rats-daa
   HPKE-PQ: I-D.ietf-hpke-pq
   TWISIGCharter:
     target: https://github.com/confidential-computing/governance/blob/main/SIGs/TWI/TWI_Charter.md
@@ -168,7 +167,7 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     * `api-key`: an API key
     * `psk`: a pre-shared symmetric key
     * `private-key`: a private key shared by the instances of a replicated service
-* Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as {{RFC7030}}, {{SPIFFE}}/{{SPIRE}}, {{RFC8555}}, {{DAA}}, etc.
+* Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as {{RFC7030}}, {{SPIFFE}}/{{SPIRE}}, {{RFC8555}}, etc.
 * Credential Acquisition System (CAS): a client-server architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism
 * Credential Acquisition Mode: one of
     1. Credential Enrollment (minting new proof-of-possession credential), or
@@ -221,7 +220,7 @@ A RATS Relying Party that needs a bound on the real age of Evidence uses a `pres
 
 This architecture is a result of work by the Confidential Computing Consortium's Trustworthy Workload Identity (TWI) SIG {{TWISIGCharter}} which has published a set of Definitions {{TWISIGDef}} and Requirements {{TWISIGReq}}.
 The requirements published by the TWI SIG are deliberately high-level.
-The design goals specified here fully align with the TWI SIG requirements, while focusing on a portable and extensible implementation.
+The design goals specified here are motivated by the TWI SIG requirements, while focusing on a portable and extensible implementation.
 
 1. Must support mechanisms for enrolling (minting new) as well as retrieving (pre-existing) credentials; the workload knows what Credential Type it will need when it launches, but discovers whether it will have to retrieve an existing or enroll a new credential at runtime
 2. Must support current and future credential formats:
@@ -229,7 +228,6 @@ The design goals specified here fully align with the TWI SIG requirements, while
    * WIMSE Workload Identity Certificates (WICs)
    * WIMSE Workload Identity Tokens (WITs)
    * Bearer tokens (JWTs, API Keys)
-   * TPM 2.0 DAA Group Certificates (for Replica workloads)
    * Pre-shared keys
    * Future formats through architectural extensibility
 3. Should limit the trust boundary expansion of the Attesting Environment to the minimum
@@ -237,7 +235,6 @@ The design goals specified here fully align with the TWI SIG requirements, while
    * EST (RFC 7030)
    * SPIFFE/SPIRE
    * ACMEv2 (RFC 8555)
-   * TPM 2.0 DAA Join protocol (based on TPM 2.0 AK Cert)
    * Future mechanisms through architectural extensibility
 5. Must support Workloads utilizing different Credential Acquisition Mechanisms per-target
 6. Must support both Background Check and Passport RATS modes, indistinguishably from the point of view of the Attester
