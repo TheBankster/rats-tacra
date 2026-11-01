@@ -5,12 +5,12 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 4 May 2027                             Sandelman Software Works
+Expires: 5 May 2027                             Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
                                                           S. Nikolaichuk
                                                    The Capital Index LLC
-                                                         31 October 2026
+                                                         1 November 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -75,7 +75,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 May 2027.
+   This Internet-Draft will expire on 5 May 2027.
 
 Copyright Notice
 
@@ -352,7 +352,7 @@ Table of Contents
    SHOULD NOT set a lifetime below 60 seconds.
 
    A present-nonce Freshness Handle is unpredictable (Section 10.2 of
-   [RFC9334]): its originator MUST generate it with at least 64 bits of
+   [RFC9334]): its originator MUST generate it with at least 128 bits of
    entropy, issue it once and never reuse it.  Its length is set by the
    protocol profile.  Initiate-Credential-Acquisition takes no requested
    length.  The Handle enters the Evidence through the digest
@@ -472,11 +472,7 @@ Table of Contents
    Attestation, for the following reasons:
 
    1.  None of the existing broadly deployed Credential Acquisition
-       Mechanisms support this two-phase sequence, but all appear
-       extensible to accommodate such changes without a lot of
-       additional effort, and without risking backwards compatibility.
-       CAS protocols MUST be able to carry Initiate-Credential-
-       Acquisition; they need not be nonce-based.
+       Mechanisms support this two-phase sequence.
 
    2.  The credentials that these existing mechanisms return are
        typically visible in plaintext to the control plane (the CAS
@@ -484,6 +480,13 @@ Table of Contents
        keep the knowledge of authentication secrets to the Attesters and
        a small number of trusted services, such as Secret Vaults and
        HSMs.
+
+   CAS protocols that are supported must therefore be able to carry
+   Initiate-Credential-Acquisition, and must be capable of fetching and
+   returning sealed, rather than plaintext, secrets.  All Credential
+   Acquisition Mechanisms examined to date appear extensible to
+   accommodate such changes without a lot of additional effort, and
+   without risking backwards compatibility.
 
 4.3.  Architecture Overview
 
@@ -595,12 +598,12 @@ Table of Contents
    ins.
 
    The Credential Acquisition System controls which Credential Types and
-   which Credential Acquisition Mechanisms (enrollment, retrieval) can
-   be provisioned to the Attester for any Attester-supplied target,
-   without the Attester's knowledge or involvement (Goal 1).  If a
-   Credential Type specified by the Attester is unavailable due to
-   Credential Acquisition System limitations, an error will result.  It
-   is an administrative error to pair an Attester with a Credential
+   which Credential Acquisition Mode (enrollment, retrieval) can be
+   offered to the Attester for any Attester-supplied target, without the
+   Attester's knowledge or involvement (Goal 1).  If a Credential Type
+   specified by the Attester is unavailable due to Credential
+   Acquisition System limitations, an error will result.  It is an
+   administrative error to pair an Attester with a Credential
    Acquisition System that is unable to supply it with the Credential
    Type(s) it requires.
 
@@ -1112,7 +1115,7 @@ Table of Contents
 
       -  Rejected or unsupported Credential Hint
 
-      -  Server error: remote attestation failure
+      -  Server error: Remote Attestation failure
 
       -  Server error: permission failure
 
@@ -1154,13 +1157,13 @@ Table of Contents
 
       -  Unsupported Target
 
-      -  Invalid Credential Type
+      -  Unsupported Credential Type
 
       -  Rejected or unsupported Credential Hint
 
       -  Server error: permission failure
 
-      -  Server error: remote attestation failure
+      -  Server error: Remote Attestation failure
 
       -  Server error: server too busy; try again later
 
@@ -1176,7 +1179,8 @@ Table of Contents
 
    The typical invocation flow is:
 
-   1.  CAAPI: Initiate-Credential-Acquisition(Target, Credential Type)
+   1.  CAAPI: Initiate-Credential-Acquisition(Target, Credential Type,
+       Credential Hint)
 
        *  Returns Freshness kind and the Credential Acquisition Mode for
           this Target and Credential Type
@@ -1257,7 +1261,7 @@ Table of Contents
 
       -  Rejected or unsupported Credential Hint
 
-      -  Server error: remote attestation failure
+      -  Server error: Remote Attestation failure
 
       -  Server error: permission failure
 
