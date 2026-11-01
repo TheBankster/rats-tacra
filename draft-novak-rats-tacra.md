@@ -59,6 +59,7 @@ normative:
   RFC9741:
 
 informative:
+  RFC5198: NET-UNICODE
   RFC7030: EST
   RFC7519: JWT
   RFC8555: ACMEv2
@@ -173,8 +174,16 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     1. Credential Enrollment (minting new proof-of-possession credential), or
     2. Credential Retrieval (retrieving an existing, pre-provisioned credential of any Credential Type)
 * Replica workloads: workloads that are functionally indistinguishable from the point of view of clients that authenticate to them or servers that they authenticate to; typical in "horizontal scale-out" scenarios where multiple identical workload instances are launched to handle the load in parallel
-* Target: the RATS-unaware Relying Party for which the Attester seeks credentials
-* Credential Hint: optional, implementation-defined information supplied by the Attester about the credential it expects. The Attester MAY obtain the hint from runtime configuration. A RATS Relying Party MAY use the hint, ignore it, or reject the request. This document does not specify the hint's syntax or meaning.
+* Target: an octet string that identifies the RATS-unaware Relying Party for which the Attester seeks credentials.
+  Two Targets are the same only when those octets are identical.
+  This document does not assign a character encoding or a Unicode normalization.
+  A protocol profile specifies how a configured name is encoded into that octet string.
+  A profile that starts from Unicode text uses UTF-8 in Normalization Form C ({{RFC5198}}), so the Attester and the RATS Relying Party produce the same octets from the same name.
+  Examples of such names are a URI and a SPIFFE ID ({{SPIFFE}}).
+* Credential Hint: optional, implementation-defined information supplied by the Attester about the credential it expects.
+  The Attester MAY obtain the hint from runtime configuration.
+  A RATS Relying Party MAY use the hint, ignore it, or reject the request.
+  This document does not specify the hint's syntax or meaning.
 * CSK: Credential Signing Key for proof-of-possession credentials; CSKpri and CSKpub refer to the private and public portions, respectively
 * CEK: Credential Encryption Key for retrieved secrets; CEKpri and CEKpub refer to the private and public portions, respectively
 * Freshness Handle: a Handle as defined in {{INTERACTION-MODELS}} (for example an attestation nonce or an Epoch Marker), bound into Evidence to demonstrate freshness
@@ -385,12 +394,16 @@ where:
 
 * `len32(x)` is the length of `x` in octets, as a 32-bit big-endian unsigned integer;
 * `freshness` is the freshness element; a timestamp is an 8-octet big-endian unsigned count of seconds since 1970-01-01T00:00:00Z;
-* `target` is the UTF-8 encoding of the Target, used as an exact octet string;
+* `target` is the Target octet string; it is not recoded or normalized when the digest is computed: the octets the Attester bound are the octets the RATS Relying Party recomputes over;
 * `subject` is, for Enrollment, the DER encoding of the CSR; for Retrieval, CEKpub in the encoding the Credential Acquisition Mechanism carries it in, which the protocol profile specifies.
 
 The length prefixes make the encoding unambiguous: no two different sequences of values produce the same octets.
 The digest is SHA-512 ({{RFC6234}}) where the freshness input is 64 octets, e.g., REPORT_DATA of AMD SEV-SNP and REPORTDATA of Intel TDX.
 For a field of another size, a protocol profile specifies a hash whose output is the size of the field.
+
+A configured target name that is not already an octet string, such as a URI typed into Attester runtime configuration, is encoded once, by the rule the protocol profile sets, before it is supplied as the Target of Initiate-Credential-Acquisition, Enroll-Credential or Retrieve-Credential.
+The RATS Relying Party applies that same rule to the Target in its policy.
+Look-alike Unicode strings remain distinct Targets; a profile that uses DNS names specifies how those names are prepared.
 
 The Verifier MUST report in the Attestation Results the value of the freshness input of the Evidence it appraised.
 Where the expected freshness value is submitted with the Evidence, as in challenge-response appraisal, it is that value, after the Verifier has checked that the Evidence carries it.
@@ -550,7 +563,7 @@ Initiates the credential acquisition process by obtaining Freshness and validati
 
 Parameters:
 
-* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Target name: the octet string of the Target definition, for example a profile-encoded URI of the RUP
 * Credential Type the Attester plans to use with this Target
 * Credential Hint (optional) the Attester wishes to communicate when obtaining the credential
 
@@ -660,7 +673,7 @@ Orchestrates an opaque-to-Attester process by which the Attester acquires a cred
 
 Parameters:
 
-* Target name, e.g., the server URI to which the Attester wishes to authenticate
+* Target name: the octet string of the Target definition, for example a profile-encoded URI of the RUP
 * Credential Type the Attester plans to use with this Target
 * Credential Hint (optional)
 
