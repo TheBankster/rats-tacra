@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-01T03:43:06.573584+00:00",
+  "timestamp": "2026-11-03T04:52:19.384611+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -512,15 +512,15 @@
       "id": "I_kwDOULZBls8AAAABUMz1kg",
       "title": "Where does the Attester get the Relying Party ID from? Need to discuss alternatives.",
       "url": "https://github.com/TheBankster/rats-tacra/issues/17",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "TheBankster",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "The one point you may want to change is where the Attester gets the Relying Party identifier. I've written it as held by the Credential Acquisition Interface for each Target and mode. If the SIG prefers another source, only that sentence changes.\n\n_Originally posted by @nikolaichuk7 in https://github.com/TheBankster/rats-tacra/issues/1#issuecomment-5911416826_\n            ",
       "createdAt": "2026-09-30T17:40:26Z",
-      "updatedAt": "2026-09-30T17:47:47Z",
-      "closedAt": null,
+      "updatedAt": "2026-11-01T14:23:54Z",
+      "closedAt": "2026-11-01T14:23:54Z",
       "comments": [
         {
           "author": "nikolaichuk7",
@@ -528,6 +528,13 @@
           "body": "The formal study compares three sources ([formal/README.md, \"Where the bound identity comes from\"](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/README.md#where-the-bound-identity-comes-from-six-more-models); ProVerif output in [rrp-source](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260926T232411Z-rrp-source.txt) and [freshness-sources](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/formal/results/proverif-20260926T233733Z-freshness-sources.txt)):\n\n1. **Held by the Credential Acquisition Interface for each Target and mode** (the current text, Section 4.5, item 3). Only the Relying Party the deployment intended can issue, with a fresh Handle and with a shared epoch alike. It is also the only source when Initiate-Credential-Acquisition is completed locally, as the EST profile allows, since there is no response to take it from. The cost is configuration in the Attester.\n2. **Taken from the Initiate-Credential-Acquisition response.** The Evidence is still accepted by only one Relying Party, but the CAS chooses which: it can initiate at another Credential Authority, hand that response to the Attester, and that Credential Authority issues.\n3. **Not bound.** A Handle minted per Relying Party session keeps the Evidence to one Relying Party by itself; freshness that is not single-use, such as an epoch, a timestamp or a Verifier Handle that several Relying Parties accept, lets two Relying Parties accept the same Evidence.\n\nThe EST profile pull request currently binds the held identifier when there is one and the response's otherwise, with a TODO pending this decision. A middle path the models do not cover yet is for the Credential Acquisition Interface to hold a set of acceptable identifiers per Target and take the response's value only when it is in that set. I can model that option, or any other the SIG wants to weigh, the same way, and where it applies also run it on SEV-SNP hardware with the reference implementation, as drills D3 and D3b already do for the first two sources ([drills.json](https://github.com/nikolaichuk7/tacra-est/blob/5661be5/evidence/20260930T171748Z-gcp-sev-snp/drills.json)). I would post the results here.\n",
           "createdAt": "2026-09-30T17:47:47Z",
           "updatedAt": "2026-09-30T17:47:47Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "For now we went with the \"not bound\" option.",
+          "createdAt": "2026-11-01T14:23:54Z",
+          "updatedAt": "2026-11-01T14:23:54Z"
         }
       ]
     },
@@ -536,15 +543,15 @@
       "id": "I_kwDOULZBls8AAAABUpO1rA",
       "title": "Add a discussion regarding which CAAPI attest-initiate parameters \"hit the wire\" in CAS",
       "url": "https://github.com/TheBankster/rats-tacra/issues/19",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "TheBankster",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "\"attest-initiate\" may get short-circuited by the CAS client and not actually result in a call to a CAS server. Even if the CAAPI call ends up carried by CAS client to CAS server, not all of the attest-initiate parameters need to be carried to the CAS server, as some may get handled locally by the CAS client.\n\nAdd the discussion of each parameter and its relationship to the CAS client/server interaction.",
       "createdAt": "2026-10-02T16:34:51Z",
-      "updatedAt": "2026-10-07T22:35:22Z",
-      "closedAt": null,
+      "updatedAt": "2026-11-01T14:23:24Z",
+      "closedAt": "2026-11-01T14:23:24Z",
       "comments": [
         {
           "author": "nikolaichuk7",
@@ -566,6 +573,13 @@
           "body": "Data for this, measured on real hardware (GCP SEV-SNP, GCP TDX, AWS SEV-SNP; Background Check and Passport, 7 October). We had the CAS change, one at a time, what it relays to the RRP on Evidence made for that RRP:\n\n| the CAS sends | the RRP |\n|---|---|\n| a made-up Handle (present-nonce) | refuses: it knows the Handles it minted |\n| the Freshness Kind absent-none for a Target of another kind | refuses: the kind is the Target's, by its policy |\n| a credential type the Target does not offer | refuses |\n| another workload's Credential Hint | refuses: the CA names the attested workload itself |\n| the other credential type the Target offers | issues, for every kind but present-nonce |\n\nSo the Handle, the Target and the RRP ID are covered by the binding, the kind and the hint by the RRP's own policy, and the credential type by nothing but a present-nonce Handle minted for one Target and type. If the type matters, it belongs in the binding or in the Target's policy.\n\nOn which fields must reach the RRP: in the same runs the RRP issued for present-epoch, absent-epoch, absent-timestamp and absent-none with no attest-initiate exchange for that request (the epoch taken as published); present-nonce needs the RRP's Handle. That fits your case, Mark: initiate has to hit the wire when the freshness value comes from the RRP, or when the CAS client cannot know a Target's kind and mode.\n\nOn what Initiate costs: of 60 acquisitions on the three platforms, it took a median 259 ms of 564 ms, all but 1.35 ms of it the round trip from the guest to the CAS server (here through an SSH tunnel to our test setup); a CAS client that completes it locally for the absent-* kinds saves that round trip, and nothing else.\n",
           "createdAt": "2026-10-07T22:35:21Z",
           "updatedAt": "2026-10-07T22:35:21Z"
+        },
+        {
+          "author": "TheBankster",
+          "authorAssociation": "OWNER",
+          "body": "This has since been addressed in the text of the draft.",
+          "createdAt": "2026-11-01T14:23:24Z",
+          "updatedAt": "2026-11-01T14:23:24Z"
         }
       ]
     },
@@ -780,6 +794,22 @@
       "body": "**CSK freshness.** The draft currently says that the CEK \u201cMUST\u201d be brand new per Retrieve. Enrollment never says CSK must be unique per request. If a CSK is reused across Targets, that is a different identity story; say it.\n\nWe may decide that asymmetric key reuse is a SHOULD NOT in either case, but in any case, the justification needs to be made and the decision documented in the draft.",
       "createdAt": "2026-10-31T20:02:50Z",
       "updatedAt": "2026-10-31T20:02:50Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 37,
+      "id": "I_kwDOULZBls8AAAABbnLxLQ",
+      "title": "Post-IETF 127: Add the Privacy Considerations section",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/37",
+      "state": "OPEN",
+      "author": "TheBankster",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "RFC 9334 has \u00a711. RFC 6973 is expected in the Security Area when Evidence identifies devices.\n\nThe CAS sees Evidence (platform, firmware, software, sometimes device identity) and, in Passport mode, Attestation Results. That is the privacy story of the architecture. A Security Considerations paragraph that \u201caccepts\u201d it is not a Privacy Considerations section.",
+      "createdAt": "2026-11-01T14:22:02Z",
+      "updatedAt": "2026-11-01T14:22:02Z",
       "closedAt": null,
       "comments": []
     }
