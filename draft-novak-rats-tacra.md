@@ -160,7 +160,7 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     * etc.
 * Credential Type: a catch-all term for any concrete credential type from the two lists above
 * Credential, a.k.a. Identity Document: an instance of a Credential Type
-* Credential Type token: the name of a Credential Type in a Credential Acquisition Mechanism and in the container of {{container}}:
+* Credential Type Identifier: the name of a Credential Type in a Credential Acquisition Mechanism and in the container of {{container}}:
     * `x509`: a PKIX certificate
     * `wic`: a WIMSE Workload Identity Certificate
     * `wit`: a WIMSE Workload Identity Token
@@ -516,7 +516,7 @@ credential-item = {
 }
 ~~~
 
-Each credential item carries a Credential Type token as its `type` and the credential as its `value`, the unpadded base64url of the credential's octets.
+Each credential item carries a Credential Type as its `type` and the credential as its `value`, the unpadded base64url of the credential's octets.
 Those octets are a DER certificate for `x509` and `wic`, a DER PrivateKeyInfo ({{RFC5958}}) for `private-key`, the key octets for `psk`, and the UTF-8 encoding of the token for `wit`, `jwt` and `api-key`.
 `format`, when present, names another encoding of those octets, which the Secret Vault and the Attesters it serves agree on out of band.
 `kid`, `purpose`, `algorithm`, `exportable` and `shared` are the key-block attributes the Secret Vault's policy sets.
