@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-03T04:52:19.384611+00:00",
+  "timestamp": "2026-11-05T04:37:46.354606+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -810,6 +810,22 @@
       "body": "RFC 9334 has \u00a711. RFC 6973 is expected in the Security Area when Evidence identifies devices.\n\nThe CAS sees Evidence (platform, firmware, software, sometimes device identity) and, in Passport mode, Attestation Results. That is the privacy story of the architecture. A Security Considerations paragraph that \u201caccepts\u201d it is not a Privacy Considerations section.",
       "createdAt": "2026-11-01T14:22:02Z",
       "updatedAt": "2026-11-01T14:22:02Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 39,
+      "id": "I_kwDOULZBls8AAAABclyJDQ",
+      "title": "private-key is an item type of the container, not a Credential Type",
+      "url": "https://github.com/TheBankster/rats-tacra/issues/39",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "draft-novak-rats-tacra.md:170 (master) lists `private-key` among the Credential Types: \"a private key shared by the instances of a replicated service\".\n\nAn Attester does not ask for a private key. It asks for an `x509` or a `wic` credential, and a replica that shares it receives, in the container, the certificate and the private half as two items. The private half is an item type of the container; the sentence on the octets, draft-novak-rats-tacra.md:520, \"a DER PrivateKeyInfo for `private-key`\", already treats it so. The Credential Types are the credentials a Target serves: `x509`, `wic`, `wit`, `jwt`, `api-key`, `psk`.\n\nProposed change:\n\n- remove `private-key` from the list of Credential Types;\n- in the container section, say that a `private-key` item carries the private half of an `x509` or `wic` credential issued to a replicated service, and keep the sentence on its octets;\n- the same in draft-novak-lamps-tacra-est.md:437 (master) and in the mock, which lists `private-key` among the credential types it knows while using it as the item type of the key in a released `x509` bundle.\n",
+      "createdAt": "2026-11-04T23:48:11Z",
+      "updatedAt": "2026-11-04T23:48:11Z",
       "closedAt": null,
       "comments": []
     }
@@ -4328,6 +4344,32 @@
       "mergeCommit": {
         "oid": "6e2fa0c8128da381eab75bd556d97fb0a903e4fb"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 38,
+      "id": "PR_kwDOULZBls8AAAABM7qkww",
+      "title": "Credential Type Identifier: the name of a Credential Type",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/38",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The definition that said Credential Type token now says Credential Type Identifier, the noun for the name of a Credential Type; the container carries a Credential Type as the type of a credential item. As decided in the review of the mock, TWI-Unified-Model/globalsign-est#8.\n\nBearer tokens, WIT and JWT keep their names. No CDDL change; the text builds with kramdown-rfc and xml2rfc.",
+      "createdAt": "2026-11-04T22:45:10Z",
+      "updatedAt": "2026-11-04T22:45:10Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "124bb8f56558e2e34cd4641c3d52aedc773595c7",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "credential-type-identifier",
+      "headRefOid": "995572df4a706dc91060274f8ac615c7d63a7c39",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
