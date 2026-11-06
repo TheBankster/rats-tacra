@@ -5,12 +5,12 @@
 Remote ATtestation ProcedureS                                   M. Novak
 Internet-Draft                                   J.P. Morgan Chase & Co.
 Intended status: Informational                             M. Richardson
-Expires: 5 May 2027                             Sandelman Software Works
+Expires: 10 May 2027                            Sandelman Software Works
                                                              H. Birkholz
                                                           Fraunhofer SIT
                                                           S. Nikolaichuk
                                                    The Capital Index LLC
-                                                         1 November 2026
+                                                         6 November 2026
 
 
      Trustworthy Acquisition of Credentials via Remote Attestation
@@ -75,7 +75,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 May 2027.
+   This Internet-Draft will expire on 10 May 2027.
 
 Copyright Notice
 
@@ -235,7 +235,7 @@ Table of Contents
    *  Credential, a.k.a. Identity Document: an instance of a Credential
       Type
 
-   *  Credential Type token: the name of a Credential Type in a
+   *  Credential Type Identifier: the name of a Credential Type in a
       Credential Acquisition Mechanism and in the container of
       Section 4.6:
 
@@ -938,15 +938,15 @@ Table of Contents
      ? shared: bool,
    }
 
-   Each credential item carries a Credential Type token as its type and
-   the credential as its value, the unpadded base64url of the
-   credential's octets.  Those octets are a DER certificate for x509 and
-   wic, a DER PrivateKeyInfo ([RFC5958]) for private-key, the key octets
-   for psk, and the UTF-8 encoding of the token for wit, jwt and api-
-   key. format, when present, names another encoding of those octets,
-   which the Secret Vault and the Attesters it serves agree on out of
-   band. kid, purpose, algorithm, exportable and shared are the key-
-   block attributes the Secret Vault's policy sets. metadata MAY carry
+   Each credential item carries a Credential Type as its type and the
+   credential as its value, the unpadded base64url of the credential's
+   octets.  Those octets are a DER certificate for x509 and wic, a DER
+   PrivateKeyInfo ([RFC5958]) for private-key, the key octets for psk,
+   and the UTF-8 encoding of the token for wit, jwt and api-key. format,
+   when present, names another encoding of those octets, which the
+   Secret Vault and the Attesters it serves agree on out of band. kid,
+   purpose, algorithm, exportable and shared are the key-block
+   attributes the Secret Vault's policy sets. metadata MAY carry
    validity_seconds (integer) and secret_version (string).
 
    The Attester, through its Credential Acquisition Interface, MUST
@@ -1624,17 +1624,17 @@ Table of Contents
               Tschofenig, H., Brockhaus, H., Mandel, J., and S. Turner,
               "Requesting a Freshness Nonce for Attestation Evidence in
               Certificate Signing Requests", Work in Progress, Internet-
-              Draft, draft-ietf-lamps-attestation-freshness-09, 17
-              October 2026, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-lamps-attestation-freshness-09>.
+              Draft, draft-ietf-lamps-attestation-freshness-10, 2
+              November 2026, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-lamps-attestation-freshness-10>.
 
    [CSR-ATTEST]
               Ounsworth, M., Tschofenig, H., Birkholz, H., Wiseman, M.,
               and N. Smith, "Use of Remote Attestation with
               Certification Signing Requests", Work in Progress,
-              Internet-Draft, draft-ietf-lamps-csr-attestation-32, 22
-              October 2026, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-lamps-csr-attestation-32>.
+              Internet-Draft, draft-ietf-lamps-csr-attestation-33, 2
+              November 2026, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-lamps-csr-attestation-33>.
 
    [ENVOY]    Envoy, "The Envoy Proxy", n.d., <https://envoyproxy.io>.
 
