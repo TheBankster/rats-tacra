@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-05T04:37:46.354606+00:00",
+  "timestamp": "2026-11-08T03:47:30.710595+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -4352,24 +4352,26 @@
       "id": "PR_kwDOULZBls8AAAABM7qkww",
       "title": "Credential Type Identifier: the name of a Credential Type",
       "url": "https://github.com/TheBankster/rats-tacra/pull/38",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nikolaichuk7",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The definition that said Credential Type token now says Credential Type Identifier, the noun for the name of a Credential Type; the container carries a Credential Type as the type of a credential item. As decided in the review of the mock, TWI-Unified-Model/globalsign-est#8.\n\nBearer tokens, WIT and JWT keep their names. No CDDL change; the text builds with kramdown-rfc and xml2rfc.",
       "createdAt": "2026-11-04T22:45:10Z",
-      "updatedAt": "2026-11-04T22:45:10Z",
+      "updatedAt": "2026-11-06T19:27:24Z",
       "baseRepository": "TheBankster/rats-tacra",
       "baseRefName": "master",
       "baseRefOid": "124bb8f56558e2e34cd4641c3d52aedc773595c7",
       "headRepository": "nikolaichuk7/rats-tacra",
       "headRefName": "credential-type-identifier",
       "headRefOid": "995572df4a706dc91060274f8ac615c7d63a7c39",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-11-06T19:27:24Z",
+      "mergedAt": "2026-11-06T19:27:24Z",
+      "mergedBy": "TheBankster",
+      "mergeCommit": {
+        "oid": "83a3ccdfbc87a703347f801562cacd3407e04aff"
+      },
       "comments": [],
       "reviews": []
     }
