@@ -167,7 +167,6 @@ In all of these cases, it is assumed that the remotely attesting workload can ma
     * `jwt`: a JSON Web Token used as a bearer token
     * `api-key`: an API key
     * `psk`: a pre-shared symmetric key
-    * `private-key`: a private key shared by the instances of a replicated service
 * Credential Acquisition Mechanism: one of any number of existing or future mechanisms for acquiring credentials, such as {{RFC7030}}, {{SPIFFE}}/{{SPIRE}}, {{RFC8555}}, etc.
 * Credential Acquisition System (CAS): a client-server architecture comprising a CAS Client and a CAS Server which implements a Credential Acquisition Mechanism
 * Credential Acquisition Mode: one of
@@ -517,8 +516,10 @@ credential-item = {
 ~~~
 
 Each credential item carries a Credential Type as its `type` and the credential as its `value`, the unpadded base64url of the credential's octets.
-Those octets are a DER certificate for `x509` and `wic`, a DER PrivateKeyInfo ({{RFC5958}}) for `private-key`, the key octets for `psk`, and the UTF-8 encoding of the token for `wit`, `jwt` and `api-key`.
+Those octets are a DER certificate for `x509` and `wic`, the key octets for `psk`, and the UTF-8 encoding of the token for `wit`, `jwt` and `api-key`.
 `format`, when present, names another encoding of those octets, which the Secret Vault and the Attesters it serves agree on out of band.
+When the Secret Vault releases the private key of an `x509` or `wic` credential, the key is a further item of the same Credential Type.
+The `format` of that item is `pkcs8`, and its octets are a DER PrivateKeyInfo ({{RFC5958}}).
 `kid`, `purpose`, `algorithm`, `exportable` and `shared` are the key-block attributes the Secret Vault's policy sets.
 `metadata` MAY carry `validity_seconds` (integer) and `secret_version` (string).
 
