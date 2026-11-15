@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-08T03:47:30.710595+00:00",
+  "timestamp": "2026-11-15T04:13:50.056341+00:00",
   "repo": "TheBankster/rats-tacra",
   "labels": [
     {
@@ -4372,6 +4372,32 @@
       "mergeCommit": {
         "oid": "83a3ccdfbc87a703347f801562cacd3407e04aff"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 40,
+      "id": "PR_kwDOULZBls8AAAABO1ad0A",
+      "title": "private-key is not a Credential Type",
+      "url": "https://github.com/TheBankster/rats-tacra/pull/40",
+      "state": "OPEN",
+      "author": "nikolaichuk7",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #39. Part of TWI-Unified-Model/tacra#13, as agreed in the review of TWI-Unified-Model/spiffe-spire#1.\n\n## What\n\n- `private-key` leaves the list of Credential Type Identifiers.\n- In \"Sealing the Released Credential\", the sentence on the octets of an item does not name `private-key`. Two sentences say how the private key of an `x509` or `wic` credential is released: as a further item of the same Credential Type, with the `format` `pkcs8` and a DER PrivateKeyInfo as its octets.\n\n#39 proposed to keep `private-key` as an item type of the container. This pull request removes the name: the Credential Type of the certificate is enough.\n\n## One choice\n\nThe private key is an item of its own, as in the `x509` credential the EST implementation releases: the certificate, its private key, the CA chain. The alternative is one `x509` item that carries the certificate and its private key together, as a PEM bundle or as PKCS#12. Say if you prefer it.\n\n## How it was verified\n\nBuilt with kramdown-rfc and xml2rfc. idnits reports nothing new.\n",
+      "createdAt": "2026-11-13T05:17:24Z",
+      "updatedAt": "2026-11-13T05:17:24Z",
+      "baseRepository": "TheBankster/rats-tacra",
+      "baseRefName": "master",
+      "baseRefOid": "83a3ccdfbc87a703347f801562cacd3407e04aff",
+      "headRepository": "nikolaichuk7/rats-tacra",
+      "headRefName": "remove-private-key",
+      "headRefOid": "e9967fc92d61474e9f1dc111b83bcbb2378413a7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
